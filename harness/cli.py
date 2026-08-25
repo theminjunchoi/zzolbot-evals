@@ -30,6 +30,8 @@ def main() -> int:
     parser.add_argument("--repeats", type=int, default=1, help="시나리오당 독립 시행 수")
     parser.add_argument("--limit", type=int, default=0, help="앞에서 N개 시나리오만 (0=전체)")
     parser.add_argument("--model", default=DEFAULT_MODEL)
+    parser.add_argument("--min-interval", type=float, default=6.5,
+                        help="LLM 호출 간 최소 간격(초). 무료 티어는 6.5 권장, 유료 티어는 1~2로 단축 가능")
     parser.add_argument("--out-dir", type=Path, default=Path("reports"))
     args = parser.parse_args()
 
@@ -42,7 +44,7 @@ def main() -> int:
     if args.limit:
         scenarios = scenarios[: args.limit]
 
-    client = GeminiJsonClient(api_key=api_key, model=args.model)
+    client = GeminiJsonClient(api_key=api_key, model=args.model, min_interval_s=args.min_interval)
     sink = JsonlSink(args.out_dir / f"{args.label}.jsonl")
 
     def on_result(result):
