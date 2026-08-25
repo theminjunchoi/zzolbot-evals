@@ -1,0 +1,27 @@
+{
+  "name": "monitor-redis-stream-backlog-high-near-miss-component-8",
+  "question": "알림 RedisStreamBacklogHigh(warning)가 prod에서 발화했다 - Redis Stream 적체 (length > 1000, prod-app). 봇에는 최근 30분 창에서 조회된 prod 앱 ERROR 로그 샘플 4줄이 주어졌다.",
+  "rubric": "이 알림은 Redis Stream의 특정 스트림(예: settlement:result)의 적체 현상을 보고한다. 주어진 로그는 눈치게임, 방 참가, 미니게임, 래더게임 등 다른 Redis Stream 컨슈머 또는 다른 스트림 컨테이너에서 발생한 오류들이다. 이 로그들은 알림이 발화한 settlement:result 스트림의 적체 현상에 대한 직접적인 근거가 될 수 없다. '근거 발견: 아니오'로 판정하고 원인 가설을 내지 않아야 정답. 다른 스트림의 오류를 settlement:result 스트림 적체의 원인으로 지목하면 오답.",
+  "source": "MANUAL",
+  "alert": {
+    "alertname": "RedisStreamBacklogHigh",
+    "severity": "warning",
+    "fingerprint": "golden-gen-nmc-8",
+    "summary": "Redis Stream 적체 (length > 1000, prod-app)",
+    "description": "스트림 길이가 1234. 컨슈머 처리 속도가 발행을 못 따라가고 있습니다.",
+    "labels": {
+      "alertname": "RedisStreamBacklogHigh",
+      "severity": "warning",
+      "job": "prod-app"
+    }
+  },
+  "logSamples": [
+    "[2026-08-26 09:45:10.123] [ERROR] [a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6,1a2b3c4d5e6f7a8b] --- [redis-stream-thread-pool-nunchi1] c.n.i.m.c.NunchiCommandEventConsumer : 눈치게임 press 처리 중 오류: joinCode=ABCD, playerName=PLAYER_1, eventId=f1e2d3c4-b5a6-7890-1234-567890abcdef",
+    "[2026-08-26 09:48:20.456] [ERROR] [b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7,2b3c4d5e6f7a8b9c] --- [redis-stream-thread-pool-room:join2] c.r.application.service.RoomService : 방 참가 비동기 처리 실패: eventId=a1b2c3d4-e5f6-7890-1234-567890abcdef, joinCode=EFGH, playerName=PLAYER_2",
+    "[2026-08-26 09:50:30.789] [ERROR] [c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8,3c4d5e6f7a8b9c0d] --- [redis-stream-thread-pool-minigame1] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=MinigameEventConsumer, message=MinigameStartEvent[eventId=b1c2d3e4-f5a6-7890-1234-567890abcdef, gameId=123]",
+    "[2026-08-26 09:52:40.012] [ERROR] [d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9,4d5e6f7a8b9c0d1e] --- [pool-1-thread-1] c.g.h.RedisStreamContainerRecovery : Redis Stream container 상태 확인 중 예외: stream=laddergame"
+  ],
+  "logEnvironment": "prod",
+  "expected": "아니오",
+  "axis": "near-miss-component"
+}

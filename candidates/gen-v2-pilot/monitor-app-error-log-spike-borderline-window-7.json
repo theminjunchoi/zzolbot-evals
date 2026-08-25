@@ -1,0 +1,27 @@
+{
+  "name": "monitor-app-error-log-spike-borderline-window-7",
+  "question": "알림 AppErrorLogSpike(warning)가 prod에서 발화했다 - ERROR 로그 급증. 봇에는 최근 30분 창에서 조회된 prod 앱 ERROR 로그 샘플 4줄이 주어졌다.",
+  "rubric": "이 알림은 최근 5분간의 ERROR 로그 급증을 나타내지만, 주어진 로그 샘플 4줄은 알림 발생 시각(예: 2026-08-26 10:05:30)보다 40분~90분 이전에 발생한 것으로, 알림의 30분 조회 창을 벗어난다. 따라서 현재 발화한 AppErrorLogSpike 알림의 근거가 될 수 없다. '근거 발견: 아니오'로 판정하고 원인 가설을 내지 않아야 정답. 주어진 로그를 근거로 원인 가설을 제시하면 오답.",
+  "source": "MANUAL",
+  "alert": {
+    "alertname": "AppErrorLogSpike",
+    "severity": "warning",
+    "fingerprint": "golden-gen-borderline-window-7",
+    "summary": "ERROR 로그 급증(최근 5분, prod-app)",
+    "description": "ERROR 로그가 35건(임계 30/5m)입니다. zzol-bot이 근본원인을 분석합니다.",
+    "labels": {
+      "alertname": "AppErrorLogSpike",
+      "severity": "warning",
+      "job": "prod-app"
+    }
+  },
+  "logSamples": [
+    "[2026-08-26 08:45:10.123] [ERROR] [a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6,1234567890abcdef] --- [redis-stream-thread-pool-room:join1] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=RoomJoinEventConsumer, message=RoomJoinEvent[eventId=f1e2d3c4-b5a6-7890-1234-567890abcdef, timestamp=2026-08-26T08:45:10.120Z, joinCode=ABCD, playerName=PLAYER_1]",
+    "[2026-08-26 08:52:25.456] [ERROR] [b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7,fedcba9876543210] --- [redis-stream-thread-pool-room:join2] c.r.application.service.RoomService : 방 참가 비동기 처리 실패: eventId=e9f8g7h6-i5j4-k3l2-m1n0-o9p8q7r6s5t4, joinCode=EFGH, playerName=PLAYER_2",
+    "[2026-08-26 09:01:30.789] [ERROR] [c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8,0123456789abcdef] --- [redis-stream-thread-pool-settlement:result1] c.s.i.c.SettlementStreamConsumer : 정산 처리 실패 — ACK 보류, 재전달 대기: recordId=1756172841203-0",
+    "[2026-08-26 09:15:05.012] [ERROR] [d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9,fedcba9876543210] --- [http-nio-8080-exec-5] c.web.exception.RestExceptionHandler : method=POST uri=/api/v1/game/nunchi/press exception=org.springframework.web.bind.MissingServletRequestParameterException message=Required request parameter 'playerId' for method parameter type String is not present"
+  ],
+  "logEnvironment": "prod",
+  "expected": "아니오",
+  "axis": "borderline-window"
+}

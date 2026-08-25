@@ -1,0 +1,32 @@
+{
+  "name": "monitor-compound-cause-06",
+  "question": "알림 AppErrorLogSpike(warning)가 prod에서 발화했다 - ERROR 로그 급증. 봇에는 최근 30분 ERROR 로그 샘플 9줄이 주어졌다.",
+  "rubric": "주어진 ERROR 로그는 Redis Stream 컨테이너가 복구를 포기한(Redis Stream container 복구 포기) 근본 원인 장애가 발생한 뒤, 이로 인해 Redis Stream 이벤트 처리 실패(이벤트 처리 실패, Redis Stream 처리 중 오류) 및 방 참가 비동기 처리 실패, 눈치게임 press 처리 오류 등 파급 증상이 연이어 발생한 상황을 보여준다. '근거 발견: 예'로 판정하고 Redis Stream 또는 Redis 연결 장애를 근본 원인 가설로 제시하면 정답. '근거 발견: 아니오'로 판정하거나, 단순히 이벤트 처리 실패나 방 참가 비동기 처리 실패를 근본 원인으로 지목하면 오답.",
+  "source": "MANUAL",
+  "alert": {
+    "alertname": "AppErrorLogSpike",
+    "severity": "warning",
+    "fingerprint": "golden-gen-compound-cause-06",
+    "summary": "ERROR 로그 급증(최근 5분, prod-app)",
+    "description": "ERROR 로그가 45건(임계 30/5m)입니다. zzol-bot이 근본원인을 분석합니다.",
+    "labels": {
+      "alertname": "AppErrorLogSpike",
+      "severity": "warning",
+      "job": "prod-app"
+    }
+  },
+  "logSamples": [
+    "[2026-08-26 10:01:15.123] [ERROR] [,] --- [pool-3-thread-1] c.g.h.RedisStreamContainerRecovery : Redis Stream container 복구 포기: stream=room-events. HealthIndicator에 DOWN 보고",
+    "[2026-08-26 10:01:30.456] [ERROR] [,] --- [redis-stream-thread-pool-room1] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=room-event-consumer, message=RoomJoinEvent(eventId=a1b2c3d4-e5f6-7890-1234-567890abcdef, joinCode=ABCD, playerName=player1)",
+    "[2026-08-26 10:01:45.789] [ERROR] [,] --- [redis-stream-thread-pool-room2] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=room-event-consumer, message=RoomJoinEvent(eventId=b2c3d4e5-f6a7-8901-2345-67890abcdef1, joinCode=EFGH, playerName=player2)",
+    "[2026-08-26 10:02:05.111] [ERROR] [,] --- [redis-stream-thread-pool-nunchi1] c.g.r.c.RedisStreamListenerStarter : Redis Stream 처리 중 오류가 발생했습니다.",
+    "[2026-08-26 10:02:10.222] [ERROR] [,] --- [redis-stream-thread-pool-nunchi2] c.g.r.c.RedisStreamListenerStarter : Redis Stream 처리 중 오류가 발생했습니다.",
+    "[2026-08-26 10:02:25.333] [ERROR] [,] --- [redis-stream-thread-pool-room:join1] c.r.application.service.RoomService : 방 참가 비동기 처리 실패: eventId=a1b2c3d4-e5f6-7890-1234-567890abcdef, joinCode=ABCD, playerName=player1",
+    "[2026-08-26 10:02:35.444] [ERROR] [,] --- [redis-stream-thread-pool-room:join2] c.r.application.service.RoomService : 방 참가 비동기 처리 실패: eventId=b2c3d4e5-f6a7-8901-2345-67890abcdef1, joinCode=EFGH, playerName=player2",
+    "[2026-08-26 10:02:50.555] [ERROR] [,] --- [redis-stream-thread-pool-nunchi3] c.n.i.m.c.NunchiCommandEventConsumer : 눈치게임 press 처리 중 오류: joinCode=IJKL, playerName=player3, eventId=c3d4e5f6-a7b8-9012-3456-7890abcdef12",
+    "[2026-08-26 10:03:00.666] [ERROR] [,] --- [redis-stream-thread-pool-nunchi4] c.n.i.m.c.NunchiCommandEventConsumer : 눈치게임 press 처리 중 오류: joinCode=MNOP, playerName=player4, eventId=d4e5f6a7-b8c9-0123-4567-890abcdef123"
+  ],
+  "logEnvironment": "prod",
+  "expected": "예",
+  "axis": "compound-cause"
+}
