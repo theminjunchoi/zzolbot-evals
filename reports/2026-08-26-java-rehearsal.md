@@ -1,0 +1,51 @@
+# 자바 환경 리허설 측정 - 골든셋 v2 (15종)
+
+- 일시: 2026-08-26 01:37~01:41 (약 4분)
+- 환경: worktree feat/1626 (HEAD bdb3b40f) + 신규 시드 10종 임시 배치, local 프로파일 (MySQL/valkey 로컬 도커), 라이브 Gemini
+- 실행: `POST /admin/zzolbot/eval/runs {"label":"golden-v2-java-rehearsal","repeats":1,"kind":"monitor"}` (run id 1)
+- 모델: 분석기, judge 모두 gemini-2.5-flash (temperature 0, JSON 강제)
+- 주의: **repeats=1 단일 실행이라 통계적 의미는 없다.** 리허설 목적(rubric 작동 검증, 시드 스키마 검증)의 측정이다. 공식 baseline은 Python 하네스에서 반복 실행으로 다시 잰다.
+
+## 결과: 13/15 PASS
+
+| 시나리오 | 기대 | 판정 | acc | grd | hall |
+|---|---|---|---|---|---|
+| **신규 10종 (v2)** | | **10/10 PASS** | | | |
+| monitor-db-pool-exhaustion-request-timeouts | 예 | PASS | 5 | 5 | F |
+| monitor-db-pool-high-unrelated-game-errors | 아니오 | PASS | 5 | 5 | F |
+| monitor-settlement-backlog-consumer-failures | 예 | PASS | 5 | 5 | F |
+| monitor-stream-latency-container-recovery | 예 | PASS | 5 | 5 | F |
+| monitor-heap-high-sparse-unrelated-errors | 아니오 | PASS | 5 | 5 | F |
+| monitor-5xx-redis-connection-failure | 예 | PASS | 5 | 5 | F |
+| monitor-outbox-deadletter-publish-failures | 예 | PASS | 4 | 5 | F |
+| monitor-ws-probe-failed-edge-layer | 아니오 | PASS | 5 | 5 | F |
+| monitor-error-spike-nunchi-consumer | 예 | PASS | 5 | 5 | F |
+| monitor-mass-ip-blocking-description-echo-trap | 아니오 | PASS | 5 | 5 | F |
+| **기존 5종 (feat/1626)** | | **3/5 PASS** | | | |
+| monitor-ip-ban-unrelated-cardgame-errors | 아니오 | PASS | 5 | 5 | F |
+| monitor-mass-ip-blocking-unrelated-cardgame-errors | 아니오 | PASS | 5 | 5 | F |
+| monitor-ip-blocking-true-scanner-evidence | 예 | PASS | 5 | 5 | F |
+| monitor-error-spike-stale-reingested-logs | 아니오 | **FAIL** | 0 | 0 | F |
+| monitor-error-spike-midnight-sparse-logs | 아니오 | **FAIL** | 0 | 0 | T |
+
+## 오답노트
+
+FAIL 2건 모두 AppErrorLogSpike 계열이고, 실패 유형이 같다: **시간적/양적 근거 검증 실패**.
+
+1. **stale-reingested-logs**: 로그 본문 타임스탬프가 전날에 흩어져 있는데(재적재 아티팩트) 이를 지적하지 못하고 "방 이벤트 처리 실패"를 현재 스파이크의 원인으로 단정. 이전 baseline(#1626, 4/5)에서는 PASS였던 시나리오라 **단일 실행 변동성**도 확인됨.
+2. **midnight-sparse-logs**: ERROR 2줄로 41건 스파이크를 설명할 수 없는데 '근거 발견: 예'로 판정하고 스케줄러 예외를 원인으로 단정. baseline에서도 동일하게 FAIL했던 케이스(재현됨).
+
+### 해석
+
+현행 시스템의 인용 검증(citedInLogs)은 **주제적 접지**(로그가 알림과 topically 관련되는가)만 코드로 강제한다. 신규 10종 중 무관 로그 함정 4종을 전부 통과한 것이 그 증거다. 반면 **시간적 접지**(로그 타임스탬프가 알림 시각과 정합하는가)와 **양적 접지**(로그 건수가 알림 수치를 설명할 수 있는가)는 프롬프트에도 코드 검증에도 없어서, 이 축의 함정만 골라서 실패한다.
+
+→ 개선 후보(다음 실험 대상):
+- 프롬프트에 시간 정합성 판정 규칙 추가 (알림 발화 시각 대비 로그 타임스탬프 검사)
+- 양적 판정 규칙 추가 (알림 description의 건수와 로그 샘플 수 대조)
+- 또는 코드 레벨 사전 필터: 윈도우 밖 타임스탬프 로그를 입력에서 태깅/제외
+- 이 축의 시나리오를 v3에서 증식해 개선 전후를 비교
+
+## 파일
+
+- 원본 응답: `2026-08-26-java-rehearsal-run1-raw.json`, `2026-08-26-scenarios-raw.json`
+- 시드: `../golden-set/monitor/*.json` (신규 10종) + worktree feat/1626 기존 5종
