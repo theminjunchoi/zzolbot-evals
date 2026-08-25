@@ -1,0 +1,40 @@
+# 실험 1: 프롬프트 접지 규칙 추가 전후 비교
+
+- 일시: 2026-08-26 (label `golden-v3-prompt-grounding`)
+- 가설: baseline의 FAIL 2건은 시스템 프롬프트에 시간적, 양적 접지 규칙이 없어서 발생한다. 규칙 추가만으로 전환 가능하다.
+- 변경: `GeminiAnomalyAnalyzer` 시스템 인스트럭션의 근거 판정 규칙에 2개 항목 추가 (전체 diff: `2026-08-26-prompt-grounding.diff`)
+  1. **시간 정합성**: 로그 샘플은 발화 직전 짧은 최근 창(수십 분) 조회 결과인데, 타임스탬프가 그 창에 담길 수 없게 흩어져 있거나 이전 날짜면 재적재 아티팩트 → evidenceFound=false + 불일치 명시
+  2. **양적 정합성**: 한두 줄의 산발 에러로는 급증을 설명 못 함 → false. 단, 알림 시각과 정합하는 좁은 시간대에 몰려 반복되면 표본이 알림 건수보다 적어도 정상 근거 (과잉 보수화 방지 가드)
+- 그 외 조건은 baseline과 동일 (확정 20종, gemini-2.5-flash, repeats=1, 자바 하네스)
+
+## 결과: 18/20 → 20/20 (목표 2건 전환, 회귀 0건)
+
+| 시나리오 | 기대 | baseline | 개선 후 |
+|---|---|---|---|
+| monitor-error-spike-stale-reingested-v2 | 아니오 | **FAIL** (acc 0) | **PASS** (acc 5) |
+| monitor-error-spike-sparse-two-lines | 아니오 | **FAIL** (acc 0, hall) | **PASS** (acc 5) |
+| monitor-outbox-deadletter-publish-failures | 예 | PASS (acc 3) | PASS (acc 5) |
+| 나머지 17종 | - | PASS (acc 5) | PASS (acc 5) |
+
+특기 사항:
+
+- **과잉 보수화 없음.** 회귀 위험이 가장 컸던 스파이크 positive 3종(nunchi, roomjoin-current, cardgame-burst)이 전부 PASS 유지. "표본이 적어도 시각이 정합하고 몰려 있으면 정상 근거"라는 가드 문구가 작동한 것으로 보인다.
+- 전환된 2건의 답변 품질도 좋다. stale-reingested는 근거 없음 판정과 함께 "로그 수집 시스템의 시간 동기화와 데이터 전송 지연 확인"을 제안했고(재적재라는 실제 원인 방향), sparse는 관찰된 에러 2건을 언급하되 "급증의 근거는 아님"을 명시했다.
+- outbox 시나리오는 acc 3 → 5로 부수 개선. 단일 실행 변동일 수 있어 해석 유보.
+
+## 한계
+
+- repeats=1 단일 실행. 전환 2건이 우연이 아닌지는 Python 하네스에서 반복 실행으로 확인 필요.
+- "수십 분"이라는 창 크기가 프롬프트에 하드코딩됨. 실제 반영 시에는 `MonitorProperties.errorLogWindowMinutes`를 주입해 렌더하는 게 맞다.
+- judge도 같은 모델(gemini-2.5-flash)이라 채점 편향 가능성은 남는다.
+
+## 실행 조건 기록
+
+- worktree feat/1626에서 프롬프트만 임시 수정해 측정, 측정 후 git checkout으로 원복 (팀 레포 커밋 없음)
+- 팀 레포 반영 여부는 별도 결정 사항. 반영한다면 diff에 창 크기 주입을 더해 #1626 후속 PR로.
+
+## 파일
+
+- 프롬프트 변경: `2026-08-26-prompt-grounding.diff`
+- 원본 응답: `2026-08-26-prompt-grounding-run-raw.json`, `2026-08-26-prompt-grounding-scenarios-raw.json`
+- 비교 대상 baseline: `2026-08-26-final20-baseline.md`
