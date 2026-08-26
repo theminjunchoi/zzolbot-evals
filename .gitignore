@@ -4,3 +4,4 @@ __pycache__/
 JOURNAL.md
 .venv*/
 raw/scratch-*/
+training/adapters/
