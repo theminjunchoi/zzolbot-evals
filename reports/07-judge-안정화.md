@@ -84,5 +84,5 @@ FAIL 3종이 **전부 2/2로 일관되게 실패**한다. 이전에는 같은 �
 
 ## 파일
 
-- 캘리브레이션: `judge-cal-v3-specificity.{jsonl,md}` (production 대조: `judge-calibration-v1`, `judge-calibration-v2-subtle`)
-- 재baseline: `rebaseline-v2-judge-r2.{jsonl,md}`
+- 캘리브레이션: `runs/judge-cal-v3-specificity.{jsonl,md}` (production 대조: `judge-calibration-v1`, `judge-calibration-v2-subtle`)
+- 재baseline: `runs/rebaseline-v2-judge-r2.{jsonl,md}`

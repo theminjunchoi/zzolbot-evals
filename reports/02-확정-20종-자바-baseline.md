@@ -56,6 +56,6 @@ FAIL 2건이 이전 리허설과 동일한 축에서 재현됐다. 버린 기존
 
 ## 파일
 
-- 원본: `2026-08-26-final20-run-raw.json`, `2026-08-26-final20-scenarios-raw.json`
+- 원본: `runs/2026-08-26-final20-run-raw.json`, `runs/2026-08-26-final20-scenarios-raw.json`
 - 시드: `../golden-set/monitor/` 확정 20종
 - 이전 리허설(v2, 15종 혼합): `01-자바-하네스-리허설.md`
