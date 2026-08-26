@@ -216,6 +216,22 @@ class SlotValueValidator(Validator):
         return found
 
 
+class ErrorLevelValidator(Validator):
+    """모든 로그가 ERROR여야 한다. 실제 봇 입력은 Loki에서 "ERROR" 문자열 필터로 조회되므로
+    WARN 라인은 프로덕션에서 봇에게 도달할 수 없다. WARN 카탈로그 항목은 로그 필터 확장(#1626
+    scanner-evidence 선행 검증 같은) 이후를 위해 남겨둔다."""
+
+    name = "error-level"
+
+    def violations(self, candidate: dict) -> list[str]:
+        found = []
+        for i, line in enumerate(candidate.get("logSamples") or []):
+            match = LOG_LINE.match(line)
+            if match and match.group("level") != "ERROR":
+                found.append(f"로그 {i}: 봇 입력은 ERROR만 도달 가능한데 {match.group('level')}")
+        return found
+
+
 class TimestampValidator(Validator):
     """시각이 파싱 가능하고 오름차순이어야 한다. 창 정합 여부는 축(axis)의 의도이므로
     expected 메타와 함께 CoherenceValidator가 본다."""
@@ -278,6 +294,7 @@ def default_validators(existing_names: set[str] | None = None) -> list[Validator
         AlertTextValidator(),
         LogLineValidator(),
         SlotValueValidator(),
+        ErrorLevelValidator(),
         TimestampValidator(),
         RubricValidator(),
         DuplicateNameValidator(existing_names or set()),
