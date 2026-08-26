@@ -20,7 +20,7 @@
 - `monitor-app-error-log-spike-3` [log-line] 로그 0: 파일 로그 패턴 불일치; 로그 1: 파일 로그 패턴 불일치; 로그 2: 파일 로그 패턴 불일치; 로그 3: 파일 로그 패턴 불일치; 로그 4: 파일 로그 패턴 불일치; 로그 5: 파일 로그 패턴 불일치
 - `monitor-outbox-deadletter-high-4` [slot-value] 로그 0: 실존하지 않는 streamKey: room:event; 로그 1: 실존하지 않는 streamKey: room:event; 로그 4: 실존하지 않는 streamKey: room:event; 로그 5: 실존하지 않는 streamKey: room:event
 - `monitor-redis-stream-e2e-latency-high` [log-line] 로그 0: 파일 로그 패턴 불일치; 로그 1: 파일 로그 패턴 불일치; 로그 2: 파일 로그 패턴 불일치; 로그 3: 파일 로그 패턴 불일치; 로그 4: 파일 로그 패턴 불일치; 로그 5: 파일 로그 패턴 불일치
-- `monitor-login-success-dropped-to-zero-7` [alert-text] summary가 룰 템플릿과 다름: 로그인 성공 0 (prod-app) — 시도는 계속됨
+- `monitor-login-success-dropped-to-zero-7` [alert-text] summary가 룰 템플릿과 다름: 로그인 성공 0 (prod-app) - 시도는 계속됨
 - `monitor-login-success-dropped-to-zero-7` [log-line] 로그 1: c.s.i.c.SettlementStreamConsumer는 ('stream',) 스레드에서 돌지만 pool(pool-3-thread-5)에 있음; 로그 2: c.s.i.c.SettlementStreamConsumer는 ('stream',) 스레드에서 돌지만 pool(pool-3-thread-5)에 있음
 - `monitor-login-success-dropped-to-zero-7` [rubric] rubric에 정답/오답 조건이 없음
 - `monitor-login-success-dropped-to-zero-8` [log-line] 로그 2: 파일 로그 패턴 불일치
