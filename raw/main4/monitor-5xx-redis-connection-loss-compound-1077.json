@@ -1,0 +1,34 @@
+{
+  "name": "monitor-5xx-redis-connection-loss-compound-1077",
+  "question": "알림 Http5xxRatioHigh(critical)가 prod에서 발화했다 - 최근 5분 5xx 비율이 5%를 넘었다. 봇에는 최근 30분 ERROR 로그 샘플 11줄(다중 스트림 리스너 동시 실패와 여러 엔드포인트의 요청 실패)이 주어졌다.",
+  "rubric": "주어진 ERROR 로그는 03:12:08부터 03:12:12까지 4초 안에 RedisStreamListenerStarter가 room:join, cardgame:select, settlement:result, minigame 네 개 스트림 스레드에서 동시에 처리 오류를 기록했고, 이어 03:12:44과 03:13:02에 EventDispatcher의 RoomJoinConsumer, SelectCardCommandEventConsumer 처리 실패 2건과 03:13:29의 SettlementStreamConsumer 정산 스트림 오류 1건이 나왔으며, 03:13:58부터 03:15:19까지 RestExceptionHandler가 서로 다른 네 엔드포인트에서 RedisConnectionFailureException(Unable to connect to Redis) 4건을 기록했음을 보여준다. '근거 발견: 예'로 판정하고 Redis 연결 자체의 상실을 근본 원인으로, 개별 스트림 컨슈머 실패와 여러 엔드포인트의 요청 예외를 그 파급 증상으로 구분해 가설을 제시하면 정답. '근거 발견: 아니오'로 판정하거나, 특정 게임 컨슈머나 정산 로직, 특정 엔드포인트의 결함을 근본 원인으로 지목해 네 스트림이 동시에 무너진 공통 원인을 놓치면 오답.",
+  "source": "MANUAL",
+  "alert": {
+    "alertname": "Http5xxRatioHigh",
+    "severity": "critical",
+    "fingerprint": "golden-gen-cc-1077",
+    "summary": "HTTP 5xx 비율 5% 초과 (prod-app)",
+    "description": "최근 5분 5xx 비율이 14.3%. 서버 측 광범위 실패 가능성.",
+    "labels": {
+      "alertname": "Http5xxRatioHigh",
+      "severity": "critical",
+      "job": "prod-app"
+    }
+  },
+  "logSamples": [
+    "[2026-08-26 03:12:08.451] [ERROR] [6febe284a6f987b2b938da4951b34fbd,0aebffe2a85ff55f] --- [redis-stream-thread-pool-room:join1] c.g.r.c.RedisStreamListenerStarter : Redis Stream 처리 중 오류가 발생했습니다.",
+    "[2026-08-26 03:12:09.117] [ERROR] [a437c36dfee5cae8225a76ac04339093,6f8e070eda3a3014] --- [redis-stream-thread-pool-cardgame:select1] c.g.r.c.RedisStreamListenerStarter : Redis Stream 처리 중 오류가 발생했습니다.",
+    "[2026-08-26 03:12:10.883] [ERROR] [7b40c8510920b8996bcb7c5a37085a1a,82b1523e58a74161] --- [redis-stream-thread-pool-settlement:result1] c.g.r.c.RedisStreamListenerStarter : Redis Stream 처리 중 오류가 발생했습니다.",
+    "[2026-08-26 03:12:12.404] [ERROR] [5b5974b78136d6f2dde6f10241f0839a,5a17e5f58fa65ed2] --- [redis-stream-thread-pool-minigame1] c.g.r.c.RedisStreamListenerStarter : Redis Stream 처리 중 오류가 발생했습니다.",
+    "[2026-08-26 03:12:44.669] [ERROR] [2b8f37e1ea2d8fed133c4ed5f8021a14,f052e37e16842e7e] --- [redis-stream-thread-pool-room:join2] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=RoomJoinConsumer, message=RoomJoinEvent[eventId=169ccb21-b9b4-4976-8cf4-ea53de9828a4, joinCode=Q5DM, playerName=도윤]",
+    "[2026-08-26 03:13:02.938] [ERROR] [0da1574bb9f03f550cdce5acc50137a0,548392d5f1f45927] --- [redis-stream-thread-pool-cardgame:select2] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=SelectCardCommandEventConsumer, message=SelectCardCommandEvent[eventId=dd680520-e34e-4715-96f7-c941101f9d36, joinCode=Q5DM, playerName=시윤, cardIndex=4]",
+    "[2026-08-26 03:13:29.505] [ERROR] [b012891cc7218a25f2fcad1ec1d776f6,2a91e7f5c2d37646] --- [redis-stream-thread-pool-settlement:result1] c.s.i.c.SettlementStreamConsumer : 정산 스트림 처리 중 오류가 발생했습니다.",
+    "[2026-08-26 03:13:58.220] [ERROR] [cd7c9da9cacca047a9d0a5e5d0293c0e,0cf74ce95898e278] --- [http-nio-8080-exec-16] c.web.exception.RestExceptionHandler : method=POST uri=/rooms/check-joinCode exception=RedisConnectionFailureException message=Unable to connect to Redis",
+    "[2026-08-26 03:14:26.771] [ERROR] [e1bc4a92d7e3049c43f7877ab85d2f53,98ea89eef876dff9] --- [http-nio-8080-exec-8] c.web.exception.RestExceptionHandler : method=POST uri=/rooms exception=RedisConnectionFailureException message=Unable to connect to Redis",
+    "[2026-08-26 03:14:53.318] [ERROR] [06f307330148719966f7386e600acdf7,b8f85f427d199362] --- [http-nio-8080-exec-23] c.web.exception.RestExceptionHandler : method=GET uri=/rooms/nickname/random exception=RedisConnectionFailureException message=Unable to connect to Redis",
+    "[2026-08-26 03:15:19.640] [ERROR] [0a12c0abfca23d36129f31b5f0016c60,20f992fb5d28e183] --- [http-nio-8080-exec-4] c.web.exception.RestExceptionHandler : method=POST uri=/rooms/check-guestName exception=RedisConnectionFailureException message=Unable to connect to Redis"
+  ],
+  "logEnvironment": "prod",
+  "expected": "예",
+  "axis": "compound-cause"
+}

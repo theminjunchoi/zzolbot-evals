@@ -1,0 +1,29 @@
+{
+  "name": "monitor-outbox-dead-letter-room-join-consume-near-miss-1085",
+  "question": "알림 OutboxDeadLetterHigh(warning)가 prod에서 발화했다 - DEAD_LETTER로 전환된 outbox 이벤트가 23건으로 임계 10을 넘었다. 봇에는 최근 30분 창에서 조회된 prod ERROR 로그 샘플 6줄이 주어졌다.",
+  "rubric": "주어진 6줄은 room:join 스트림을 읽는 소비 단계의 실패다. EventDispatcher가 11:03:21, 11:08:06, 11:16:13에 RoomJoinConsumer의 RoomJoinEvent 처리 실패 3건을 남겼고, RoomService가 11:05:44와 11:10:29에 방 참가 비동기 처리 실패 2건을, RoomEventWaitManager가 11:13:51에 방 이벤트 자동 정리 실패 1건을 남겼다. 반면 알림이 세는 것은 OutboxEventProcessor가 재시도를 초과해 DEAD_LETTER로 전환한 outbox 이벤트이고, 그 전환 로그는 한 줄도 없다. 발행 측(outbox)과 소비 측(room:join 컨슈머)은 다른 컴포넌트이므로 '근거 발견: 아니오'로 판정하고 그 차이를 지적해야 정답. 방 참가 소비 실패를 DEAD_LETTER 적체의 원인으로 단정하거나 두 현상을 같은 것으로 묶으면 오답.",
+  "source": "MANUAL",
+  "alert": {
+    "alertname": "OutboxDeadLetterHigh",
+    "severity": "warning",
+    "fingerprint": "golden-gen-nmc-1085",
+    "summary": "Outbox DEAD_LETTER 적체 (> 10, prod-app)",
+    "description": "재시도 초과로 DEAD_LETTER 전환된 outbox 이벤트가 23건. 다운스트림 발행 경로 점검 필요.",
+    "labels": {
+      "alertname": "OutboxDeadLetterHigh",
+      "severity": "warning",
+      "job": "prod-app"
+    }
+  },
+  "logSamples": [
+    "[2026-08-26 11:03:21.876] [ERROR] [35dbe6d277645cc009aa73844e243dcf,7c1da2d260878a1b] --- [redis-stream-thread-pool-room:join1] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=RoomJoinConsumer, message=RoomJoinEvent[eventId=3cfb1a9a-e1d5-497f-83ee-f2fc8826997d, timestamp=2026-08-26T02:03:21.872000127Z, joinCode=QW38, playerName=USER4]",
+    "[2026-08-26 11:05:44.203] [ERROR] [a69280d91079d22f72aba0710564c456,fd4befc3653b33c1] --- [redis-stream-thread-pool-room:join1] c.r.application.service.RoomService : 방 참가 비동기 처리 실패: eventId=14924982-17bc-4b34-a08c-5d800644bb6b, joinCode=QW38, playerName=USER4",
+    "[2026-08-26 11:08:06.591] [ERROR] [2e06efd43ffbacedffad86d7e8f6f037,7b32d35ef31105f5] --- [redis-stream-thread-pool-room:join2] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=RoomJoinConsumer, message=RoomJoinEvent[eventId=b65fc768-c2e5-4efb-b82a-a54a0c05968b, timestamp=2026-08-26T02:08:06.588000234Z, joinCode=QW38, playerName=USER7]",
+    "[2026-08-26 11:10:29.014] [ERROR] [2a98cad1ebc22a7ae643031ba3a3e60c,a4b910aa9e73205c] --- [redis-stream-thread-pool-room:join2] c.r.application.service.RoomService : 방 참가 비동기 처리 실패: eventId=e3f72d46-4822-4f33-8aef-eb3ecef8f00c, joinCode=QW38, playerName=USER7",
+    "[2026-08-26 11:13:51.462] [ERROR] [,] --- [pool-4-thread-1] c.r.i.messaging.RoomEventWaitManager : 방 이벤트 자동 정리 (실패): eventId=6eb759d5-9f12-4bcf-bd2b-d60bf152f8d4",
+    "[2026-08-26 11:16:13.905] [ERROR] [d0237bc1283cf58a9d7bacc606beb4f7,54350bd603f177fe] --- [redis-stream-thread-pool-room:join1] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=RoomJoinConsumer, message=RoomJoinEvent[eventId=d6a724a4-f276-47e7-85fd-a191a65d895c, timestamp=2026-08-26T02:16:13.901000512Z, joinCode=QW38, playerName=USER9]"
+  ],
+  "logEnvironment": "prod",
+  "expected": "아니오",
+  "axis": "near-miss-component"
+}

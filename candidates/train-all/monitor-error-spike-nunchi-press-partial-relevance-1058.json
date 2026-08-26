@@ -1,0 +1,31 @@
+{
+  "name": "monitor-error-spike-nunchi-press-partial-relevance-1058",
+  "question": "알림 AppErrorLogSpike(warning)가 prod에서 발화했다 - 최근 5분 ERROR 로그가 58건으로 임계 30건을 넘었다. 봇에는 최근 30분 ERROR 로그 샘플 8줄(눈치게임 press 처리 실패 밀집과 그 밖의 산발 오류가 섞임)이 주어졌다.",
+  "rubric": "주어진 ERROR 로그 8줄 중 관련 로그는 20:31부터 20:33까지 약 3분 창에 몰린 NunchiCommandEventConsumer의 눈치게임 press 처리 오류 5건(nunchi 스트림 스레드 3개에 걸침)이고, 무관 로그는 그보다 앞뒤로 흩어진 RoomEventWaitManager의 방 이벤트 자동 정리 실패 2건과 SettlementPendingSweeper의 pending 정산 재처리 실패 1건이다. '근거 발견: 예'로 판정하고 눈치게임 press 커맨드 처리 경로의 반복 실패를 ERROR 급증의 원인 가설로 제시하면 정답. '근거 발견: 아니오'로 판정하거나 산발적인 방 이벤트 정리 실패 또는 정산 pending 재처리 실패를 원인으로 지목하면 오답.",
+  "source": "MANUAL",
+  "alert": {
+    "alertname": "AppErrorLogSpike",
+    "severity": "warning",
+    "fingerprint": "golden-gen-esnp-1058",
+    "summary": "ERROR 로그 급증(최근 5분, prod-app)",
+    "description": "ERROR 로그가 58건(임계 30/5m)입니다. zzol-bot이 근본원인을 분석합니다.",
+    "labels": {
+      "alertname": "AppErrorLogSpike",
+      "severity": "warning",
+      "job": "prod-app"
+    }
+  },
+  "logSamples": [
+    "[2026-08-26 20:09:12.447] [ERROR] [,] --- [pool-2-thread-4] c.r.i.messaging.RoomEventWaitManager : 방 이벤트 자동 정리 (실패): eventId=6ba3412b-9372-414f-88cf-2d529ffb6f29",
+    "[2026-08-26 20:18:36.905] [ERROR] [,] --- [pool-5-thread-1] c.s.i.c.SettlementPendingSweeper : pending 정산 메시지 재처리 실패: recordId=1756208316492-0",
+    "[2026-08-26 20:31:02.118] [ERROR] [3759ca217a27272200e71002c852c8bf,728dfdc08d11a6a3] --- [redis-stream-thread-pool-nunchi1] c.n.i.m.c.NunchiCommandEventConsumer : 눈치게임 press 처리 중 오류: joinCode=T7QK, playerName=서준, eventId=4402a3f4-ad38-4984-87d5-89c209d36207",
+    "[2026-08-26 20:31:41.556] [ERROR] [1322a6d11785c1aff0a751ec637c422e,49467239124c0d43] --- [redis-stream-thread-pool-nunchi2] c.n.i.m.c.NunchiCommandEventConsumer : 눈치게임 press 처리 중 오류: joinCode=T7QK, playerName=유나, eventId=670d2548-6eae-40ae-bb48-a98947c18012",
+    "[2026-08-26 20:32:20.983] [ERROR] [3ed7dd9f935a50618423a13418b29558,802b9feb1475938c] --- [redis-stream-thread-pool-nunchi3] c.n.i.m.c.NunchiCommandEventConsumer : 눈치게임 press 처리 중 오류: joinCode=T7QK, playerName=도현, eventId=45bf1ff2-554d-46c5-b13e-d9fce6c4df4b",
+    "[2026-08-26 20:33:04.371] [ERROR] [6d1026e6c5d54f8b0cce20b351b7566a,77d14224ccbbeb35] --- [redis-stream-thread-pool-nunchi1] c.n.i.m.c.NunchiCommandEventConsumer : 눈치게임 press 처리 중 오류: joinCode=V2MB, playerName=서준, eventId=a375df6f-60f7-4bf5-a1dd-45b67b08cbeb",
+    "[2026-08-26 20:33:47.809] [ERROR] [4e285497b2fe37dfaf4b8af69aa37a17,5c2d03d7016a614a] --- [redis-stream-thread-pool-nunchi2] c.n.i.m.c.NunchiCommandEventConsumer : 눈치게임 press 처리 중 오류: joinCode=V2MB, playerName=하율, eventId=e28c23d7-5ad7-409a-9360-8ef0b70a416d",
+    "[2026-08-26 20:41:19.264] [ERROR] [,] --- [pool-2-thread-4] c.r.i.messaging.RoomEventWaitManager : 방 이벤트 자동 정리 (실패): eventId=c0424753-b954-428c-a43a-95b87d1310a3"
+  ],
+  "logEnvironment": "prod",
+  "expected": "예",
+  "axis": "partial-relevance"
+}

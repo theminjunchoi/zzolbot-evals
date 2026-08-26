@@ -1,0 +1,31 @@
+{
+  "name": "monitor-stream-latency-laddergame-draw-dense-1070",
+  "question": "알림 RedisStreamE2eLatencyHigh(warning)가 prod에서 발화했다 - Redis Stream E2E 지연 p95가 500ms를 넘었다. 봇에는 최근 30분 ERROR 로그 샘플 8줄(laddergame 스트림의 사다리 뽑기 이벤트 처리 실패가 좁은 구간에 밀집)이 주어졌다.",
+  "rubric": "주어진 ERROR 로그 8줄은 모두 EventDispatcher가 redis-stream-thread-pool-laddergame1과 redis-stream-thread-pool-laddergame2 스레드에서 기록한 '이벤트 처리 실패: consumer=LadderDrawCommandEventConsumer, message=LadderDrawCommandEvent' 로그이며, 15:48:11부터 15:51:56까지 약 3분 45초 구간에 동일한 joinCode=K3WP 방에서 반복됐다. '근거 발견: 예'로 판정하고 laddergame 스트림 컨슈머가 LadderDrawCommandEvent 처리에 반복 실패하면서 해당 스트림 소비가 적체돼 E2E 지연이 올라갔다는 가설을 제시하면 정답. '근거 발견: 아니오'로 판정하거나, 로그에 없는 다른 스트림이나 외부 스토리지를 지연의 원인으로 지목하면 오답.",
+  "source": "MANUAL",
+  "alert": {
+    "alertname": "RedisStreamE2eLatencyHigh",
+    "severity": "warning",
+    "fingerprint": "golden-gen-pd-1070",
+    "summary": "Redis Stream E2E 지연 p95 > 500ms (prod-app)",
+    "description": "스트림 처리 p95 지연이 3.4s. 컨슈머 처리 적체 또는 다운스트림(App Service) 지연 가능성.",
+    "labels": {
+      "alertname": "RedisStreamE2eLatencyHigh",
+      "severity": "warning",
+      "job": "prod-app"
+    }
+  },
+  "logSamples": [
+    "[2026-08-26 15:48:11.204] [ERROR] [e1d6654956c7028507bec52d81375680,43932960e6e903fb] --- [redis-stream-thread-pool-laddergame1] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=LadderDrawCommandEventConsumer, message=LadderDrawCommandEvent[joinCode=K3WP, playerName=예린, eventId=04982aa5-fe6c-4ca2-9c29-1382650b957c]",
+    "[2026-08-26 15:48:39.663] [ERROR] [92234b0e43b24888438915d86b97107b,c3bb5ed61fc49973] --- [redis-stream-thread-pool-laddergame2] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=LadderDrawCommandEventConsumer, message=LadderDrawCommandEvent[joinCode=K3WP, playerName=도윤, eventId=336a4d30-2520-413c-a5d2-699ad73de9e9]",
+    "[2026-08-26 15:49:07.115] [ERROR] [656908f063a514a946313395231185d3,90458ec524eb5994] --- [redis-stream-thread-pool-laddergame1] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=LadderDrawCommandEventConsumer, message=LadderDrawCommandEvent[joinCode=K3WP, playerName=민서, eventId=4f88dde3-1b8d-4acb-9807-e4bd96a41233]",
+    "[2026-08-26 15:49:44.552] [ERROR] [4b43a5dbc5540fd23deb8d3d23f1af46,03cc9f2688d5bb2e] --- [redis-stream-thread-pool-laddergame2] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=LadderDrawCommandEventConsumer, message=LadderDrawCommandEvent[joinCode=K3WP, playerName=시우, eventId=1822b7d4-4fda-4eb6-b54a-0f8963e2aab4]",
+    "[2026-08-26 15:50:16.908] [ERROR] [3ddfdab144e3541fb7ff10141c43b859,5e977e34421f031e] --- [redis-stream-thread-pool-laddergame1] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=LadderDrawCommandEventConsumer, message=LadderDrawCommandEvent[joinCode=K3WP, playerName=예린, eventId=83485016-e5bc-4336-9a29-b33cd2dd2a7a]",
+    "[2026-08-26 15:50:52.337] [ERROR] [39dd4ca681f34aad472b951626df261c,91ad06bfeab982e3] --- [redis-stream-thread-pool-laddergame2] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=LadderDrawCommandEventConsumer, message=LadderDrawCommandEvent[joinCode=K3WP, playerName=채원, eventId=5b279f5b-bbb3-49a9-bd83-08d56b3a86f5]",
+    "[2026-08-26 15:51:21.774] [ERROR] [44594c04142e31f39fb80f9ec2323acb,016c2874694c0631] --- [redis-stream-thread-pool-laddergame1] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=LadderDrawCommandEventConsumer, message=LadderDrawCommandEvent[joinCode=K3WP, playerName=도윤, eventId=f417da20-4ad5-4b40-90f0-bacf61b07fb1]",
+    "[2026-08-26 15:51:56.130] [ERROR] [8d2fb73925cf172c5e2fb2e3b7cb08dd,4ba70de8af992749] --- [redis-stream-thread-pool-laddergame2] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=LadderDrawCommandEventConsumer, message=LadderDrawCommandEvent[joinCode=K3WP, playerName=준우, eventId=e7c572e3-b13a-406c-a8ba-7deba95c564d]"
+  ],
+  "logEnvironment": "prod",
+  "expected": "예",
+  "axis": "positive-dense"
+}

@@ -1,0 +1,32 @@
+{
+  "name": "monitor-error-spike-room-join-async-partial-1071",
+  "question": "알림 AppErrorLogSpike(warning)가 prod에서 발화했다 - 최근 5분 ERROR 로그가 임계 30건을 넘었다. 봇에는 최근 30분 ERROR 로그 샘플 9줄(방 참가 비동기 처리 실패 밀집과 그와 무관한 산발 에러)이 주어졌다.",
+  "rubric": "주어진 ERROR 로그 중 06:41:18부터 06:44:21까지 약 3분 구간에 밀집한 RoomService의 '방 참가 비동기 처리 실패' 4건(joinCode=V8QT 2건, joinCode=H2LC 2건)과 RoomEventWaitManager의 '방 이벤트 자동 정리 (실패)' 2건이 알림과 직접 관련된 근거이고, 06:22:57과 06:52:10의 SettlementPendingSweeper pending 정산 메시지 재처리 실패 2건과 06:47:33의 GameTaskSchedulerFactory [blindtimer] 스케줄 예외 1건은 방 참가 경로와 무관한 산발 에러다. '근거 발견: 예'로 판정하고 room:join 스트림의 방 참가 비동기 처리 실패가 이벤트 대기 타임아웃 정리 실패로 이어져 ERROR 로그가 급증했다는 가설을 제시하면 정답. '근거 발견: 아니오'로 판정하거나, 무관한 정산 pending 재처리 실패나 blindtimer 스케줄 예외를 급증의 원인으로 지목하면 오답.",
+  "source": "MANUAL",
+  "alert": {
+    "alertname": "AppErrorLogSpike",
+    "severity": "warning",
+    "fingerprint": "golden-gen-pr-1071",
+    "summary": "ERROR 로그 급증(최근 5분, prod-app)",
+    "description": "ERROR 로그가 46건(임계 30/5m)입니다. zzol-bot이 근본원인을 분석합니다.",
+    "labels": {
+      "alertname": "AppErrorLogSpike",
+      "severity": "warning",
+      "job": "prod-app"
+    }
+  },
+  "logSamples": [
+    "[2026-08-26 06:22:57.418] [ERROR] [,] --- [pool-7-thread-1] c.s.i.c.SettlementPendingSweeper : pending 정산 메시지 재처리 실패: recordId=1787812977418-0",
+    "[2026-08-26 06:41:18.204] [ERROR] [986d1cf69a5c4a1e399e6917e1ad5e93,fbc60b374d936f24] --- [redis-stream-thread-pool-room:join1] c.r.application.service.RoomService : 방 참가 비동기 처리 실패: eventId=d3f7f5cb-25e2-49b3-b1b6-840dd99ce33d, joinCode=V8QT, playerName=지우",
+    "[2026-08-26 06:41:47.663] [ERROR] [e23f83d4aa4574c84e7b4e252be9cd5e,3332d39dd1aa4697] --- [redis-stream-thread-pool-room:join2] c.r.application.service.RoomService : 방 참가 비동기 처리 실패: eventId=1c6f392b-9de8-40c7-bcea-68c7c1fba601, joinCode=V8QT, playerName=채원",
+    "[2026-08-26 06:42:29.115] [ERROR] [834b1ff6572d6f00c32c0bd8f6d2b16d,66974f3ed2659412] --- [redis-stream-thread-pool-room:join1] c.r.application.service.RoomService : 방 참가 비동기 처리 실패: eventId=57e92243-a9f5-49a8-b7e4-1c924802268f, joinCode=H2LC, playerName=준우",
+    "[2026-08-26 06:43:02.548] [ERROR] [,] --- [pool-4-thread-3] c.r.i.messaging.RoomEventWaitManager : 방 이벤트 자동 정리 (실패): eventId=ee7a7fb3-532f-46db-a6df-ed77a3f18b53",
+    "[2026-08-26 06:43:44.907] [ERROR] [4e2ac6ed344e8589f67099bb1a0be638,ad5e0712e82e05dd] --- [redis-stream-thread-pool-room:join2] c.r.application.service.RoomService : 방 참가 비동기 처리 실패: eventId=8112fa07-ce00-4fba-bebe-8d2172a5578e, joinCode=H2LC, playerName=나윤",
+    "[2026-08-26 06:44:21.336] [ERROR] [,] --- [pool-4-thread-3] c.r.i.messaging.RoomEventWaitManager : 방 이벤트 자동 정리 (실패): eventId=690b774a-7328-4765-a8e1-5ffe869653f0",
+    "[2026-08-26 06:47:33.771] [ERROR] [,] --- [blindtimer-task-2] c.g.s.GameTaskSchedulerFactory : [blindtimer] 스케줄 실행 중 예외가 발생했습니다.",
+    "[2026-08-26 06:52:10.229] [ERROR] [,] --- [pool-7-thread-1] c.s.i.c.SettlementPendingSweeper : pending 정산 메시지 재처리 실패: recordId=1787813530229-1"
+  ],
+  "logEnvironment": "prod",
+  "expected": "예",
+  "axis": "partial-relevance"
+}

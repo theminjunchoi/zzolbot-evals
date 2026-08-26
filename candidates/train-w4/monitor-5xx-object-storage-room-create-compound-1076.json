@@ -1,0 +1,33 @@
+{
+  "name": "monitor-5xx-object-storage-room-create-compound-1076",
+  "question": "알림 Http5xxRatioHigh(critical)가 prod에서 발화했다 - 최근 5분 5xx 비율이 5%를 넘었다. 봇에는 최근 30분 ERROR 로그 샘플 10줄(오브젝트 스토리지 접근 실패와 그에 뒤따른 방 생성 요청 실패)이 주어졌다.",
+  "rubric": "주어진 ERROR 로그는 13:41:02부터 13:44:24까지 OracleObjectStorageService가 QR 코드 업로드 실패 3건(connect timed out)과 Public URL 생성 실패 1건(Service error:ServiceUnavailable)을 기록했고, 각 업로드 실패 직후 같은 트레이스에서 QrCodeService의 QR 코드 생성 실패 3건과 RestExceptionHandler의 POST /rooms 요청 예외 3건(ObjectStorageUploadException)이 이어졌음을 보여준다. '근거 발견: 예'로 판정하고 Oracle Object Storage 접근 실패를 근본 원인으로, QR 코드 생성 실패와 POST /rooms 요청 예외를 그 파급 증상으로 구분해 가설을 제시하면 정답. '근거 발견: 아니오'로 판정하거나, QR 코드 생성 로직이나 방 생성 API 자체의 결함을 근본 원인으로 지목해 외부 스토리지 장애가 선행했다는 점을 놓치면 오답.",
+  "source": "MANUAL",
+  "alert": {
+    "alertname": "Http5xxRatioHigh",
+    "severity": "critical",
+    "fingerprint": "golden-gen-cc-1076",
+    "summary": "HTTP 5xx 비율 5% 초과 (prod-app)",
+    "description": "최근 5분 5xx 비율이 7.6%. 서버 측 광범위 실패 가능성.",
+    "labels": {
+      "alertname": "Http5xxRatioHigh",
+      "severity": "critical",
+      "job": "prod-app"
+    }
+  },
+  "logSamples": [
+    "[2026-08-26 13:41:02.117] [ERROR] [87bc9ea23e3f679f2a3f07aa9de66cf3,b36088cbcd0073e0] --- [] c.r.infra.OracleObjectStorageService : Oracle Object Storage QR 코드 업로드 실패: contents=https://zzol.site/rooms/B3QN, error=SdkClientException: Unable to execute HTTP request: connect timed out",
+    "[2026-08-26 13:41:02.463] [ERROR] [87bc9ea23e3f679f2a3f07aa9de66cf3,f21300585650d02b] --- [] c.r.application.service.QrCodeService : QR 코드 생성 실패: joinCode=B3QN, error=ObjectStorageUploadException: QR 이미지 업로드에 실패했습니다",
+    "[2026-08-26 13:41:05.980] [ERROR] [87bc9ea23e3f679f2a3f07aa9de66cf3,86a227c20d42e426] --- [http-nio-8080-exec-11] c.web.exception.RestExceptionHandler : method=POST uri=/rooms exception=ObjectStorageUploadException message=QR 이미지 업로드에 실패했습니다",
+    "[2026-08-26 13:42:37.221] [ERROR] [78e6aea1490c9823a37b5f691c12dfc1,2974d9c5805324bf] --- [] c.r.infra.OracleObjectStorageService : Oracle Object Storage QR 코드 업로드 실패: contents=https://zzol.site/rooms/F9RT, error=SdkClientException: Unable to execute HTTP request: connect timed out",
+    "[2026-08-26 13:42:37.604] [ERROR] [78e6aea1490c9823a37b5f691c12dfc1,e9be3d1d7cb4ec90] --- [] c.r.application.service.QrCodeService : QR 코드 생성 실패: joinCode=F9RT, error=ObjectStorageUploadException: QR 이미지 업로드에 실패했습니다",
+    "[2026-08-26 13:42:41.155] [ERROR] [78e6aea1490c9823a37b5f691c12dfc1,fc7b821558a8d1df] --- [http-nio-8080-exec-26] c.web.exception.RestExceptionHandler : method=POST uri=/rooms exception=ObjectStorageUploadException message=QR 이미지 업로드에 실패했습니다",
+    "[2026-08-26 13:43:58.742] [ERROR] [1f8a1f695540198769e373d928973cf9,04d3e9f5c1148cbf] --- [] c.r.infra.OracleObjectStorageService : Oracle Object Storage Public URL 생성 실패: storageKey=qr/2026/08/26/C7MK.png, error=BmcException: Service error:ServiceUnavailable",
+    "[2026-08-26 13:44:20.316] [ERROR] [938b59639e98dd9577dd2c80ef325d2b,82f69ceeeed2ac1c] --- [] c.r.infra.OracleObjectStorageService : Oracle Object Storage QR 코드 업로드 실패: contents=https://zzol.site/rooms/H2SV, error=SdkClientException: Unable to execute HTTP request: connect timed out",
+    "[2026-08-26 13:44:20.688] [ERROR] [938b59639e98dd9577dd2c80ef325d2b,3413f0555f8745ad] --- [] c.r.application.service.QrCodeService : QR 코드 생성 실패: joinCode=H2SV, error=ObjectStorageUploadException: QR 이미지 업로드에 실패했습니다",
+    "[2026-08-26 13:44:24.907] [ERROR] [938b59639e98dd9577dd2c80ef325d2b,b0f0b9a6b91b8823] --- [http-nio-8080-exec-3] c.web.exception.RestExceptionHandler : method=POST uri=/rooms exception=ObjectStorageUploadException message=QR 이미지 업로드에 실패했습니다"
+  ],
+  "logEnvironment": "prod",
+  "expected": "예",
+  "axis": "compound-cause"
+}

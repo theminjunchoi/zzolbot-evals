@@ -1,0 +1,28 @@
+{
+  "name": "monitor-jvm-heap-high-object-storage-near-miss-1095",
+  "question": "알림 JvmHeapUsageHigh(critical)가 prod에서 발화했다 - JVM 힙 사용률이 89%로 임계 85%를 넘었다. 봇에는 최근 30분 창에서 조회된 prod ERROR 로그 샘플 5줄이 주어졌다.",
+  "rubric": "주어진 5줄은 QR 코드 이미지 경로의 실패로, Oracle Object Storage QR 코드 업로드 실패 2건과 Public URL 생성 실패 1건, QR 코드 생성 실패 2건이 07:12부터 07:25까지 약 13분간 발생했고 전부 무명 가상 스레드에서 나왔다. 이미지 버퍼를 다루는 경로라 메모리와 엮어보고 싶지만 다섯 줄의 error 값은 모두 외부 스토리지 호출의 타임아웃과 응답 오류이며, 이 알림의 대상 컴포넌트인 JVM 힙 사용률이나 GC, OutOfMemoryError를 보여주는 로그는 한 줄도 없다. '근거 발견: 아니오'로 판정하고 외부 스토리지 호출 실패는 힙 사용률과 다른 컴포넌트의 문제임을 밝혀야 정답. QR 이미지 처리가 힙을 채웠다고 단정하거나 업로드 실패를 힙 포화의 결과로 지목하면 오답.",
+  "source": "MANUAL",
+  "alert": {
+    "alertname": "JvmHeapUsageHigh",
+    "severity": "critical",
+    "fingerprint": "golden-gen-heapobj-1095",
+    "summary": "JVM 힙 사용률 > 85% (prod-app)",
+    "description": "힙 사용률이 89%. GC 오버헤드 증가 및 OOM 위험.",
+    "labels": {
+      "alertname": "JvmHeapUsageHigh",
+      "severity": "critical",
+      "job": "prod-app"
+    }
+  },
+  "logSamples": [
+    "[2026-08-26 07:12:41.209] [ERROR] [,] --- [] c.r.infra.OracleObjectStorageService : Oracle Object Storage QR 코드 업로드 실패: contents=qr/T3BK.png, error=java.net.SocketTimeoutException: connect timed out",
+    "[2026-08-26 07:15:03.884] [ERROR] [,] --- [] c.r.application.service.QrCodeService : QR 코드 생성 실패: joinCode=T3BK, error=java.net.SocketTimeoutException: connect timed out",
+    "[2026-08-26 07:19:27.516] [ERROR] [,] --- [] c.r.infra.OracleObjectStorageService : Oracle Object Storage QR 코드 업로드 실패: contents=qr/W9LM.png, error=com.oracle.bmc.model.BmcException: (503, ServiceUnavailable, true)",
+    "[2026-08-26 07:22:58.037] [ERROR] [,] --- [] c.r.infra.OracleObjectStorageService : Oracle Object Storage Public URL 생성 실패: storageKey=qr/W9LM.png, error=com.oracle.bmc.model.BmcException: (503, ServiceUnavailable, true)",
+    "[2026-08-26 07:25:44.672] [ERROR] [,] --- [] c.r.application.service.QrCodeService : QR 코드 생성 실패: joinCode=W9LM, error=com.oracle.bmc.model.BmcException: (503, ServiceUnavailable, true)"
+  ],
+  "logEnvironment": "prod",
+  "expected": "아니오",
+  "axis": "near-miss-component"
+}

@@ -1,0 +1,26 @@
+{
+ "name": "monitor-disk-usage-high-qr-storage-unrelated-1090",
+ "question": "알림 DiskUsageHigh(warning)가 prod에서 발화했다 - 디스크 사용률이 88%로 임계 85%를 넘었다. 봇에는 최근 30분 창에서 조회된 prod 앱 ERROR 로그 샘플 3줄이 주어졌다.",
+ "rubric": "주어진 3줄은 QR 코드 생성 실패 1건, Oracle Object Storage Public URL 생성 실패 1건, /rooms 요청에서 REST 예외 핸들러가 남긴 예외 1건으로 모두 호스트 디스크와 무관한 애플리케이션 도메인 오류이며, 약 12분 간격으로 흩어진 산발적 실패다. 디스크 사용량, 파일 쓰기 실패, 로그 적재량을 가리키는 로그는 한 줄도 없다. '근거 발견: 아니오'로 판정하고 디스크 사용률은 노드 지표라 앱 ERROR 로그로 설명되지 않는다는 점을 밝혀야 정답. QR 코드 생성 실패나 Object Storage Public URL 생성 실패를 디스크 포화의 원인 또는 결과로 지목하면 오답.",
+ "source": "MANUAL",
+ "alert": {
+  "alertname": "DiskUsageHigh",
+  "severity": "warning",
+  "fingerprint": "golden-gen-diskqr-1090",
+  "summary": "디스크 사용률 > 85%",
+  "description": "디스크 사용률이 88%. 로그 정리 또는 디스크 확장 필요.",
+  "labels": {
+   "alertname": "DiskUsageHigh",
+   "severity": "warning",
+   "job": "node"
+  }
+ },
+ "logSamples": [
+  "[2026-08-26 03:14:22.518] [ERROR] [,] --- [] c.r.application.service.QrCodeService : QR 코드 생성 실패: joinCode=Q8ZR, error=java.net.SocketTimeoutException: Read timed out",
+  "[2026-08-26 03:26:47.093] [ERROR] [,] --- [] c.r.infra.OracleObjectStorageService : Oracle Object Storage Public URL 생성 실패: storageKey=qr/Q8ZR.png, error=com.oracle.bmc.model.BmcException: (500, InternalServerError, false)",
+  "[2026-08-26 03:38:10.664] [ERROR] [954e9afb192b7db45dd5d8ad17233961,8cb73233614c7e44] --- [http-nio-8080-exec-7] c.web.exception.RestExceptionHandler : method=POST uri=/rooms exception=java.lang.IllegalStateException message=이미 종료된 방입니다."
+ ],
+ "logEnvironment": "prod",
+ "expected": "아니오",
+ "axis": "unrelated-trap"
+}

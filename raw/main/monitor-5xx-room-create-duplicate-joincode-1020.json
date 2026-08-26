@@ -1,0 +1,32 @@
+{
+ "name": "monitor-5xx-room-create-duplicate-joincode-1020",
+ "question": "알림 Http5xxRatioHigh(critical)가 prod에서 발화했다 - 최근 5분 5xx 비율이 임계 5%를 넘겼다. 봇에는 최근 30분 ERROR 로그 샘플 9줄(방 생성 요청의 joinCode 중복키 위반 밀집과 그와 무관한 산발 에러)이 주어졌다.",
+ "rubric": "관련 로그는 16:05부터 16:07 사이에 밀집한 POST /rooms 요청 6건으로, 모두 room.uk_room_join_code 유니크 제약 중복(DataIntegrityViolationException)으로 실패했고 K2VD, B9TR, M3XF처럼 같은 joinCode가 짧은 간격으로 두 번씩 충돌해 joinCode 생성이 기존 값과 충돌하고 있음을 보여주는 5xx의 직접 근거다. 반면 16:02의 speedtouch 스트림 이벤트 처리 실패, 16:12의 pending 정산 재처리 실패, 16:18의 QR 코드 생성 실패는 방 생성 경로와 무관한 산발 에러다. '근거 발견: 예'로 판정하고 방 생성 시 joinCode 중복(유니크 제약 위반)으로 인한 POST /rooms 실패를 5xx 비율 상승의 원인 가설로 제시하면 정답. '근거 발견: 아니오'로 판정하거나 스트림 이벤트 처리 실패, 정산 재처리 실패, QR 코드 실패를 5xx의 원인으로 끌어들이면 오답.",
+ "source": "MANUAL",
+ "alert": {
+  "alertname": "Http5xxRatioHigh",
+  "severity": "critical",
+  "fingerprint": "golden-gen-pr-1020",
+  "summary": "HTTP 5xx 비율 5% 초과 (prod-app)",
+  "description": "최근 5분 5xx 비율이 11.4%. 서버 측 광범위 실패 가능성.",
+  "labels": {
+   "alertname": "Http5xxRatioHigh",
+   "severity": "critical",
+   "job": "prod-app"
+  }
+ },
+ "logSamples": [
+  "[2026-08-26 16:02:11.336] [ERROR] [e12decf357a110c9d83aca6a9b3380c8,d1b01bae6995fdb4] --- [redis-stream-thread-pool-speedtouch1] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=TouchProgressEventConsumer, message=TouchProgressEvent[joinCode=H8QN, playerName=지우, eventId=7ef7f8d5-9b29-4b20-993f-01ce42007885]",
+  "[2026-08-26 16:05:33.741] [ERROR] [f5d214100a8254b0c2419b808b623d11,d166a65c8598dd78] --- [http-nio-8080-exec-11] c.web.exception.RestExceptionHandler : method=POST uri=/rooms exception=DataIntegrityViolationException message=Duplicate entry 'K2VD' for key 'room.uk_room_join_code'",
+  "[2026-08-26 16:05:47.208] [ERROR] [b5ffadb2401e4c336f7f945f82a25a04,366f9c7381687692] --- [http-nio-8080-exec-24] c.web.exception.RestExceptionHandler : method=POST uri=/rooms exception=DataIntegrityViolationException message=Duplicate entry 'K2VD' for key 'room.uk_room_join_code'",
+  "[2026-08-26 16:06:02.955] [ERROR] [573a744035f2507d2259face777db21c,6eb8e2f10e1ffbc0] --- [http-nio-8080-exec-08] c.web.exception.RestExceptionHandler : method=POST uri=/rooms exception=DataIntegrityViolationException message=Duplicate entry 'B9TR' for key 'room.uk_room_join_code'",
+  "[2026-08-26 16:06:18.470] [ERROR] [56ce615fda7947f8cdd5f1a1ede44178,e099a4d6c2dbf51d] --- [http-nio-8080-exec-31] c.web.exception.RestExceptionHandler : method=POST uri=/rooms exception=DataIntegrityViolationException message=Duplicate entry 'B9TR' for key 'room.uk_room_join_code'",
+  "[2026-08-26 16:06:44.129] [ERROR] [7780a99eb949a520d986b045022ff245,a3f7208c7ed14f8f] --- [http-nio-8080-exec-05] c.web.exception.RestExceptionHandler : method=POST uri=/rooms exception=DataIntegrityViolationException message=Duplicate entry 'M3XF' for key 'room.uk_room_join_code'",
+  "[2026-08-26 16:07:09.683] [ERROR] [bacbeca9ac9e5f26827752dfe3262d98,7a341579eaa06817] --- [http-nio-8080-exec-19] c.web.exception.RestExceptionHandler : method=POST uri=/rooms exception=DataIntegrityViolationException message=Duplicate entry 'M3XF' for key 'room.uk_room_join_code'",
+  "[2026-08-26 16:12:26.014] [ERROR] [,] --- [pool-6-thread-1] c.s.i.c.SettlementPendingSweeper : pending 정산 메시지 재처리 실패: recordId=1756193546014-0",
+  "[2026-08-26 16:18:50.377] [ERROR] [,] --- [] c.r.application.service.QrCodeService : QR 코드 생성 실패: joinCode=W6PC, error=Storage client not initialized"
+ ],
+ "logEnvironment": "prod",
+ "expected": "예",
+ "axis": "partial-relevance"
+}

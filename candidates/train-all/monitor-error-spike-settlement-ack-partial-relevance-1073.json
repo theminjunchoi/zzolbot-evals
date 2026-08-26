@@ -1,0 +1,32 @@
+{
+  "name": "monitor-error-spike-settlement-ack-partial-relevance-1073",
+  "question": "알림 AppErrorLogSpike(warning)가 prod에서 발화했다 - 최근 5분 ERROR 로그가 임계 30건을 넘었다. 봇에는 최근 30분 ERROR 로그 샘플 9줄(정산 스트림 처리 실패 밀집과 그와 무관한 산발 에러)이 주어졌다.",
+  "rubric": "주어진 ERROR 로그 중 09:21:03부터 09:24:26까지 약 3분 20초 구간에 redis-stream-thread-pool-settlement:result1과 redis-stream-thread-pool-settlement:result2 스레드에서 SettlementStreamConsumer가 기록한 정산 처리 실패(ACK 보류, 재전달 대기) 5건과 정산 스트림 처리 중 오류 1건이 알림과 직접 관련된 근거이고, 09:07:44의 GameTaskSchedulerFactory [blockstacking] 스케줄 예외 1건, 09:29:52의 RoomService 방 참가 비동기 처리 실패 1건, 09:33:18의 QrCodeService QR 코드 생성 실패 1건은 정산 경로와 무관한 산발 에러다. '근거 발견: 예'로 판정하고 settlement:result 스트림의 정산 처리 실패가 ACK 보류와 재전달로 반복되면서 ERROR 로그가 급증했다는 가설을 제시하면 정답. '근거 발견: 아니오'로 판정하거나, 무관한 blockstacking 스케줄 예외나 방 참가 비동기 처리 실패, QR 코드 생성 실패를 급증의 원인으로 지목하면 오답.",
+  "source": "MANUAL",
+  "alert": {
+    "alertname": "AppErrorLogSpike",
+    "severity": "warning",
+    "fingerprint": "golden-gen-pr-1073",
+    "summary": "ERROR 로그 급증(최근 5분, prod-app)",
+    "description": "ERROR 로그가 41건(임계 30/5m)입니다. zzol-bot이 근본원인을 분석합니다.",
+    "labels": {
+      "alertname": "AppErrorLogSpike",
+      "severity": "warning",
+      "job": "prod-app"
+    }
+  },
+  "logSamples": [
+    "[2026-08-26 09:07:44.310] [ERROR] [,] --- [blockstacking-task-2] c.g.s.GameTaskSchedulerFactory : [blockstacking] 스케줄 실행 중 예외가 발생했습니다.",
+    "[2026-08-26 09:21:03.118] [ERROR] [09d4e7dbfc8f152f4a16fde561a833db,8181eb38a45638e1] --- [redis-stream-thread-pool-settlement:result1] c.s.i.c.SettlementStreamConsumer : 정산 처리 실패 — ACK 보류, 재전달 대기: recordId=1787736063118-0",
+    "[2026-08-26 09:21:39.552] [ERROR] [6ad2baaa7bba68132fff936e734ddca5,42e9da5269855ff4] --- [redis-stream-thread-pool-settlement:result2] c.s.i.c.SettlementStreamConsumer : 정산 처리 실패 — ACK 보류, 재전달 대기: recordId=1787736099552-0",
+    "[2026-08-26 09:22:15.884] [ERROR] [87ccb2cf82d0ac4ed47dcc2f7b610126,9a17537179839633] --- [redis-stream-thread-pool-settlement:result1] c.s.i.c.SettlementStreamConsumer : 정산 스트림 처리 중 오류가 발생했습니다.",
+    "[2026-08-26 09:22:58.207] [ERROR] [f0dd451e939ec94e779529d35d332cf8,35e2f0d0074c311c] --- [redis-stream-thread-pool-settlement:result2] c.s.i.c.SettlementStreamConsumer : 정산 처리 실패 — ACK 보류, 재전달 대기: recordId=1787736178207-1",
+    "[2026-08-26 09:23:41.663] [ERROR] [354df3a2cb5bfebefe09c265a97292c6,975b72a11d397dea] --- [redis-stream-thread-pool-settlement:result1] c.s.i.c.SettlementStreamConsumer : 정산 처리 실패 — ACK 보류, 재전달 대기: recordId=1787736221663-0",
+    "[2026-08-26 09:24:26.045] [ERROR] [1c2b21cdc4b15d4e81fb728e4915600f,28412d3885821b4d] --- [redis-stream-thread-pool-settlement:result2] c.s.i.c.SettlementStreamConsumer : 정산 처리 실패 — ACK 보류, 재전달 대기: recordId=1787736266045-0",
+    "[2026-08-26 09:29:52.774] [ERROR] [279ddcaced639ce885201e7b5aabd250,d8c9ae9d5fe19c0e] --- [redis-stream-thread-pool-room:join1] c.r.application.service.RoomService : 방 참가 비동기 처리 실패: eventId=166fcd51-8cee-4bb5-8975-3eeb0ae92469, joinCode=T7QD, playerName=예린",
+    "[2026-08-26 09:33:18.492] [ERROR] [b0d5c8163baa11f5ce753042c58793e1,6760468f7818b2a8] --- [] c.r.application.service.QrCodeService : QR 코드 생성 실패: joinCode=T7QD, error=java.net.SocketTimeoutException: Read timed out"
+  ],
+  "logEnvironment": "prod",
+  "expected": "예",
+  "axis": "partial-relevance"
+}

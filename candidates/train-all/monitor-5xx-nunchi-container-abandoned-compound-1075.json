@@ -1,0 +1,32 @@
+{
+  "name": "monitor-5xx-nunchi-container-abandoned-compound-1075",
+  "question": "알림 Http5xxRatioHigh(critical)가 prod에서 발화했다 - 최근 5분 5xx 비율이 5%를 넘었다. 봇에는 최근 30분 ERROR 로그 샘플 9줄(nunchi 스트림 컨테이너 복구 실패와 그 뒤의 요청 실패)이 주어졌다.",
+  "rubric": "주어진 ERROR 로그는 21:04:12부터 21:05:44까지 pool-3-thread-1에서 RedisStreamContainerRecovery가 stream=nunchi 컨테이너의 상태 확인 예외 1건과 복구 중 예외 2건을 기록한 뒤 복구를 포기하고 HealthIndicator에 DOWN을 보고했고, 그 직후 21:06:20과 21:06:58에 NunchiCommandEventConsumer의 눈치게임 press 처리 오류 2건, 21:07:33부터 21:08:47까지 RestExceptionHandler가 RedisSystemException(Stream container for nunchi is not running)으로 HTTP 요청 예외 3건을 기록했음을 보여준다. '근거 발견: 예'로 판정하고 nunchi 스트림 컨테이너의 복구 실패와 포기를 근본 원인으로, 눈치게임 press 처리 오류와 RestExceptionHandler가 기록한 요청 예외를 그 파급 증상으로 구분해 가설을 제시하면 정답. '근거 발견: 아니오'로 판정하거나, 눈치게임 press 처리 오류나 HTTP 요청 예외 자체를 근본 원인으로 지목해 컨테이너 복구 포기와의 선후 관계를 구분하지 못하면 오답.",
+  "source": "MANUAL",
+  "alert": {
+    "alertname": "Http5xxRatioHigh",
+    "severity": "critical",
+    "fingerprint": "golden-gen-cc-1075",
+    "summary": "HTTP 5xx 비율 5% 초과 (prod-app)",
+    "description": "최근 5분 5xx 비율이 11.4%. 서버 측 광범위 실패 가능성.",
+    "labels": {
+      "alertname": "Http5xxRatioHigh",
+      "severity": "critical",
+      "job": "prod-app"
+    }
+  },
+  "logSamples": [
+    "[2026-08-26 21:04:12.338] [ERROR] [,] --- [pool-3-thread-1] c.g.h.RedisStreamContainerRecovery : Redis Stream container 상태 확인 중 예외: stream=nunchi",
+    "[2026-08-26 21:04:42.905] [ERROR] [,] --- [pool-3-thread-1] c.g.h.RedisStreamContainerRecovery : Redis Stream container 복구 중 예외 발생: stream=nunchi",
+    "[2026-08-26 21:05:13.472] [ERROR] [,] --- [pool-3-thread-1] c.g.h.RedisStreamContainerRecovery : Redis Stream container 복구 중 예외 발생: stream=nunchi",
+    "[2026-08-26 21:05:44.061] [ERROR] [,] --- [pool-3-thread-1] c.g.h.RedisStreamContainerRecovery : Redis Stream container 복구 포기: stream=nunchi. HealthIndicator에 DOWN 보고",
+    "[2026-08-26 21:06:20.517] [ERROR] [2a71522dd4c3886a9b3ddfae25a9742b,82ee0b5c68421ce7] --- [redis-stream-thread-pool-nunchi1] c.n.i.m.c.NunchiCommandEventConsumer : 눈치게임 press 처리 중 오류: joinCode=K4WD, playerName=서준, eventId=ceb15743-13ff-4eda-bc83-4bb8fb8aac20",
+    "[2026-08-26 21:06:58.234] [ERROR] [d6fec5ee6cf299ac99cc5466ce131b58,a38865a7878274b3] --- [redis-stream-thread-pool-nunchi2] c.n.i.m.c.NunchiCommandEventConsumer : 눈치게임 press 처리 중 오류: joinCode=K4WD, playerName=하람, eventId=1a81ce90-44b6-4936-a428-7f54dab78601",
+    "[2026-08-26 21:07:33.880] [ERROR] [52970a631cf7720096c50eb05957dea0,5208c7498acea906] --- [http-nio-8080-exec-12] c.web.exception.RestExceptionHandler : method=GET uri=/rooms/K4WD/probabilities exception=RedisSystemException message=Stream container for nunchi is not running",
+    "[2026-08-26 21:08:05.126] [ERROR] [4d218d9b65a9b15e823d6aaadccce959,670a4870ea09de80] --- [http-nio-8080-exec-7] c.web.exception.RestExceptionHandler : method=POST uri=/rooms exception=RedisSystemException message=Stream container for nunchi is not running",
+    "[2026-08-26 21:08:47.593] [ERROR] [ec0c3f5d622b6291885d6760dfe74f11,74cd91f7b4fe7c45] --- [http-nio-8080-exec-19] c.web.exception.RestExceptionHandler : method=PATCH uri=/rooms/K4WD/settings exception=RedisSystemException message=Stream container for nunchi is not running"
+  ],
+  "logEnvironment": "prod",
+  "expected": "예",
+  "axis": "compound-cause"
+}

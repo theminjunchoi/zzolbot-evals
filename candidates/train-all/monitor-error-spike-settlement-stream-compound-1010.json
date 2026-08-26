@@ -1,0 +1,33 @@
+{
+  "name": "monitor-error-spike-settlement-stream-compound-1010",
+  "question": "알림 AppErrorLogSpike(warning)가 prod에서 발화했다 - 최근 5분 ERROR 로그가 임계(30건/5m)를 넘어 급증. 봇에는 최근 30분 ERROR 로그 샘플 10줄(정산 스트림 컨테이너 복구 실패와 정산 처리 실패 연쇄)이 주어졌다.",
+  "rubric": "주어진 ERROR 로그는 settlement:result 스트림 컨테이너의 상태 확인과 복구가 반복 실패해 끝내 복구를 포기(HealthIndicator DOWN 보고)하는 근본 원인과, 그 여파로 SettlementStreamConsumer의 정산 처리가 ACK 보류 상태로 밀리고 SettlementPendingSweeper의 pending 재처리까지 실패하는 파급 증상을 함께 담고 있다. '근거 발견: 예'로 판정하고 settlement:result 스트림 컨테이너 복구 실패를 근본 원인으로, 정산 처리 실패와 pending 재처리 실패를 그 파급 증상으로 구분해 가설을 제시하면 정답. '근거 발견: 아니오'로 판정하거나 정산 로직 버그, pending sweeper 자체를 근본 원인으로 지목하고 스트림 컨테이너 복구 실패를 놓치면 오답.",
+  "source": "MANUAL",
+  "alert": {
+    "alertname": "AppErrorLogSpike",
+    "severity": "warning",
+    "fingerprint": "golden-gen-cc-1010",
+    "summary": "ERROR 로그 급증(최근 5분, prod-app)",
+    "description": "ERROR 로그가 214건(임계 30/5m)입니다. zzol-bot이 근본원인을 분석합니다.",
+    "labels": {
+      "alertname": "AppErrorLogSpike",
+      "severity": "warning",
+      "job": "prod-app"
+    }
+  },
+  "logSamples": [
+    "[2026-08-26 03:41:02.118] [ERROR] [,] --- [pool-1-thread-3] c.g.h.RedisStreamContainerRecovery : Redis Stream container 상태 확인 중 예외: stream=settlement:result",
+    "[2026-08-26 03:41:12.446] [ERROR] [,] --- [pool-1-thread-3] c.g.h.RedisStreamContainerRecovery : Redis Stream container 복구 중 예외 발생: stream=settlement:result",
+    "[2026-08-26 03:41:33.907] [ERROR] [252ad7275ac03d1e32f6029125445248,6fc5152634139a02] --- [redis-stream-thread-pool-settlement:result1] c.g.r.c.RedisStreamListenerStarter : Redis Stream 처리 중 오류가 발생했습니다.",
+    "[2026-08-26 03:42:07.552] [ERROR] [13f3d1ae8499944e2a77bfe662ecbc1b,84fc4d6538eefafa] --- [redis-stream-thread-pool-settlement:result1] c.s.i.c.SettlementStreamConsumer : 정산 스트림 처리 중 오류가 발생했습니다.",
+    "[2026-08-26 03:42:41.019] [ERROR] [2ff3d80e7a837a060ceecade5cd0fdef,96b07dcdd4b54180] --- [redis-stream-thread-pool-settlement:result2] c.s.i.c.SettlementStreamConsumer : 정산 처리 실패 — ACK 보류, 재전달 대기: recordId=1756172561019-0",
+    "[2026-08-26 03:43:15.774] [ERROR] [13ab3daf39cdf2ec5d30188f656636a3,958619af8cde12c4] --- [redis-stream-thread-pool-settlement:result2] c.s.i.c.SettlementStreamConsumer : 정산 처리 실패 — ACK 보류, 재전달 대기: recordId=1756172595774-2",
+    "[2026-08-26 03:44:02.638] [ERROR] [,] --- [pool-4-thread-2] c.s.i.c.SettlementPendingSweeper : pending 정산 메시지 재처리 실패: recordId=1756172561019-0",
+    "[2026-08-26 03:45:22.145] [ERROR] [,] --- [pool-1-thread-3] c.g.h.RedisStreamContainerRecovery : Redis Stream container 복구 중 예외 발생: stream=settlement:result",
+    "[2026-08-26 03:46:08.470] [ERROR] [,] --- [pool-1-thread-3] c.g.h.RedisStreamContainerRecovery : Redis Stream container 복구 포기: stream=settlement:result. HealthIndicator에 DOWN 보고",
+    "[2026-08-26 03:46:44.913] [ERROR] [,] --- [pool-4-thread-2] c.s.i.c.SettlementPendingSweeper : pending 정산 메시지 재처리 실패: recordId=1756172595774-2"
+  ],
+  "logEnvironment": "prod",
+  "expected": "예",
+  "axis": "compound-cause"
+}

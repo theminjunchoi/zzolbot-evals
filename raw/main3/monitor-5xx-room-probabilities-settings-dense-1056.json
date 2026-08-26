@@ -1,0 +1,32 @@
+{
+ "name": "monitor-5xx-room-probabilities-settings-dense-1056",
+ "question": "알림 Http5xxRatioHigh(critical)가 prod에서 발화했다 - 최근 5분 5xx 비율이 5%를 초과했다. 봇에는 최근 30분 ERROR 로그 샘플 9줄(방 확률, 설정 조회 요청의 동일 예외 반복)이 주어졌다.",
+ "rubric": "주어진 ERROR 로그는 19:22:11부터 19:26:48까지 약 5분 동안 RestExceptionHandler가 동일한 exception=IllegalStateException(확률 가중치 미초기화)으로 GET 요청 9건을 처리한 기록이며, uri=/rooms/<joinCode>/probabilities가 6건, uri=/rooms/<joinCode>/settings가 3건이고 joinCode는 R7KD, W2NP, C5TB 세 개로 알림 시간창과 정합하는 직접 근거다. '근거 발견: 예'로 판정하고 방 확률 가중치가 초기화되지 않아 확률, 설정 조회 요청이 IllegalStateException으로 반복 실패하는 것을 원인으로 제시하면 정답. '근거 발견: 아니오'로 판정하거나 Redis 스트림, DB 연결 등 로그에 없는 원인을 지목하면 오답.",
+ "source": "MANUAL",
+ "alert": {
+  "alertname": "Http5xxRatioHigh",
+  "severity": "critical",
+  "fingerprint": "golden-gen-pd-1056",
+  "summary": "HTTP 5xx 비율 5% 초과 (prod-app)",
+  "description": "최근 5분 5xx 비율이 12.6%. 서버 측 광범위 실패 가능성.",
+  "labels": {
+   "alertname": "Http5xxRatioHigh",
+   "severity": "critical",
+   "job": "prod-app"
+  }
+ },
+ "logSamples": [
+  "[2026-08-26 19:22:11.508] [ERROR] [2584981144c728936ccac8be03089b2a,3f608fe27f3451e6] --- [http-nio-8080-exec-4] c.web.exception.RestExceptionHandler : method=GET uri=/rooms/R7KD/probabilities exception=IllegalStateException message=Probability weights are not initialized: joinCode=R7KD",
+  "[2026-08-26 19:22:47.093] [ERROR] [5342d436337f6fe7708cefdfe4e158d0,baf3850c7cbbcbf6] --- [http-nio-8080-exec-11] c.web.exception.RestExceptionHandler : method=GET uri=/rooms/R7KD/settings exception=IllegalStateException message=Probability weights are not initialized: joinCode=R7KD",
+  "[2026-08-26 19:23:15.660] [ERROR] [b4786dc98359085d3699eb8d9a19060f,1607f16188b9d345] --- [http-nio-8080-exec-9] c.web.exception.RestExceptionHandler : method=GET uri=/rooms/W2NP/probabilities exception=IllegalStateException message=Probability weights are not initialized: joinCode=W2NP",
+  "[2026-08-26 19:23:52.417] [ERROR] [0acae23d0825d55caa398656bcfa40e2,ec1e6a93308e4504] --- [http-nio-8080-exec-16] c.web.exception.RestExceptionHandler : method=GET uri=/rooms/W2NP/probabilities exception=IllegalStateException message=Probability weights are not initialized: joinCode=W2NP",
+  "[2026-08-26 19:24:29.884] [ERROR] [e8ff1b21f866d2e41d41ca4a42746d93,04b5548bd896870f] --- [http-nio-8080-exec-2] c.web.exception.RestExceptionHandler : method=GET uri=/rooms/W2NP/settings exception=IllegalStateException message=Probability weights are not initialized: joinCode=W2NP",
+  "[2026-08-26 19:25:03.271] [ERROR] [b3d800e0cc84c4131c6c4345247adea9,1ec2e5ac7dfc5647] --- [http-nio-8080-exec-21] c.web.exception.RestExceptionHandler : method=GET uri=/rooms/C5TB/probabilities exception=IllegalStateException message=Probability weights are not initialized: joinCode=C5TB",
+  "[2026-08-26 19:25:40.735] [ERROR] [9b58703dadad601ecd47e7f3510181f1,f7e6a6e37cadf11f] --- [http-nio-8080-exec-8] c.web.exception.RestExceptionHandler : method=GET uri=/rooms/C5TB/probabilities exception=IllegalStateException message=Probability weights are not initialized: joinCode=C5TB",
+  "[2026-08-26 19:26:12.049] [ERROR] [d6021f65fe16a8b9e99dc39c302f7888,1334bd1b5fbaf821] --- [http-nio-8080-exec-13] c.web.exception.RestExceptionHandler : method=GET uri=/rooms/C5TB/settings exception=IllegalStateException message=Probability weights are not initialized: joinCode=C5TB",
+  "[2026-08-26 19:26:48.902] [ERROR] [3e7482f14ec93e55f36201624461a084,2515b00fe817abd8] --- [http-nio-8080-exec-5] c.web.exception.RestExceptionHandler : method=GET uri=/rooms/R7KD/probabilities exception=IllegalStateException message=Probability weights are not initialized: joinCode=R7KD"
+ ],
+ "logEnvironment": "prod",
+ "expected": "예",
+ "axis": "positive-dense"
+}

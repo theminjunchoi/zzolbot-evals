@@ -1,0 +1,31 @@
+{
+ "name": "monitor-stream-latency-minigame-start-mixed-1048",
+ "question": "알림 RedisStreamE2eLatencyHigh(warning)가 prod에서 발화했다 - 스트림 E2E 처리 p95가 500ms를 넘었다. 봇에는 최근 30분 ERROR 로그 샘플 8줄(미니게임 시작과 종료 명령 이벤트 처리 실패, 그 사이에 섞인 무관한 산발 오류)이 주어졌다.",
+ "rubric": "관련 로그는 minigame 스트림에서 MiniGameStartConsumer의 이벤트 처리가 세 차례, blockstacking 스트림에서 StopCommandEventConsumer의 이벤트 처리가 두 차례 실패한 부분으로 미니게임 시작과 종료 경로의 컨슈머 실패를 보여주며, 방 이벤트 자동 정리 실패와 스케줄 태스크의 Unexpected error는 스트림 지연과 무관한 산발 오류다. '근거 발견: 예'로 판정하고 미니게임 시작과 종료 명령 컨슈머의 처리 실패와 재전달을 E2E 지연 상승의 원인 가설로 제시하면 정답. '근거 발견: 아니오'로 판정하거나, 무관한 방 이벤트 정리 실패나 스케줄 태스크 오류를 지연의 원인으로 지목하면 오답.",
+ "source": "MANUAL",
+ "alert": {
+  "alertname": "RedisStreamE2eLatencyHigh",
+  "severity": "warning",
+  "fingerprint": "golden-gen-rse-1048",
+  "summary": "Redis Stream E2E 지연 p95 > 500ms (prod-app)",
+  "description": "스트림 처리 p95 지연이 3.1s. 컨슈머 처리 적체 또는 다운스트림(App Service) 지연 가능성.",
+  "labels": {
+   "alertname": "RedisStreamE2eLatencyHigh",
+   "severity": "warning",
+   "job": "prod-app"
+  }
+ },
+ "logSamples": [
+  "[2026-08-26 22:13:40.115] [ERROR] [,] --- [pool-6-thread-2] c.r.i.messaging.RoomEventWaitManager : 방 이벤트 자동 정리 (실패): eventId=9eb8f11e-5c48-48c2-8e7c-ae806d5e81d9",
+  "[2026-08-26 22:15:22.673] [ERROR] [3213b61ad395b053de5709fccd48c9ad,888cf37ae015e95e] --- [redis-stream-thread-pool-minigame1] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=MiniGameStartConsumer, message=MiniGameStartEvent[eventId=034b9940-93f3-44ba-b6d3-d3fb948c6102, joinCode=CJ46, miniGameType=blockstacking]",
+  "[2026-08-26 22:16:04.209] [ERROR] [fab09fb444582bcb27f9be0d52f2b436,fa88823c5e85327d] --- [redis-stream-thread-pool-minigame2] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=MiniGameStartConsumer, message=MiniGameStartEvent[eventId=f7aa42af-c328-432d-b261-b001cadc6904, joinCode=CJ46, miniGameType=blindtimer]",
+  "[2026-08-26 22:16:58.844] [ERROR] [,] --- [pool-6-thread-1] o.s.s.s.TaskUtils$LoggingErrorHandler : Unexpected error occurred in scheduled task",
+  "[2026-08-26 22:17:41.375] [ERROR] [43d3ac21b232ba43e9d6fedde4ba2f38,a9596fa189193512] --- [redis-stream-thread-pool-blockstacking1] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=StopCommandEventConsumer, message=StopCommandEvent[eventId=484b1baa-a9b1-40e6-b928-a4920d30846d, joinCode=CJ46, playerName=바다]",
+  "[2026-08-26 22:18:36.902] [ERROR] [805dcd0bab2baf8ceb705ac107c87f73,dd446f3fd6501ae1] --- [redis-stream-thread-pool-minigame1] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=MiniGameStartConsumer, message=MiniGameStartEvent[eventId=f458bed2-2eeb-4974-97bc-1083dd21cd3a, joinCode=YR83, miniGameType=racinggame]",
+  "[2026-08-26 22:19:24.518] [ERROR] [2cf564988ea8f8c8a43a41f853f6e59f,7da83cc7a5a27039] --- [redis-stream-thread-pool-blockstacking2] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=StopCommandEventConsumer, message=StopCommandEvent[eventId=02dc2246-8a2e-41ec-a29f-de2f00c4d8b7, joinCode=YR83, playerName=소라]",
+  "[2026-08-26 22:20:11.046] [ERROR] [432fa3dbe16a540a66497ecb058eac6f,1a9b02ef1b7d3930] --- [redis-stream-thread-pool-minigame2] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=MiniGameStartConsumer, message=MiniGameStartEvent[eventId=fce6c398-475f-4822-8e32-5a8051359bd0, joinCode=YR83, miniGameType=nunchi]"
+ ],
+ "logEnvironment": "prod",
+ "expected": "예",
+ "axis": "partial-relevance"
+}

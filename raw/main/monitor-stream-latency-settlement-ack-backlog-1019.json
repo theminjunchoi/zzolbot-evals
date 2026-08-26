@@ -1,0 +1,31 @@
+{
+ "name": "monitor-stream-latency-settlement-ack-backlog-1019",
+ "question": "알림 RedisStreamE2eLatencyHigh(warning)가 prod에서 발화했다 - 스트림 처리 p95 지연이 임계 500ms를 넘겼다. 봇에는 최근 30분 ERROR 로그 샘플 8줄(정산 스트림 컨슈머의 ACK 보류 실패 밀집과 그와 무관한 산발 에러)이 주어졌다.",
+ "rubric": "관련 로그는 13:36부터 13:37 사이에 밀집한 정산 스트림 컨슈머의 처리 실패와 ACK 보류(재전달 대기) 3건 및 정산 스트림 처리 오류 1건, 그리고 같은 recordId를 다시 처리하려다 실패한 SettlementPendingSweeper 2건으로, 정산 메시지가 ACK되지 않고 재전달로 누적되어 settlement:result 스트림의 E2E 지연이 커진 직접 근거다. 반면 13:31의 QR 코드 생성 실패와 13:39의 /rooms/check-guestName 요청 파라미터 오류는 스트림 처리 경로와 무관한 산발 에러다. '근거 발견: 예'로 판정하고 정산 스트림 컨슈머의 반복 실패와 ACK 보류로 인한 pending 누적을 지연의 원인 가설로 제시하면 정답. '근거 발견: 아니오'로 판정하거나 QR 코드 생성 실패 또는 guestName 검증 오류를 지연의 원인으로 끌어들이면 오답.",
+ "source": "MANUAL",
+ "alert": {
+  "alertname": "RedisStreamE2eLatencyHigh",
+  "severity": "warning",
+  "fingerprint": "golden-gen-pr-1019",
+  "summary": "Redis Stream E2E 지연 p95 > 500ms (prod-app)",
+  "description": "스트림 처리 p95 지연이 2.7s. 컨슈머 처리 적체 또는 다운스트림(App Service) 지연 가능성.",
+  "labels": {
+   "alertname": "RedisStreamE2eLatencyHigh",
+   "severity": "warning",
+   "job": "prod-app"
+  }
+ },
+ "logSamples": [
+  "[2026-08-26 13:31:47.902] [ERROR] [,] --- [] c.r.application.service.QrCodeService : QR 코드 생성 실패: joinCode=T4WD, error=Image encode timeout",
+  "[2026-08-26 13:36:02.418] [ERROR] [0f00773d9f680a281d7a8b8b86eb7f03,f8af07a7d931aaf7] --- [redis-stream-thread-pool-settlement:result1] c.s.i.c.SettlementStreamConsumer : 정산 처리 실패 — ACK 보류, 재전달 대기: recordId=1756181762418-0",
+  "[2026-08-26 13:36:09.735] [ERROR] [20bfed4867b731a8faff0dce3eb9611d,3b87a229848813f0] --- [redis-stream-thread-pool-settlement:result1] c.s.i.c.SettlementStreamConsumer : 정산 처리 실패 — ACK 보류, 재전달 대기: recordId=1756181769735-0",
+  "[2026-08-26 13:36:18.264] [ERROR] [5a679105db3debfd809c200c8ec1e96b,48f305638351722b] --- [redis-stream-thread-pool-settlement:result2] c.s.i.c.SettlementStreamConsumer : 정산 스트림 처리 중 오류가 발생했습니다.",
+  "[2026-08-26 13:36:31.590] [ERROR] [e0d30fde54b14095eef0664d6e1013e7,fc92bda6c2f0ff66] --- [redis-stream-thread-pool-settlement:result1] c.s.i.c.SettlementStreamConsumer : 정산 처리 실패 — ACK 보류, 재전달 대기: recordId=1756181791590-0",
+  "[2026-08-26 13:37:00.147] [ERROR] [,] --- [pool-4-thread-2] c.s.i.c.SettlementPendingSweeper : pending 정산 메시지 재처리 실패: recordId=1756181762418-0",
+  "[2026-08-26 13:37:00.612] [ERROR] [,] --- [pool-4-thread-2] c.s.i.c.SettlementPendingSweeper : pending 정산 메시지 재처리 실패: recordId=1756181769735-0",
+  "[2026-08-26 13:39:55.083] [ERROR] [e8294cab56d963652dd84cc55469d983,ecf2b9d19de9f705] --- [http-nio-8080-exec-17] c.web.exception.RestExceptionHandler : method=GET uri=/rooms/check-guestName exception=IllegalArgumentException message=guestName must not be blank"
+ ],
+ "logEnvironment": "prod",
+ "expected": "예",
+ "axis": "partial-relevance"
+}

@@ -1,0 +1,32 @@
+{
+  "name": "monitor-stream-latency-room-join-dispatch-1044",
+  "question": "알림 RedisStreamE2eLatencyHigh(warning)가 prod에서 발화했다 - 스트림 E2E 처리 p95가 500ms를 넘었다. 봇에는 최근 30분 ERROR 로그 샘플 9줄(room:join 이벤트 디스패치 실패와 방 참가 비동기 처리 실패)이 주어졌다.",
+  "rubric": "주어진 ERROR 로그는 알림 발화 직전 약 4분 동안 room:join 스트림에서 RoomJoinConsumer의 이벤트 처리가 반복 실패하고, 같은 방과 플레이어에 대해 방 참가 비동기 처리도 실패했으며, 응답을 받지 못한 방 이벤트가 자동 정리 단계에서도 실패했음을 보여준다. '근거 발견: 예'로 판정하고 RoomJoinConsumer의 처리 실패와 그에 따른 재전달, 대기 이벤트 적체를 E2E 지연 상승의 원인 가설로 제시하면 정답. '근거 발견: 아니오'로 판정하거나, room:join 컨슈머 실패를 짚지 않고 다른 게임 스트림이나 프런트엔드 문제를 원인으로 지목하면 오답.",
+  "source": "MANUAL",
+  "alert": {
+    "alertname": "RedisStreamE2eLatencyHigh",
+    "severity": "warning",
+    "fingerprint": "golden-gen-rse-1044",
+    "summary": "Redis Stream E2E 지연 p95 > 500ms (prod-app)",
+    "description": "스트림 처리 p95 지연이 2.4s. 컨슈머 처리 적체 또는 다운스트림(App Service) 지연 가능성.",
+    "labels": {
+      "alertname": "RedisStreamE2eLatencyHigh",
+      "severity": "warning",
+      "job": "prod-app"
+    }
+  },
+  "logSamples": [
+    "[2026-08-26 21:02:11.336] [ERROR] [6894e06a20be80a6e72a94f622a9fadb,4bc38322ff32c9d9] --- [redis-stream-thread-pool-room:join1] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=RoomJoinConsumer, message=RoomJoinEvent[eventId=b4c09a8c-c194-40d4-a9c4-a5c4d2b4ec8a, joinCode=MD73, playerName=피카]",
+    "[2026-08-26 21:02:49.770] [ERROR] [26a449d68cf204fb2a28b13c4e9c3afa,07a178ba143b679d] --- [redis-stream-thread-pool-room:join2] c.r.application.service.RoomService : 방 참가 비동기 처리 실패: eventId=b4c09a8c-c194-40d4-a9c4-a5c4d2b4ec8a, joinCode=MD73, playerName=피카",
+    "[2026-08-26 21:03:26.118] [ERROR] [37c1d4535ec8c2a47ea09f2adce42d70,64af3df1d3e28f42] --- [redis-stream-thread-pool-room:join1] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=RoomJoinConsumer, message=RoomJoinEvent[eventId=de2d70d0-0ee7-4ab4-bbed-1c00e2bd3cb5, joinCode=MD73, playerName=단이]",
+    "[2026-08-26 21:04:02.594] [ERROR] [,] --- [pool-2-thread-3] c.r.i.messaging.RoomEventWaitManager : 방 이벤트 자동 정리 (실패): eventId=b4c09a8c-c194-40d4-a9c4-a5c4d2b4ec8a",
+    "[2026-08-26 21:04:41.207] [ERROR] [133c3925e9cbff6345e97925fe914b56,2f4e4569ef53aead] --- [redis-stream-thread-pool-room:join3] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=RoomJoinConsumer, message=RoomJoinEvent[eventId=f677f44f-2f67-4341-8380-ba5512dcbeee, joinCode=XF52, playerName=루카]",
+    "[2026-08-26 21:05:09.845] [ERROR] [392461f9c9f24da6d648c3111023adbd,90a99f13ccf4e9f4] --- [redis-stream-thread-pool-room:join2] c.r.application.service.RoomService : 방 참가 비동기 처리 실패: eventId=f677f44f-2f67-4341-8380-ba5512dcbeee, joinCode=XF52, playerName=루카",
+    "[2026-08-26 21:05:44.362] [ERROR] [92265eadb19cce61855aee05edcf4bb4,ea29bbb6883553e2] --- [redis-stream-thread-pool-room:join1] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=RoomJoinConsumer, message=RoomJoinEvent[eventId=23708247-9a6f-42aa-8a9f-3cb1bf125ff3, joinCode=XF52, playerName=보노]",
+    "[2026-08-26 21:06:02.918] [ERROR] [,] --- [pool-2-thread-3] c.r.i.messaging.RoomEventWaitManager : 방 이벤트 자동 정리 (실패): eventId=de2d70d0-0ee7-4ab4-bbed-1c00e2bd3cb5",
+    "[2026-08-26 21:06:19.470] [ERROR] [cb55f4fa9519639d953f48eda92d7150,b5eba64d8b684b44] --- [redis-stream-thread-pool-room:join3] c.r.application.service.RoomService : 방 참가 비동기 처리 실패: eventId=de2d70d0-0ee7-4ab4-bbed-1c00e2bd3cb5, joinCode=MD73, playerName=단이"
+  ],
+  "logEnvironment": "prod",
+  "expected": "예",
+  "axis": "positive-dense"
+}

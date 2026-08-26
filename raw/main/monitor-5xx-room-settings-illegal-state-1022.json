@@ -1,0 +1,32 @@
+{
+ "name": "monitor-5xx-room-settings-illegal-state-1022",
+ "question": "알림 Http5xxRatioHigh(critical)가 prod에서 발화했다 - 최근 5분 5xx 비율이 임계 5%를 넘겼다. 봇에는 최근 30분 ERROR 로그 샘플 9줄(게임 진행 중 방 설정 변경 요청의 상태 위반 실패 밀집과 그와 무관한 산발 에러)이 주어졌다.",
+ "rubric": "관련 로그는 11:08부터 11:09 사이에 밀집한 HTTP 요청 실패 6건으로, D7KM과 Q4ZB 두 방에서 게임이 진행 중인 상태의 설정 변경(PATCH /rooms/{joinCode}/settings)과 초기화되지 않은 확률 조회(GET /rooms/{joinCode}/probabilities)가 IllegalStateException으로 서버 오류 처리된 5xx의 직접 근거다. 반면 11:02의 Outbox DEAD_LETTER 전환, 11:15의 사다리 뽑기 이벤트 처리 실패, 11:21의 Object Storage Public URL 생성 실패는 해당 엔드포인트와 무관한 산발 에러다. '근거 발견: 예'로 판정하고 게임 진행 중 방 상태와 맞지 않는 설정 변경 및 확률 조회 요청이 IllegalStateException으로 5xx 처리되는 것을 원인 가설로 제시하면 정답. '근거 발견: 아니오'로 판정하거나 Outbox 실패, 사다리 이벤트 실패, Object Storage 실패를 5xx의 원인으로 끌어들이면 오답.",
+ "source": "MANUAL",
+ "alert": {
+  "alertname": "Http5xxRatioHigh",
+  "severity": "critical",
+  "fingerprint": "golden-gen-pr-1022",
+  "summary": "HTTP 5xx 비율 5% 초과 (prod-app)",
+  "description": "최근 5분 5xx 비율이 6.7%. 서버 측 광범위 실패 가능성.",
+  "labels": {
+   "alertname": "Http5xxRatioHigh",
+   "severity": "critical",
+   "job": "prod-app"
+  }
+ },
+ "logSamples": [
+  "[2026-08-26 11:02:55.640] [ERROR] [,] --- [pool-7-thread-2] c.global.outbox.OutboxEventProcessor : Outbox 이벤트 최대 재시도 초과, DEAD_LETTER 전환: id=7719, streamKey=concurrent",
+  "[2026-08-26 11:08:14.077] [ERROR] [5207ccccbcf716abbc87875d38d5a9b8,e31663fb020a326c] --- [http-nio-8080-exec-27] c.web.exception.RestExceptionHandler : method=PATCH uri=/rooms/D7KM/settings exception=IllegalStateException message=Cannot change settings while game is running",
+  "[2026-08-26 11:08:29.512] [ERROR] [46ef588131cad350dbda61c26a72031a,bc5c7a4de8c22732] --- [http-nio-8080-exec-13] c.web.exception.RestExceptionHandler : method=PATCH uri=/rooms/D7KM/settings exception=IllegalStateException message=Cannot change settings while game is running",
+  "[2026-08-26 11:08:46.238] [ERROR] [dfd96bfab9e27ce291d834e6aceffb51,4e157a885adda3a6] --- [http-nio-8080-exec-06] c.web.exception.RestExceptionHandler : method=GET uri=/rooms/D7KM/probabilities exception=IllegalStateException message=Probability snapshot is not initialized",
+  "[2026-08-26 11:09:03.891] [ERROR] [71a88783ce8e9453846ae1048a1bef0a,bcbe7f3958600e66] --- [http-nio-8080-exec-33] c.web.exception.RestExceptionHandler : method=PATCH uri=/rooms/Q4ZB/settings exception=IllegalStateException message=Cannot change settings while game is running",
+  "[2026-08-26 11:09:22.455] [ERROR] [81d62e75c40a661135f9fe744f301a66,ce4b64689d304aa8] --- [http-nio-8080-exec-21] c.web.exception.RestExceptionHandler : method=GET uri=/rooms/Q4ZB/probabilities exception=IllegalStateException message=Probability snapshot is not initialized",
+  "[2026-08-26 11:09:48.104] [ERROR] [df5dba2b68cd7a224434cfd32ab3a0b2,8bc90922bbc0f3f4] --- [http-nio-8080-exec-02] c.web.exception.RestExceptionHandler : method=PATCH uri=/rooms/D7KM/settings exception=IllegalStateException message=Cannot change settings while game is running",
+  "[2026-08-26 11:15:37.729] [ERROR] [071647241708c4fc7923f9460d51c1ed,0a4e0ecf41c51fd0] --- [redis-stream-thread-pool-laddergame1] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=LadderDrawCommandEventConsumer, message=LadderDrawCommandEvent[joinCode=N2SV, playerName=예린, eventId=dea881b1-45d1-49d1-b6eb-e44e87a66092]",
+  "[2026-08-26 11:21:09.363] [ERROR] [,] --- [] c.r.infra.OracleObjectStorageService : Oracle Object Storage Public URL 생성 실패: storageKey=qr/2026/08/26/N2SV.png, error=PreauthenticatedRequest expired"
+ ],
+ "logEnvironment": "prod",
+ "expected": "예",
+ "axis": "partial-relevance"
+}

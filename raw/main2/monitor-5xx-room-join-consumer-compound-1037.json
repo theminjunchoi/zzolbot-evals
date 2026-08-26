@@ -1,0 +1,32 @@
+{
+ "name": "monitor-5xx-room-join-consumer-compound-1037",
+ "question": "알림 Http5xxRatioHigh(critical)가 prod에서 발화했다 - 최근 5분 5xx 비율이 11.6%로 임계 5%를 넘었다. 봇에는 최근 30분 ERROR 로그 샘플 9줄(room:join 스트림 컨슈머 실패와 뒤이은 방 참가 요청 5xx)이 주어졌다.",
+ "rubric": "주어진 ERROR 로그는 16:12에 room:join 스트림 스레드의 EventDispatcher RoomJoinConsumer가 RoomJoinEvent 처리에 실패한 뒤 같은 eventId로 방 참가 비동기 처리 실패와 방 이벤트 자동 정리 실패가 이어지고, 16:13 이후 POST /rooms 요청이 방 참가 이벤트 응답 대기 시간 초과로 연달아 실패했음을 보여준다. '근거 발견: 예'로 판정하고 room:join 스트림 컨슈머의 이벤트 처리 실패를 근본 원인으로, HTTP 5xx와 대기 시간 초과를 그 파급 증상으로 구분해 제시하면 정답. '근거 발견: 아니오'로 판정하거나 HTTP 요청 처리 자체나 RoomEventWaitManager 정리 실패를 근본 원인으로 지목하면 오답.",
+ "source": "MANUAL",
+ "alert": {
+  "alertname": "Http5xxRatioHigh",
+  "severity": "critical",
+  "fingerprint": "golden-gen-5rj-1037",
+  "summary": "HTTP 5xx 비율 5% 초과 (prod-app)",
+  "description": "최근 5분 5xx 비율이 11.6%. 서버 측 광범위 실패 가능성.",
+  "labels": {
+   "alertname": "Http5xxRatioHigh",
+   "severity": "critical",
+   "job": "prod-app"
+  }
+ },
+ "logSamples": [
+  "[2026-08-26 16:12:03.551] [ERROR] [8079b0b0fd3e8c943f2bd3455f0a3136,b2ad19a657cecca3] --- [redis-stream-thread-pool-room:join1] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=RoomJoinConsumer, message=RoomJoinEvent[joinCode=VB4K, playerName=지호, eventId=6e532e58-984a-66ee-92b4-f40f12fcb0d7]",
+  "[2026-08-26 16:12:24.907] [ERROR] [6214c21cf22cd98152331435dc86bbad,3a937a70f94af9b7] --- [redis-stream-thread-pool-room:join2] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=RoomJoinConsumer, message=RoomJoinEvent[joinCode=VB4K, playerName=서준, eventId=673aaf8b-56a5-a06b-c664-3c445a93d61c]",
+  "[2026-08-26 16:12:48.362] [ERROR] [0f6a3a97af12aa396940e4c6f4c6d9cb,97120db5ffdddb7f] --- [redis-stream-thread-pool-room:join1] c.r.application.service.RoomService : 방 참가 비동기 처리 실패: eventId=6e532e58-984a-66ee-92b4-f40f12fcb0d7, joinCode=VB4K, playerName=지호",
+  "[2026-08-26 16:13:09.775] [ERROR] [cd84c3f2434e69194a3692c87eba2102,fcd3b5e4c2cb129c] --- [redis-stream-thread-pool-room:join2] c.r.application.service.RoomService : 방 참가 비동기 처리 실패: eventId=673aaf8b-56a5-a06b-c664-3c445a93d61c, joinCode=VB4K, playerName=서준",
+  "[2026-08-26 16:13:31.208] [ERROR] [f3dd5d8f20d2944288f38e21b1396fb5,1a8c27607ff62a5a] --- [redis-stream-thread-pool-room:join1] c.r.i.messaging.RoomEventWaitManager : 방 이벤트 자동 정리 (실패): eventId=6e532e58-984a-66ee-92b4-f40f12fcb0d7",
+  "[2026-08-26 16:13:52.640] [ERROR] [f9b229f1ca2500c84bc9d8e84043728d,456d575ded238f92] --- [http-nio-8080-exec-16] c.web.exception.RestExceptionHandler : method=POST uri=/rooms exception=RoomJoinTimeoutException message=방 참가 이벤트 응답 대기 시간이 초과되었습니다",
+  "[2026-08-26 16:14:18.093] [ERROR] [c4176760718c22c4b785378406be4b69,5ef9114abd903c1c] --- [http-nio-8080-exec-4] c.web.exception.RestExceptionHandler : method=POST uri=/rooms exception=RoomJoinTimeoutException message=방 참가 이벤트 응답 대기 시간이 초과되었습니다",
+  "[2026-08-26 16:14:45.526] [ERROR] [14a659d43799855aeb0e286c60b48634,52e3a35d03751d39] --- [http-nio-8080-exec-21] c.web.exception.RestExceptionHandler : method=GET uri=/rooms/VB4K/settings exception=IllegalStateException message=room:join consumer is not draining",
+  "[2026-08-26 16:15:11.984] [ERROR] [d6d0ca50ba207b6685dff1f9a409ddf3,6140f5397604fb05] --- [http-nio-8080-exec-9] c.web.exception.RestExceptionHandler : method=POST uri=/rooms exception=RoomJoinTimeoutException message=방 참가 이벤트 응답 대기 시간이 초과되었습니다"
+ ],
+ "logEnvironment": "prod",
+ "expected": "예",
+ "axis": "compound-cause"
+}

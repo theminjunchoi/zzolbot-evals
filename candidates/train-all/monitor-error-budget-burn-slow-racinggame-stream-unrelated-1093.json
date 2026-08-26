@@ -1,0 +1,27 @@
+{
+  "name": "monitor-error-budget-burn-slow-racinggame-stream-unrelated-1093",
+  "question": "알림 ErrorBudgetBurnSlow(warning)가 prod에서 발화했다 - 5xx 비율이 6시간과 30분 양 창에서 3%를 넘어 에러버짓이 느리게 소진되고 있다. 봇에는 최근 30분 창에서 조회된 prod ERROR 로그 샘플 4줄이 주어졌다.",
+  "rubric": "주어진 4줄은 racinggame 스트림 컨테이너 복구 중 예외 1건, Redis Stream 처리 오류 1건, TapCommandEvent 처리 실패 1건, racinggame 스케줄 실행 예외 1건으로 전부 racinggame 도메인의 비동기 스트림과 게임 스케줄러 경로이며 09:03부터 09:21까지 약 18분에 걸쳐 한 건씩 발생했다. 이 로그들은 예외 발생만 보여줄 뿐 HTTP 응답 코드와 연결되지 않고, 요청 처리 경로의 RestExceptionHandler 로그는 표본에 없다. '근거 발견: 아니오'로 판정하고 5xx 비율을 설명할 요청 경로 근거가 표본에 없다고 밝혀야 정답. racinggame 스트림 오류를 5xx 상승의 원인으로 단정하면 오답.",
+  "source": "MANUAL",
+  "alert": {
+    "alertname": "ErrorBudgetBurnSlow",
+    "severity": "warning",
+    "fingerprint": "golden-gen-ebsrac-1093",
+    "summary": "에러버짓 느린 소진 (SLO 99.5%, burn-rate 6×)",
+    "description": "prod-app 5xx 비율이 6h·30m 양 창에서 3%를 초과. 누적 시 에러버짓 위협.",
+    "labels": {
+      "alertname": "ErrorBudgetBurnSlow",
+      "severity": "warning",
+      "job": "prod-app"
+    }
+  },
+  "logSamples": [
+    "[2026-08-26 09:03:44.271] [ERROR] [,] --- [pool-8-thread-3] c.g.h.RedisStreamContainerRecovery : Redis Stream container 복구 중 예외 발생: stream=racinggame",
+    "[2026-08-26 09:07:19.638] [ERROR] [85a9455237428716f35f21fc4c79fce6,eba151df4b51f8a7] --- [redis-stream-thread-pool-racinggame1] c.g.r.c.RedisStreamListenerStarter : Redis Stream 처리 중 오류가 발생했습니다.",
+    "[2026-08-26 09:15:56.402] [ERROR] [079864ae69fc3cbd04143d4439673e92,e499178b433761b8] --- [redis-stream-thread-pool-racinggame2] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=TapCommandEventConsumer, message=TapCommandEvent[eventId=aedff439-417d-4c6c-ad44-c5ea6c84c585, timestamp=2026-08-26T00:15:56.397210884Z, joinCode=H6PT, playerName=민서]",
+    "[2026-08-26 09:21:33.905] [ERROR] [,] --- [racinggame-task-3] c.g.s.GameTaskSchedulerFactory : [racinggame] 스케줄 실행 중 예외가 발생했습니다."
+  ],
+  "logEnvironment": "prod",
+  "expected": "아니오",
+  "axis": "unrelated-trap"
+}

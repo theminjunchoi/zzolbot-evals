@@ -1,0 +1,31 @@
+{
+  "name": "monitor-5xx-qr-upload-partial-relevance-1009",
+  "question": "알림 Http5xxRatioHigh(critical)가 prod에서 발화했다 - 최근 5분 5xx 비율 5% 초과. 봇에는 최근 30분 ERROR 로그 샘플 8줄(방 생성 QR 업로드 실패 연쇄와 그와 무관한 산발 에러)이 주어졌다.",
+  "rubric": "주어진 ERROR 로그 중 Oracle Object Storage QR 코드 업로드 실패 → QrCodeService QR 코드 생성 실패 → RestExceptionHandler의 POST /rooms 5xx로 이어지는 두 묶음(joinCode=QK47, joinCode=B3TP)이 알림과 직접 관련된 근거이고, GameTaskSchedulerFactory의 [nunchi] 스케줄 예외와 TaskUtils$LoggingErrorHandler의 스케줄 태스크 오류는 방 생성 경로와 무관한 산발 에러다. '근거 발견: 예'로 판정하고 Oracle Object Storage 업로드 실패(연결 타임아웃)로 QR 생성이 실패해 POST /rooms가 5xx를 낸다는 가설을 제시하면 정답. '근거 발견: 아니오'로 판정하거나, 무관한 nunchi 스케줄러 예외 또는 스케줄 태스크 오류를 5xx의 원인으로 지목하면 오답.",
+  "source": "MANUAL",
+  "alert": {
+    "alertname": "Http5xxRatioHigh",
+    "severity": "critical",
+    "fingerprint": "golden-gen-pr-1009",
+    "summary": "HTTP 5xx 비율 5% 초과 (prod-app)",
+    "description": "최근 5분 5xx 비율이 7.4%. 서버 측 광범위 실패 가능성.",
+    "labels": {
+      "alertname": "Http5xxRatioHigh",
+      "severity": "critical",
+      "job": "prod-app"
+    }
+  },
+  "logSamples": [
+    "[2026-08-26 09:12:41.208] [ERROR] [,] --- [nunchi-task-1] c.g.s.GameTaskSchedulerFactory : [nunchi] 스케줄 실행 중 예외가 발생했습니다.",
+    "[2026-08-26 09:14:03.517] [ERROR] [f1294643c253163241cf73ef38178393,49bfeb585d57edbf] --- [] c.r.infra.OracleObjectStorageService : Oracle Object Storage QR 코드 업로드 실패: contents=https://zzol.site/rooms/QK47, error=SdkClientException: Unable to execute HTTP request: connect timed out",
+    "[2026-08-26 09:14:03.902] [ERROR] [f1294643c253163241cf73ef38178393,e3c24bd7f0df9050] --- [] c.r.application.service.QrCodeService : QR 코드 생성 실패: joinCode=QK47, error=ObjectStorageUploadException: QR 이미지 업로드에 실패했습니다",
+    "[2026-08-26 09:14:04.113] [ERROR] [f1294643c253163241cf73ef38178393,7ef590d838351591] --- [http-nio-8080-exec-11] c.web.exception.RestExceptionHandler : method=POST uri=/rooms exception=QrCodeGenerationException message=QR 코드 생성에 실패했습니다: joinCode=QK47",
+    "[2026-08-26 09:15:22.640] [ERROR] [e7e94e0b3b083bcda025f7735986e93e,b0d45770d84f7e6a] --- [] c.r.infra.OracleObjectStorageService : Oracle Object Storage QR 코드 업로드 실패: contents=https://zzol.site/rooms/B3TP, error=SdkClientException: Unable to execute HTTP request: connect timed out",
+    "[2026-08-26 09:15:23.004] [ERROR] [e7e94e0b3b083bcda025f7735986e93e,f6211683043f3af6] --- [] c.r.application.service.QrCodeService : QR 코드 생성 실패: joinCode=B3TP, error=ObjectStorageUploadException: QR 이미지 업로드에 실패했습니다",
+    "[2026-08-26 09:15:23.271] [ERROR] [e7e94e0b3b083bcda025f7735986e93e,b2897441d53bc6de] --- [http-nio-8080-exec-24] c.web.exception.RestExceptionHandler : method=POST uri=/rooms exception=QrCodeGenerationException message=QR 코드 생성에 실패했습니다: joinCode=B3TP",
+    "[2026-08-26 09:17:36.884] [ERROR] [,] --- [pool-2-thread-1] o.s.s.s.TaskUtils$LoggingErrorHandler : Unexpected error occurred in scheduled task"
+  ],
+  "logEnvironment": "prod",
+  "expected": "예",
+  "axis": "partial-relevance"
+}

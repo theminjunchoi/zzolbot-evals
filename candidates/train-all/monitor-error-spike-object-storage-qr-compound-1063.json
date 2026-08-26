@@ -1,0 +1,33 @@
+{
+  "name": "monitor-error-spike-object-storage-qr-compound-1063",
+  "question": "알림 AppErrorLogSpike(warning)가 prod에서 발화했다 - 최근 5분 ERROR 로그가 63건으로 임계 30건을 넘었다. 봇에는 최근 30분 ERROR 로그 샘플 10줄(오브젝트 스토리지 접근 실패와 그에 이어지는 QR 생성 및 방 생성 요청 실패)이 주어졌다.",
+  "rubric": "주어진 ERROR 로그 10줄은 10:47부터 10:51까지 OracleObjectStorageService의 QR 코드 업로드 실패 3건과 Public URL 생성 실패 1건이 나고, 각 업로드 실패 직후 1초 이내에 같은 joinCode의 QrCodeService QR 코드 생성 실패 3건과 POST /rooms 요청의 실패 3건이 이어졌음을 보여준다. '근거 발견: 예'로 판정하고 Oracle Object Storage 접근 실패를 근본 원인으로, QR 코드 생성 실패와 방 생성 요청 실패는 그로 인한 파급 증상으로 구분해 가설을 제시하면 정답. '근거 발견: 아니오'로 판정하거나 QR 코드 생성 로직 자체 또는 방 생성 API를 근본 원인으로 지목해 스토리지 실패를 파급으로 뒤집어 설명하면 오답.",
+  "source": "MANUAL",
+  "alert": {
+    "alertname": "AppErrorLogSpike",
+    "severity": "warning",
+    "fingerprint": "golden-gen-esoq-1063",
+    "summary": "ERROR 로그 급증(최근 5분, prod-app)",
+    "description": "ERROR 로그가 63건(임계 30/5m)입니다. zzol-bot이 근본원인을 분석합니다.",
+    "labels": {
+      "alertname": "AppErrorLogSpike",
+      "severity": "warning",
+      "job": "prod-app"
+    }
+  },
+  "logSamples": [
+    "[2026-08-26 10:47:03.412] [ERROR] [,] --- [] c.r.infra.OracleObjectStorageService : Oracle Object Storage QR 코드 업로드 실패: contents=https://zzol.site/rooms/join?code=QF3M, error=BmcException: Service returned 503 Service Unavailable",
+    "[2026-08-26 10:47:03.879] [ERROR] [,] --- [] c.r.application.service.QrCodeService : QR 코드 생성 실패: joinCode=QF3M, error=StorageUploadException: QR 코드 업로드에 실패했습니다",
+    "[2026-08-26 10:47:04.156] [ERROR] [d2e59b8a6e85ad5fdf55659ddcec1777,93c4002f3081626f] --- [http-nio-8080-exec-12] c.web.exception.RestExceptionHandler : method=POST uri=/rooms exception=StorageUploadException message=QR 코드 업로드에 실패했습니다",
+    "[2026-08-26 10:48:22.735] [ERROR] [,] --- [] c.r.infra.OracleObjectStorageService : Oracle Object Storage QR 코드 업로드 실패: contents=https://zzol.site/rooms/join?code=T9BD, error=BmcException: Service returned 503 Service Unavailable",
+    "[2026-08-26 10:48:23.201] [ERROR] [,] --- [] c.r.application.service.QrCodeService : QR 코드 생성 실패: joinCode=T9BD, error=StorageUploadException: QR 코드 업로드에 실패했습니다",
+    "[2026-08-26 10:48:23.498] [ERROR] [6882c858ecdf7c1bce9c0f6c8f9492a4,2f58657bd5284284] --- [http-nio-8080-exec-25] c.web.exception.RestExceptionHandler : method=POST uri=/rooms exception=StorageUploadException message=QR 코드 업로드에 실패했습니다",
+    "[2026-08-26 10:50:14.827] [ERROR] [,] --- [] c.r.infra.OracleObjectStorageService : Oracle Object Storage QR 코드 업로드 실패: contents=https://zzol.site/rooms/join?code=H2LW, error=BmcException: Service returned 503 Service Unavailable",
+    "[2026-08-26 10:50:15.290] [ERROR] [,] --- [] c.r.application.service.QrCodeService : QR 코드 생성 실패: joinCode=H2LW, error=StorageUploadException: QR 코드 업로드에 실패했습니다",
+    "[2026-08-26 10:50:15.584] [ERROR] [6b5a3a43a5d846cb539c5d3fe0560164,add30160e72c8164] --- [http-nio-8080-exec-7] c.web.exception.RestExceptionHandler : method=POST uri=/rooms exception=StorageUploadException message=QR 코드 업로드에 실패했습니다",
+    "[2026-08-26 10:51:39.402] [ERROR] [,] --- [] c.r.infra.OracleObjectStorageService : Oracle Object Storage Public URL 생성 실패: storageKey=qr/H2LW.png, error=BmcException: Service returned 503 Service Unavailable"
+  ],
+  "logEnvironment": "prod",
+  "expected": "예",
+  "axis": "compound-cause"
+}

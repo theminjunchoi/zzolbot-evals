@@ -1,0 +1,28 @@
+{
+  "name": "monitor-jvm-heap-high-blindtimer-scheduler-near-miss-1096",
+  "question": "알림 JvmHeapUsageHigh(critical)가 prod에서 발화했다 - JVM 힙 사용률이 94%로 임계 85%를 넘었다. 봇에는 최근 30분 창에서 조회된 prod ERROR 로그 샘플 5줄이 주어졌다.",
+  "rubric": "주어진 5줄은 blindtimer 게임 스케줄 실행 예외 2건, 스프링 스케줄러의 Unexpected error occurred in scheduled task 2건, 방 이벤트 자동 정리 실패 1건으로 18:33부터 18:47까지 약 14분간 스케줄러 계열 스레드에서만 발생했다. 같은 prod-app JVM 안이라 GC 지연과 엮어보고 싶지만 이 알림의 대상 컴포넌트는 힙 메모리이고 로그가 보여주는 것은 스케줄 작업 실행 실패라 다른 컴포넌트이며, 힙 점유나 OutOfMemoryError, GC 시간을 보여주는 로그는 한 줄도 없고 실패 원인도 로그에 적혀 있지 않다. '근거 발견: 아니오'로 판정하고 스케줄러 실패로는 힙 사용률 94%를 설명할 수 없다고 밝혀야 정답. 스케줄 작업 실패를 GC 정지나 힙 포화의 증거로 단정하면 오답.",
+  "source": "MANUAL",
+  "alert": {
+    "alertname": "JvmHeapUsageHigh",
+    "severity": "critical",
+    "fingerprint": "golden-gen-heapsch-1096",
+    "summary": "JVM 힙 사용률 > 85% (prod-app)",
+    "description": "힙 사용률이 94%. GC 오버헤드 증가 및 OOM 위험.",
+    "labels": {
+      "alertname": "JvmHeapUsageHigh",
+      "severity": "critical",
+      "job": "prod-app"
+    }
+  },
+  "logSamples": [
+    "[2026-08-26 18:33:12.905] [ERROR] [,] --- [blindtimer-task-1] c.g.s.GameTaskSchedulerFactory : [blindtimer] 스케줄 실행 중 예외가 발생했습니다.",
+    "[2026-08-26 18:36:47.318] [ERROR] [,] --- [pool-12-thread-2] o.s.s.s.TaskUtils$LoggingErrorHandler : Unexpected error occurred in scheduled task",
+    "[2026-08-26 18:39:55.640] [ERROR] [,] --- [blindtimer-task-2] c.g.s.GameTaskSchedulerFactory : [blindtimer] 스케줄 실행 중 예외가 발생했습니다.",
+    "[2026-08-26 18:43:21.077] [ERROR] [,] --- [pool-12-thread-2] o.s.s.s.TaskUtils$LoggingErrorHandler : Unexpected error occurred in scheduled task",
+    "[2026-08-26 18:47:09.462] [ERROR] [,] --- [pool-10-thread-5] c.r.i.messaging.RoomEventWaitManager : 방 이벤트 자동 정리 (실패): eventId=6c331709-0dca-4be7-8eeb-06a5e16da922"
+  ],
+  "logEnvironment": "prod",
+  "expected": "아니오",
+  "axis": "near-miss-component"
+}

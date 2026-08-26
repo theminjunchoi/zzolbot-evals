@@ -1,0 +1,31 @@
+{
+  "name": "monitor-5xx-guest-name-lock-timeout-dense-1066",
+  "question": "알림 Http5xxRatioHigh(critical)가 prod에서 발화했다 - 최근 5분 5xx 비율 5% 초과. 봇에는 최근 30분 ERROR 로그 샘플 8줄(방 생성과 게스트 이름 확인 요청의 락 대기 타임아웃 실패가 좁은 구간에 밀집)이 주어졌다.",
+  "rubric": "주어진 ERROR 로그 8줄은 모두 RestExceptionHandler가 http-nio-8080-exec 스레드에서 기록한 것으로, 10:26:03부터 10:29:41까지 약 3분 40초 구간에 POST /rooms 5건과 POST /rooms/check-guestName 3건이 전부 동일한 exception=CannotAcquireLockException, message=Lock wait timeout exceeded로 실패했다. '근거 발견: 예'로 판정하고 방 생성 경로의 DB 행 잠금 경합(락 대기 타임아웃)으로 요청이 반복 실패하고 있다는 가설을 제시하면 정답. '근거 발견: 아니오'로 판정하거나, 로그에 없는 Redis 스트림이나 게임 스케줄러를 5xx의 원인으로 지목하면 오답.",
+  "source": "MANUAL",
+  "alert": {
+    "alertname": "Http5xxRatioHigh",
+    "severity": "critical",
+    "fingerprint": "golden-gen-pd-1066",
+    "summary": "HTTP 5xx 비율 5% 초과 (prod-app)",
+    "description": "최근 5분 5xx 비율이 11.6%. 서버 측 광범위 실패 가능성.",
+    "labels": {
+      "alertname": "Http5xxRatioHigh",
+      "severity": "critical",
+      "job": "prod-app"
+    }
+  },
+  "logSamples": [
+    "[2026-08-26 10:26:03.117] [ERROR] [58e9d60388d0227a5408fc160707f2f6,d13d469dfc95bb16] --- [http-nio-8080-exec-12] c.web.exception.RestExceptionHandler : method=POST uri=/rooms exception=CannotAcquireLockException message=Lock wait timeout exceeded; try restarting transaction",
+    "[2026-08-26 10:26:29.884] [ERROR] [27cc727a039f816e17aa30ad178013e1,52f217f9848e59f1] --- [http-nio-8080-exec-07] c.web.exception.RestExceptionHandler : method=POST uri=/rooms/check-guestName exception=CannotAcquireLockException message=Lock wait timeout exceeded; try restarting transaction",
+    "[2026-08-26 10:26:58.402] [ERROR] [ab1f5325c9b25e31565b6979cc7621c9,5dbffb3263a019bd] --- [http-nio-8080-exec-21] c.web.exception.RestExceptionHandler : method=POST uri=/rooms exception=CannotAcquireLockException message=Lock wait timeout exceeded; try restarting transaction",
+    "[2026-08-26 10:27:34.775] [ERROR] [aedfa31fd675b8d660890efd5cce820e,29f2a4bba878037a] --- [http-nio-8080-exec-05] c.web.exception.RestExceptionHandler : method=POST uri=/rooms exception=CannotAcquireLockException message=Lock wait timeout exceeded; try restarting transaction",
+    "[2026-08-26 10:27:59.208] [ERROR] [9deeba7ed93c60b0b6c07e7a6463c4a5,9c43f4602df2a13a] --- [http-nio-8080-exec-18] c.web.exception.RestExceptionHandler : method=POST uri=/rooms/check-guestName exception=CannotAcquireLockException message=Lock wait timeout exceeded; try restarting transaction",
+    "[2026-08-26 10:28:41.630] [ERROR] [4bce160836c66900df40eb8e8975878a,19a41b89cfe41016] --- [http-nio-8080-exec-03] c.web.exception.RestExceptionHandler : method=POST uri=/rooms exception=CannotAcquireLockException message=Lock wait timeout exceeded; try restarting transaction",
+    "[2026-08-26 10:29:12.955] [ERROR] [3a86eab8f9a8458da9316c3991ca0895,1315a1fd2b954fae] --- [http-nio-8080-exec-26] c.web.exception.RestExceptionHandler : method=POST uri=/rooms/check-guestName exception=CannotAcquireLockException message=Lock wait timeout exceeded; try restarting transaction",
+    "[2026-08-26 10:29:41.363] [ERROR] [1c97ee804f26b7a385ab55085eef525f,dada4562ffcade18] --- [http-nio-8080-exec-11] c.web.exception.RestExceptionHandler : method=POST uri=/rooms exception=CannotAcquireLockException message=Lock wait timeout exceeded; try restarting transaction"
+  ],
+  "logEnvironment": "prod",
+  "expected": "예",
+  "axis": "positive-dense"
+}

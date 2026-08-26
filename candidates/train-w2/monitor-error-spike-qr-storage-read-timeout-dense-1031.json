@@ -1,0 +1,32 @@
+{
+  "name": "monitor-error-spike-qr-storage-read-timeout-dense-1031",
+  "question": "알림 AppErrorLogSpike(warning)가 prod에서 발화했다 - 최근 5분 ERROR 로그가 임계 30건을 넘겨 급증했다. 봇에는 최근 30분 ERROR 로그 샘플 9줄(약 4분 사이 밀집된 Object Storage 읽기 타임아웃과 QR 코드 생성 실패)이 주어졌다.",
+  "rubric": "주어진 ERROR 로그는 알림 시각과 정합하는 약 4분의 좁은 창에 Oracle Object Storage의 QR 업로드와 Public URL 생성이 SdkClientException read timeout으로 6건 밀집 실패하고 그에 이어 QR 코드 생성 실패가 3건 반복됨을 보여준다. '근거 발견: 예'로 판정하고 Object Storage 응답 지연(read timeout)으로 QR 업로드와 URL 생성이 연속 실패해 ERROR 로그가 급증했다는 원인 가설을 제시하면 정답. '근거 발견: 아니오'로 판정하거나 로그가 알림과 무관하다고 하거나 Redis Stream, DB를 원인으로 지목하면 오답.",
+  "source": "MANUAL",
+  "alert": {
+    "alertname": "AppErrorLogSpike",
+    "severity": "warning",
+    "fingerprint": "golden-gen-pd-1031",
+    "summary": "ERROR 로그 급증(최근 5분, prod-app)",
+    "description": "ERROR 로그가 64건(임계 30/5m)입니다. zzol-bot이 근본원인을 분석합니다.",
+    "labels": {
+      "alertname": "AppErrorLogSpike",
+      "severity": "warning",
+      "job": "prod-app"
+    }
+  },
+  "logSamples": [
+    "[2026-08-26 06:41:09.618] [ERROR] [,] --- [] c.r.infra.OracleObjectStorageService : Oracle Object Storage QR 코드 업로드 실패: contents=zzol-qr-M8FD.png, error=SdkClientException: Unable to execute HTTP request: Read timed out",
+    "[2026-08-26 06:41:37.204] [ERROR] [,] --- [] c.r.infra.OracleObjectStorageService : Oracle Object Storage QR 코드 업로드 실패: contents=zzol-qr-P3HK.png, error=SdkClientException: Unable to execute HTTP request: Read timed out",
+    "[2026-08-26 06:42:05.881] [ERROR] [,] --- [] c.r.application.service.QrCodeService : QR 코드 생성 실패: joinCode=M8FD, error=Object Storage upload failed",
+    "[2026-08-26 06:42:33.470] [ERROR] [,] --- [] c.r.infra.OracleObjectStorageService : Oracle Object Storage Public URL 생성 실패: storageKey=qr/2026/08/26/P3HK.png, error=SdkClientException: Unable to execute HTTP request: Read timed out",
+    "[2026-08-26 06:43:01.945] [ERROR] [,] --- [] c.r.infra.OracleObjectStorageService : Oracle Object Storage QR 코드 업로드 실패: contents=zzol-qr-A6RJ.png, error=SdkClientException: Unable to execute HTTP request: Read timed out",
+    "[2026-08-26 06:43:36.312] [ERROR] [,] --- [] c.r.application.service.QrCodeService : QR 코드 생성 실패: joinCode=P3HK, error=Object Storage upload failed",
+    "[2026-08-26 06:44:08.759] [ERROR] [,] --- [] c.r.infra.OracleObjectStorageService : Oracle Object Storage Public URL 생성 실패: storageKey=qr/2026/08/26/A6RJ.png, error=SdkClientException: Unable to execute HTTP request: Read timed out",
+    "[2026-08-26 06:44:41.126] [ERROR] [,] --- [] c.r.application.service.QrCodeService : QR 코드 생성 실패: joinCode=A6RJ, error=Object Storage upload failed",
+    "[2026-08-26 06:45:12.503] [ERROR] [,] --- [] c.r.infra.OracleObjectStorageService : Oracle Object Storage QR 코드 업로드 실패: contents=zzol-qr-M8FD.png, error=SdkClientException: Unable to execute HTTP request: Read timed out"
+  ],
+  "logEnvironment": "prod",
+  "expected": "예",
+  "axis": "positive-dense"
+}

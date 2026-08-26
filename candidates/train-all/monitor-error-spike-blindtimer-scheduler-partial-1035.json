@@ -1,0 +1,32 @@
+{
+  "name": "monitor-error-spike-blindtimer-scheduler-partial-1035",
+  "question": "알림 AppErrorLogSpike(warning)가 prod에서 발화했다 - 최근 5분 ERROR 로그가 51건으로 임계 30건을 넘었다. 봇에는 최근 30분 ERROR 로그 샘플 9줄(blindtimer 게임 스케줄러 예외 밀집과 무관한 산발 오류 2줄)이 주어졌다.",
+  "rubric": "주어진 ERROR 로그 중 20:19~20:21에 blindtimer-task 스레드에서 반복된 7줄의 GameTaskSchedulerFactory [blindtimer] 스케줄 실행 예외가 ERROR 급증의 직접 근거이고, 20:04의 TaskUtils 스케줄 작업 예외 1줄과 20:11의 RestExceptionHandler 방 설정 조회 RoomNotFoundException 1줄은 급증 구간 밖의 무관한 산발 오류다. '근거 발견: 예'로 판정하고 blindtimer 게임 스케줄러 태스크의 반복 예외를 원인 가설로 제시하면 정답. '근거 발견: 아니오'로 판정하거나 TaskUtils 예외 또는 방 설정 조회 실패를 급증의 원인으로 지목하면 오답.",
+  "source": "MANUAL",
+  "alert": {
+    "alertname": "AppErrorLogSpike",
+    "severity": "warning",
+    "fingerprint": "golden-gen-esbt-1035",
+    "summary": "ERROR 로그 급증(최근 5분, prod-app)",
+    "description": "ERROR 로그가 51건(임계 30/5m)입니다. zzol-bot이 근본원인을 분석합니다.",
+    "labels": {
+      "alertname": "AppErrorLogSpike",
+      "severity": "warning",
+      "job": "prod-app"
+    }
+  },
+  "logSamples": [
+    "[2026-08-26 20:04:16.775] [ERROR] [,] --- [pool-2-thread-3] o.s.s.s.TaskUtils$LoggingErrorHandler : Unexpected error occurred in scheduled task",
+    "[2026-08-26 20:11:39.402] [ERROR] [940784b575906d1ac5499065aa6971a0,f2e699d1648da236] --- [http-nio-8080-exec-11] c.web.exception.RestExceptionHandler : method=GET uri=/rooms/K7QD/settings exception=RoomNotFoundException message=존재하지 않는 방 코드입니다",
+    "[2026-08-26 20:19:02.531] [ERROR] [,] --- [blindtimer-task-1] c.g.s.GameTaskSchedulerFactory : [blindtimer] 스케줄 실행 중 예외가 발생했습니다.",
+    "[2026-08-26 20:19:23.118] [ERROR] [,] --- [blindtimer-task-2] c.g.s.GameTaskSchedulerFactory : [blindtimer] 스케줄 실행 중 예외가 발생했습니다.",
+    "[2026-08-26 20:19:47.664] [ERROR] [,] --- [blindtimer-task-1] c.g.s.GameTaskSchedulerFactory : [blindtimer] 스케줄 실행 중 예외가 발생했습니다.",
+    "[2026-08-26 20:20:05.290] [ERROR] [,] --- [blindtimer-task-3] c.g.s.GameTaskSchedulerFactory : [blindtimer] 스케줄 실행 중 예외가 발생했습니다.",
+    "[2026-08-26 20:20:31.847] [ERROR] [,] --- [blindtimer-task-2] c.g.s.GameTaskSchedulerFactory : [blindtimer] 스케줄 실행 중 예외가 발생했습니다.",
+    "[2026-08-26 20:20:59.213] [ERROR] [,] --- [blindtimer-task-1] c.g.s.GameTaskSchedulerFactory : [blindtimer] 스케줄 실행 중 예외가 발생했습니다.",
+    "[2026-08-26 20:21:24.586] [ERROR] [,] --- [blindtimer-task-3] c.g.s.GameTaskSchedulerFactory : [blindtimer] 스케줄 실행 중 예외가 발생했습니다."
+  ],
+  "logEnvironment": "prod",
+  "expected": "예",
+  "axis": "partial-relevance"
+}

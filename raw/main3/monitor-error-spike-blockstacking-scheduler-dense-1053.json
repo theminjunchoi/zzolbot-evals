@@ -1,0 +1,33 @@
+{
+ "name": "monitor-error-spike-blockstacking-scheduler-dense-1053",
+ "question": "알림 AppErrorLogSpike(warning)가 prod에서 발화했다 - 최근 5분 ERROR 로그가 임계를 넘어 급증했다. 봇에는 최근 30분 ERROR 로그 샘플 10줄(블록쌓기 게임 스케줄 태스크 예외 반복)이 주어졌다.",
+ "rubric": "주어진 ERROR 로그는 11:31:04부터 11:35:07까지 약 4분 동안 GameTaskSchedulerFactory의 [blockstacking] 스케줄 실행 예외가 blockstacking-task-1, blockstacking-task-2, blockstacking-task-3 스레드에서 6회 반복되고 TaskUtils$LoggingErrorHandler의 스케줄 태스크 예외가 4회 함께 기록된 내용으로, ERROR 급증 알림과 시간창이 정합하는 직접 근거다. '근거 발견: 예'로 판정하고 blockstacking 게임 스케줄 태스크의 반복 예외를 ERROR 급증의 원인으로 제시하면 정답. '근거 발견: 아니오'로 판정하거나 Redis 스트림 컨슈머, HTTP 요청 실패 등 로그에 없는 경로를 원인으로 지목하면 오답.",
+ "source": "MANUAL",
+ "alert": {
+  "alertname": "AppErrorLogSpike",
+  "severity": "warning",
+  "fingerprint": "golden-gen-pd-1053",
+  "summary": "ERROR 로그 급증(최근 5분, prod-app)",
+  "description": "ERROR 로그가 96건(임계 30/5m)입니다. zzol-bot이 근본원인을 분석합니다.",
+  "labels": {
+   "alertname": "AppErrorLogSpike",
+   "severity": "warning",
+   "job": "prod-app"
+  }
+ },
+ "logSamples": [
+  "[2026-08-26 11:31:04.118] [ERROR] [,] --- [blockstacking-task-1] c.g.s.GameTaskSchedulerFactory : [blockstacking] 스케줄 실행 중 예외가 발생했습니다.",
+  "[2026-08-26 11:31:04.133] [ERROR] [,] --- [pool-6-thread-2] o.s.s.s.TaskUtils$LoggingErrorHandler : Unexpected error occurred in scheduled task",
+  "[2026-08-26 11:31:38.602] [ERROR] [,] --- [blockstacking-task-2] c.g.s.GameTaskSchedulerFactory : [blockstacking] 스케줄 실행 중 예외가 발생했습니다.",
+  "[2026-08-26 11:31:38.615] [ERROR] [,] --- [pool-6-thread-2] o.s.s.s.TaskUtils$LoggingErrorHandler : Unexpected error occurred in scheduled task",
+  "[2026-08-26 11:32:15.947] [ERROR] [,] --- [blockstacking-task-1] c.g.s.GameTaskSchedulerFactory : [blockstacking] 스케줄 실행 중 예외가 발생했습니다.",
+  "[2026-08-26 11:32:16.001] [ERROR] [,] --- [pool-6-thread-4] o.s.s.s.TaskUtils$LoggingErrorHandler : Unexpected error occurred in scheduled task",
+  "[2026-08-26 11:33:02.330] [ERROR] [,] --- [blockstacking-task-3] c.g.s.GameTaskSchedulerFactory : [blockstacking] 스케줄 실행 중 예외가 발생했습니다.",
+  "[2026-08-26 11:33:41.788] [ERROR] [,] --- [blockstacking-task-2] c.g.s.GameTaskSchedulerFactory : [blockstacking] 스케줄 실행 중 예외가 발생했습니다.",
+  "[2026-08-26 11:34:19.256] [ERROR] [,] --- [pool-6-thread-2] o.s.s.s.TaskUtils$LoggingErrorHandler : Unexpected error occurred in scheduled task",
+  "[2026-08-26 11:35:07.884] [ERROR] [,] --- [blockstacking-task-1] c.g.s.GameTaskSchedulerFactory : [blockstacking] 스케줄 실행 중 예외가 발생했습니다."
+ ],
+ "logEnvironment": "prod",
+ "expected": "예",
+ "axis": "positive-dense"
+}

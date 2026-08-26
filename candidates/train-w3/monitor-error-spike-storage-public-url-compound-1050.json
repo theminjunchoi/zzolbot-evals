@@ -1,0 +1,33 @@
+{
+  "name": "monitor-error-spike-storage-public-url-compound-1050",
+  "question": "알림 AppErrorLogSpike(warning)가 prod에서 발화했다 - 최근 5분 ERROR 로그가 임계를 넘어 급증했다. 봇에는 최근 30분 ERROR 로그 샘플 10줄(Object Storage Public URL 생성 실패와 그에 뒤따른 QR 코드 생성 실패, 방 생성 요청 예외)이 주어졌다.",
+  "rubric": "주어진 ERROR 로그는 OracleObjectStorageService의 Public URL 생성이 error=Read timed out으로 4회 실패하고, 그 직후 같은 joinCode에 대해 QrCodeService의 QR 코드 생성이 3회 실패했으며, 이어서 RestExceptionHandler가 method=POST uri=/rooms 요청 3건을 QrCodeGenerationException으로 처리한 내용으로, Object Storage 응답 지연(Read timed out)이 근본 원인이고 QR 생성 실패와 방 생성 요청 예외는 그 파급 증상이다. '근거 발견: 예'로 판정하고 Oracle Object Storage의 Read timed out을 근본 원인으로, QR 코드 생성 실패와 /rooms 요청 예외를 파급 증상으로 구분해 가설을 제시하면 정답. '근거 발견: 아니오'로 판정하거나 QR 코드 생성 로직 또는 방 생성 API 자체의 결함을 근본 원인으로 지목하면 오답.",
+  "source": "MANUAL",
+  "alert": {
+    "alertname": "AppErrorLogSpike",
+    "severity": "warning",
+    "fingerprint": "golden-gen-cc-1050",
+    "summary": "ERROR 로그 급증(최근 5분, prod-app)",
+    "description": "ERROR 로그가 74건(임계 30/5m)입니다. zzol-bot이 근본원인을 분석합니다.",
+    "labels": {
+      "alertname": "AppErrorLogSpike",
+      "severity": "warning",
+      "job": "prod-app"
+    }
+  },
+  "logSamples": [
+    "[2026-08-26 13:33:12.404] [ERROR] [fefadf85dee54298e4f8fbc91ec2f55d,8936fd2ea722d299] --- [] c.r.infra.OracleObjectStorageService : Oracle Object Storage Public URL 생성 실패: storageKey=qr/2026/08/26/H4WS.png, error=Read timed out",
+    "[2026-08-26 13:33:12.511] [ERROR] [afe6719d7fed474175502161c5375a12,9c716aa71f58db76] --- [] c.r.application.service.QrCodeService : QR 코드 생성 실패: joinCode=H4WS, error=Read timed out",
+    "[2026-08-26 13:33:12.640] [ERROR] [8a182609c4d49d9f457df02bd33331b1,a2ae01d90ed922cc] --- [http-nio-8080-exec-7] c.web.exception.RestExceptionHandler : method=POST uri=/rooms exception=QrCodeGenerationException message=QR code generation failed for joinCode=H4WS",
+    "[2026-08-26 13:34:48.129] [ERROR] [b57a40f5ba16e4823deba73cc6be99c9,877eeb24948d738c] --- [] c.r.infra.OracleObjectStorageService : Oracle Object Storage Public URL 생성 실패: storageKey=qr/2026/08/26/K7QD.png, error=Read timed out",
+    "[2026-08-26 13:34:48.233] [ERROR] [1a2837bbfd4e7426a61b631441954fee,f3c83001c1c1ef05] --- [] c.r.application.service.QrCodeService : QR 코드 생성 실패: joinCode=K7QD, error=Read timed out",
+    "[2026-08-26 13:34:48.351] [ERROR] [1d72671d48f5d8ef89df7756c8d2ec0f,c066406d89a0bfd0] --- [http-nio-8080-exec-12] c.web.exception.RestExceptionHandler : method=POST uri=/rooms exception=QrCodeGenerationException message=QR code generation failed for joinCode=K7QD",
+    "[2026-08-26 13:36:20.907] [ERROR] [f572402b4a7396e4254172b8f3fb1e5c,ebc276c2594805f8] --- [] c.r.infra.OracleObjectStorageService : Oracle Object Storage Public URL 생성 실패: storageKey=qr/2026/08/26/M2VB.png, error=Read timed out",
+    "[2026-08-26 13:36:21.014] [ERROR] [5f78bf1176cbe1537eac44a586140dfc,2cdd0523d331e955] --- [] c.r.application.service.QrCodeService : QR 코드 생성 실패: joinCode=M2VB, error=Read timed out",
+    "[2026-08-26 13:36:21.142] [ERROR] [2b320759ec8617f64251583fcb378cc7,2aa9afc26d2ee5a8] --- [http-nio-8080-exec-3] c.web.exception.RestExceptionHandler : method=POST uri=/rooms exception=QrCodeGenerationException message=QR code generation failed for joinCode=M2VB",
+    "[2026-08-26 13:38:05.663] [ERROR] [73a364e13e64efd0b36bcf38c370d102,6945b352d6939836] --- [] c.r.infra.OracleObjectStorageService : Oracle Object Storage Public URL 생성 실패: storageKey=qr/2026/08/26/T9RC.png, error=Read timed out"
+  ],
+  "logEnvironment": "prod",
+  "expected": "예",
+  "axis": "compound-cause"
+}

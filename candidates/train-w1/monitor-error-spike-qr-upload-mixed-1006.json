@@ -1,0 +1,34 @@
+{
+  "name": "monitor-error-spike-qr-upload-mixed-1006",
+  "question": "알림 AppErrorLogSpike(warning)가 prod에서 발화했다 - 최근 5분 ERROR 로그가 임계 30건을 초과. 봇에는 최근 30분 ERROR 로그 샘플 11줄(알림 직전에 밀집한 오브젝트 스토리지 업로드 실패와 앞서 흩어진 게임, 정산 오류)이 주어졌다.",
+  "rubric": "주어진 ERROR 로그에서 알림 직전 약 4분에 밀집한 여덟 줄은 Oracle Object Storage로의 QR 업로드와 Public URL 생성이 모두 503 Service Unavailable로 실패하고 그 결과 QR 코드 생성과 POST /rooms 요청이 연달아 실패한 내용이라 ERROR 급증의 직접 근거이고, 그보다 10분 이상 앞서 한 줄씩 떨어져 있는 racinggame 스케줄 예외, blockstacking 스트림의 StopCommandEvent 처리 실패, pending 정산 재처리 실패는 스토리지 경로와 무관한 산발적 배경 오류다. '근거 발견: 예'로 판정하고 밀집한 오브젝트 스토리지 503 실패와 그 파급인 QR 생성, 방 생성 요청 실패를 급증의 근본 원인 가설로 제시하면 정답. '근거 발견: 아니오'로 판정하거나, racinggame 스케줄 예외, blockstacking 이벤트 실패, 정산 재처리 실패를 급증의 원인으로 끌어들이면 오답.",
+  "source": "MANUAL",
+  "alert": {
+    "alertname": "AppErrorLogSpike",
+    "severity": "warning",
+    "fingerprint": "golden-gen-aes-1006",
+    "summary": "ERROR 로그 급증(최근 5분, prod-app)",
+    "description": "ERROR 로그가 63건(임계 30/5m)입니다. zzol-bot이 근본원인을 분석합니다.",
+    "labels": {
+      "alertname": "AppErrorLogSpike",
+      "severity": "warning",
+      "job": "prod-app"
+    }
+  },
+  "logSamples": [
+    "[2026-08-26 14:55:12.664] [ERROR] [,] --- [racinggame-task-1] c.g.s.GameTaskSchedulerFactory : [racinggame] 스케줄 실행 중 예외가 발생했습니다.",
+    "[2026-08-26 15:02:49.317] [ERROR] [d81386948aac9d07e893c7b200be652b,eb6575488574cb91] --- [redis-stream-thread-pool-blockstacking1] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=StopCommandEventConsumer, message=StopCommandEvent[eventId=da430252-d17d-4b62-ba7b-1df3e238f0b1, timestamp=2026-08-26T06:02:49.317408562Z, joinCode=M8VT, playerName=PLAYER_3]",
+    "[2026-08-26 15:08:33.205] [ERROR] [,] --- [pool-2-thread-2] c.s.i.c.SettlementPendingSweeper : pending 정산 메시지 재처리 실패: recordId=1787812113205-0",
+    "[2026-08-26 15:17:41.128] [ERROR] [133bb300f9eb1e032946e0b34d391ab2,60e998efde995b5a] --- [] c.r.infra.OracleObjectStorageService : Oracle Object Storage QR 코드 업로드 실패: contents=qr/D5RK.png, error=Service error: 503 Service Unavailable",
+    "[2026-08-26 15:17:41.362] [ERROR] [3fdfe5a4bd655946649fa21cff823bdf,3f035298f7fc10ed] --- [] c.r.application.service.QrCodeService : QR 코드 생성 실패: joinCode=D5RK, error=Service error: 503 Service Unavailable",
+    "[2026-08-26 15:17:41.455] [ERROR] [fb3ebbf37958c9cd573bd0b5928948d1,619db278b56efff6] --- [http-nio-8080-exec-21] c.web.exception.RestExceptionHandler : method=POST uri=/rooms exception=InfrastructureException message=QR code upload failed for joinCode=D5RK",
+    "[2026-08-26 15:19:06.740] [ERROR] [00b8f9ef827951a88d45eca98f55ee9d,289aab633925f3de] --- [] c.r.infra.OracleObjectStorageService : Oracle Object Storage QR 코드 업로드 실패: contents=qr/W7QP.png, error=Service error: 503 Service Unavailable",
+    "[2026-08-26 15:19:06.981] [ERROR] [b9a7d0c2913d7e991ad341b27104b61f,6e28cd4b92d3f3a7] --- [] c.r.application.service.QrCodeService : QR 코드 생성 실패: joinCode=W7QP, error=Service error: 503 Service Unavailable",
+    "[2026-08-26 15:19:07.073] [ERROR] [df38eb476d40b999c75b21d213d22450,276f564a7d308706] --- [http-nio-8080-exec-09] c.web.exception.RestExceptionHandler : method=POST uri=/rooms exception=InfrastructureException message=QR code upload failed for joinCode=W7QP",
+    "[2026-08-26 15:20:52.639] [ERROR] [82bd1a462ce47e5d9db231f0fe648db3,de45f9fee3aebb45] --- [] c.r.infra.OracleObjectStorageService : Oracle Object Storage Public URL 생성 실패: storageKey=qr/N2HB.png, error=Service error: 503 Service Unavailable",
+    "[2026-08-26 15:21:24.918] [ERROR] [c4a01ca656ccf2c99aca355e758612fa,72f9d08c15f7ea99] --- [] c.r.application.service.QrCodeService : QR 코드 생성 실패: joinCode=N2HB, error=Service error: 503 Service Unavailable"
+  ],
+  "logEnvironment": "prod",
+  "expected": "예",
+  "axis": "partial-relevance"
+}

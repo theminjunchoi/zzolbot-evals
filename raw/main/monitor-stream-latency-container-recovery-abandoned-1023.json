@@ -1,0 +1,34 @@
+{
+ "name": "monitor-stream-latency-container-recovery-abandoned-1023",
+ "question": "알림 RedisStreamE2eLatencyHigh(warning)가 prod에서 발화했다 - 스트림 처리 p95 지연이 임계 500ms를 넘겼다. 봇에는 최근 30분 ERROR 로그 샘플 11줄(Redis Stream 컨테이너 상태 확인 및 복구 실패와 그에 뒤따른 컨슈머 처리 실패)이 주어졌다.",
+ "rubric": "주어진 ERROR 로그는 18:22:30부터 스케줄러(pool-9-thread-1)에서 nunchi와 speedtouch 스트림 컨테이너의 상태 확인 예외, 복구 예외, 최종 복구 포기(HealthIndicator DOWN 보고)가 순차적으로 발생하고, 복구 포기 직후부터 같은 스트림의 리스너 처리 오류, 눈치게임 press 처리 실패, 이벤트 디스패치 실패가 뒤따른 내용으로, 컨테이너 복구 실패가 선행하고 컨슈머 처리 실패가 그 뒤를 따른다. '근거 발견: 예'로 판정하고 Redis Stream 컨테이너의 상태 확인 및 복구 실패(컨테이너가 정상 소비를 재개하지 못하고 DOWN으로 떨어진 것)를 근본 원인으로, 리스너 처리 오류와 눈치게임 press 실패 및 이벤트 디스패치 실패는 소비 중단에 따른 파급 증상으로 구분해 가설을 제시하면 정답. '근거 발견: 아니오'로 판정하거나 눈치게임 로직 결함 또는 개별 이벤트 컨슈머 버그를 근본 원인으로 지목해 근본과 파급을 뒤집으면 오답.",
+ "source": "MANUAL",
+ "alert": {
+  "alertname": "RedisStreamE2eLatencyHigh",
+  "severity": "warning",
+  "fingerprint": "golden-gen-cc-1023",
+  "summary": "Redis Stream E2E 지연 p95 > 500ms (prod-app)",
+  "description": "스트림 처리 p95 지연이 4.9s. 컨슈머 처리 적체 또는 다운스트림(App Service) 지연 가능성.",
+  "labels": {
+   "alertname": "RedisStreamE2eLatencyHigh",
+   "severity": "warning",
+   "job": "prod-app"
+  }
+ },
+ "logSamples": [
+  "[2026-08-26 18:22:30.114] [ERROR] [,] --- [pool-9-thread-1] c.g.h.RedisStreamContainerRecovery : Redis Stream container 상태 확인 중 예외: stream=nunchi",
+  "[2026-08-26 18:22:35.629] [ERROR] [,] --- [pool-9-thread-1] c.g.h.RedisStreamContainerRecovery : Redis Stream container 상태 확인 중 예외: stream=speedtouch",
+  "[2026-08-26 18:22:45.271] [ERROR] [,] --- [pool-9-thread-1] c.g.h.RedisStreamContainerRecovery : Redis Stream container 복구 중 예외 발생: stream=nunchi",
+  "[2026-08-26 18:23:00.802] [ERROR] [,] --- [pool-9-thread-1] c.g.h.RedisStreamContainerRecovery : Redis Stream container 복구 중 예외 발생: stream=speedtouch",
+  "[2026-08-26 18:23:15.437] [ERROR] [,] --- [pool-9-thread-1] c.g.h.RedisStreamContainerRecovery : Redis Stream container 복구 포기: stream=nunchi. HealthIndicator에 DOWN 보고",
+  "[2026-08-26 18:23:21.955] [ERROR] [50997cb6290beec9a4ac26cdb50d8714,1f7915e3e8d86bb3] --- [redis-stream-thread-pool-nunchi1] c.g.r.c.RedisStreamListenerStarter : Redis Stream 처리 중 오류가 발생했습니다.",
+  "[2026-08-26 18:23:34.680] [ERROR] [ad18970b2caeb9ea7dd44737b9b59986,4e73e291e753af5f] --- [redis-stream-thread-pool-nunchi1] c.n.i.m.c.NunchiCommandEventConsumer : 눈치게임 press 처리 중 오류: joinCode=J3HP, playerName=수아, eventId=c2d6dfa9-1f36-4a60-9c2e-4801606a2adf",
+  "[2026-08-26 18:23:48.216] [ERROR] [,] --- [pool-9-thread-1] c.g.h.RedisStreamContainerRecovery : Redis Stream container 복구 포기: stream=speedtouch. HealthIndicator에 DOWN 보고",
+  "[2026-08-26 18:24:02.743] [ERROR] [d30857a8a20ccff9be77b682dcfb2027,7a0b21f66ecd98d6] --- [redis-stream-thread-pool-speedtouch2] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=TouchProgressEventConsumer, message=TouchProgressEvent[joinCode=J3HP, playerName=주원, eventId=26334a49-8cd8-4df6-9336-ece9d4273147]",
+  "[2026-08-26 18:24:19.508] [ERROR] [9ab3361eb852741042aa4a0b70829e5f,7543ec57555d2ed9] --- [redis-stream-thread-pool-speedtouch2] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=TapCommandEventConsumer, message=TapCommandEvent[joinCode=R8LK, playerName=은우, eventId=98e36335-bfd4-4d59-b530-edae48a72c7b]",
+  "[2026-08-26 18:24:37.061] [ERROR] [b0bd7d742ca0b9d8b6b933a9b842de35,11286f4174bfd562] --- [redis-stream-thread-pool-nunchi2] c.g.r.c.RedisStreamListenerStarter : Redis Stream 처리 중 오류가 발생했습니다."
+ ],
+ "logEnvironment": "prod",
+ "expected": "예",
+ "axis": "compound-cause"
+}

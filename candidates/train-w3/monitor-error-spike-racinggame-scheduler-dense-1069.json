@@ -1,0 +1,32 @@
+{
+  "name": "monitor-error-spike-racinggame-scheduler-dense-1069",
+  "question": "알림 AppErrorLogSpike(warning)가 prod에서 발화했다 - 최근 5분 ERROR 로그가 임계 30건을 넘었다. 봇에는 최근 30분 ERROR 로그 샘플 9줄(racinggame 게임 스케줄 실행 예외가 좁은 구간에 밀집)이 주어졌다.",
+  "rubric": "주어진 ERROR 로그 9줄은 21:33:04부터 21:36:58까지 약 4분 구간에 밀집해 있으며, racinggame-task-1, racinggame-task-2, racinggame-task-3 스레드에서 GameTaskSchedulerFactory의 '[racinggame] 스케줄 실행 중 예외가 발생했습니다.' 6건과 pool-8 스케줄러 스레드에서 TaskUtils$LoggingErrorHandler의 'Unexpected error occurred in scheduled task' 3건으로 구성된다. '근거 발견: 예'로 판정하고 racinggame 게임 스케줄 태스크가 반복 예외로 실패하면서 ERROR 로그가 급증했다는 가설을 제시하면 정답. '근거 발견: 아니오'로 판정하거나, 로그에 없는 HTTP 요청 실패나 Outbox 적체를 급증의 원인으로 지목하면 오답.",
+  "source": "MANUAL",
+  "alert": {
+    "alertname": "AppErrorLogSpike",
+    "severity": "warning",
+    "fingerprint": "golden-gen-pd-1069",
+    "summary": "ERROR 로그 급증(최근 5분, prod-app)",
+    "description": "ERROR 로그가 58건(임계 30/5m)입니다. zzol-bot이 근본원인을 분석합니다.",
+    "labels": {
+      "alertname": "AppErrorLogSpike",
+      "severity": "warning",
+      "job": "prod-app"
+    }
+  },
+  "logSamples": [
+    "[2026-08-26 21:33:04.118] [ERROR] [,] --- [racinggame-task-1] c.g.s.GameTaskSchedulerFactory : [racinggame] 스케줄 실행 중 예외가 발생했습니다.",
+    "[2026-08-26 21:33:29.556] [ERROR] [,] --- [racinggame-task-2] c.g.s.GameTaskSchedulerFactory : [racinggame] 스케줄 실행 중 예외가 발생했습니다.",
+    "[2026-08-26 21:33:52.907] [ERROR] [,] --- [pool-8-thread-1] o.s.s.s.TaskUtils$LoggingErrorHandler : Unexpected error occurred in scheduled task",
+    "[2026-08-26 21:34:18.334] [ERROR] [,] --- [racinggame-task-1] c.g.s.GameTaskSchedulerFactory : [racinggame] 스케줄 실행 중 예외가 발생했습니다.",
+    "[2026-08-26 21:34:47.771] [ERROR] [,] --- [racinggame-task-3] c.g.s.GameTaskSchedulerFactory : [racinggame] 스케줄 실행 중 예외가 발생했습니다.",
+    "[2026-08-26 21:35:15.209] [ERROR] [,] --- [pool-8-thread-2] o.s.s.s.TaskUtils$LoggingErrorHandler : Unexpected error occurred in scheduled task",
+    "[2026-08-26 21:35:44.663] [ERROR] [,] --- [racinggame-task-2] c.g.s.GameTaskSchedulerFactory : [racinggame] 스케줄 실행 중 예외가 발생했습니다.",
+    "[2026-08-26 21:36:22.045] [ERROR] [,] --- [racinggame-task-1] c.g.s.GameTaskSchedulerFactory : [racinggame] 스케줄 실행 중 예외가 발생했습니다.",
+    "[2026-08-26 21:36:58.480] [ERROR] [,] --- [pool-8-thread-1] o.s.s.s.TaskUtils$LoggingErrorHandler : Unexpected error occurred in scheduled task"
+  ],
+  "logEnvironment": "prod",
+  "expected": "예",
+  "axis": "positive-dense"
+}

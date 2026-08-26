@@ -1,0 +1,31 @@
+{
+ "name": "monitor-stream-latency-blockstacking-partial-relevance-1033",
+ "question": "알림 RedisStreamE2eLatencyHigh(warning)가 prod에서 발화했다 - 스트림 처리 p95 지연이 1.42s로 임계 500ms를 넘었다. 봇에는 최근 30분 ERROR 로그 샘플 8줄(blockstacking 스트림 컨슈머 실패 밀집과 QR 이미지 계열 산발 오류)이 주어졌다.",
+ "rubric": "주어진 ERROR 로그 중 09:41~09:44에 밀집한 6줄(blockstacking 스트림 스레드의 EventDispatcher StopCommandEventConsumer 처리 실패 4건과 RedisStreamListenerStarter 처리 오류 2건)이 알림과 직접 관련된 근거이고, 09:22와 09:29의 QrCodeService QR 코드 생성 실패와 OracleObjectStorageService Public URL 생성 실패 2줄은 스트림 지연과 무관한 산발 오류다. '근거 발견: 예'로 판정하고 blockstacking 스트림 컨슈머의 반복 실패와 재전달로 인한 처리 적체를 원인 가설로 제시하면 정답. '근거 발견: 아니오'로 판정하거나 QR 코드 및 Object Storage 오류를 지연의 원인으로 끌어들이면 오답.",
+ "source": "MANUAL",
+ "alert": {
+  "alertname": "RedisStreamE2eLatencyHigh",
+  "severity": "warning",
+  "fingerprint": "golden-gen-slbs-1033",
+  "summary": "Redis Stream E2E 지연 p95 > 500ms (prod-app)",
+  "description": "스트림 처리 p95 지연이 1.42s. 컨슈머 처리 적체 또는 다운스트림(App Service) 지연 가능성.",
+  "labels": {
+   "alertname": "RedisStreamE2eLatencyHigh",
+   "severity": "warning",
+   "job": "prod-app"
+  }
+ },
+ "logSamples": [
+  "[2026-08-26 09:22:41.507] [ERROR] [66d82322f7581b785b8e3dd536ea79e1,bca343d44cb654dc] --- [] c.r.application.service.QrCodeService : QR 코드 생성 실패: joinCode=Q3TM, error=ObjectStorage 응답 지연으로 이미지 생성 중단",
+  "[2026-08-26 09:29:03.118] [ERROR] [5852c0fc804d2b98567a0293b8d4fd9f,d9dfe3111f320bd6] --- [] c.r.infra.OracleObjectStorageService : Oracle Object Storage Public URL 생성 실패: storageKey=qr/Q3TM.png, error=PreauthenticatedRequest 만료",
+  "[2026-08-26 09:41:52.336] [ERROR] [d1cf8423540daa791e418f91082343e6,2790c354707d56ca] --- [redis-stream-thread-pool-blockstacking1] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=StopCommandEventConsumer, message=StopCommandEvent[joinCode=Q3TM, playerName=은서, eventId=3321f36b-7f9b-0550-5ac7-132bb6e54419]",
+  "[2026-08-26 09:42:07.914] [ERROR] [d6526816b842f3d4dd9c06f560629b03,9321eff0918bac5d] --- [redis-stream-thread-pool-blockstacking2] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=StopCommandEventConsumer, message=StopCommandEvent[joinCode=Q3TM, playerName=태윤, eventId=ceeab6cc-2a4e-5fb5-1ea3-7e6c06ca6fd4]",
+  "[2026-08-26 09:42:23.605] [ERROR] [76bf93fa407dc1f0a7c1c4f69730c5dc,15034d5fd0032f09] --- [redis-stream-thread-pool-blockstacking2] c.g.r.c.RedisStreamListenerStarter : Redis Stream 처리 중 오류가 발생했습니다.",
+  "[2026-08-26 09:43:11.247] [ERROR] [070d0350826381bc4dac5f40389841e8,acf6b4b4222c589c] --- [redis-stream-thread-pool-blockstacking1] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=StopCommandEventConsumer, message=StopCommandEvent[joinCode=W8YD, playerName=은서, eventId=e604ca3f-8fa7-257b-621b-eb0050ad8340]",
+  "[2026-08-26 09:43:48.092] [ERROR] [bddcfd108e826c20fd6e7f4e939a2e55,ec64ac4de6c0bb93] --- [redis-stream-thread-pool-blockstacking3] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=StopCommandEventConsumer, message=StopCommandEvent[joinCode=W8YD, playerName=수아, eventId=00dc98ea-5731-c08e-ff91-9caa066d3129]",
+  "[2026-08-26 09:44:30.771] [ERROR] [f9a87d4c1788ff57310245ebd8961a2d,0913f36358c355fb] --- [redis-stream-thread-pool-blockstacking4] c.g.r.c.RedisStreamListenerStarter : Redis Stream 처리 중 오류가 발생했습니다."
+ ],
+ "logEnvironment": "prod",
+ "expected": "예",
+ "axis": "partial-relevance"
+}

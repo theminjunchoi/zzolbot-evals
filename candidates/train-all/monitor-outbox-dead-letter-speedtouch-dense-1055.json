@@ -1,0 +1,32 @@
+{
+  "name": "monitor-outbox-dead-letter-speedtouch-dense-1055",
+  "question": "알림 OutboxDeadLetterHigh(warning)가 prod에서 발화했다 - 재시도 초과로 DEAD_LETTER 전환된 outbox 이벤트가 적체됐다. 봇에는 최근 30분 ERROR 로그 샘플 9줄(outbox 이벤트 DEAD_LETTER 전환 반복)이 주어졌다.",
+  "rubric": "주어진 ERROR 로그는 08:12:06부터 08:16:31까지 약 4분 동안 OutboxEventProcessor가 최대 재시도 초과로 outbox 이벤트를 DEAD_LETTER로 전환한 기록 9줄이며, 9줄 모두 streamKey=speedtouch이고 id는 90412부터 90466까지 서로 다른 값으로 알림 시간창과 정합하는 직접 근거다. '근거 발견: 예'로 판정하고 speedtouch 스트림으로의 outbox 발행이 반복 실패해 재시도 초과 후 DEAD_LETTER로 전환되고 있음을 원인으로 제시하면 정답. '근거 발견: 아니오'로 판정하거나 로그에 없는 다른 streamKey나 정산, 방 참가 경로를 원인으로 지목하면 오답.",
+  "source": "MANUAL",
+  "alert": {
+    "alertname": "OutboxDeadLetterHigh",
+    "severity": "warning",
+    "fingerprint": "golden-gen-pd-1055",
+    "summary": "Outbox DEAD_LETTER 적체 (> 10, prod-app)",
+    "description": "재시도 초과로 DEAD_LETTER 전환된 outbox 이벤트가 17건. 다운스트림 발행 경로 점검 필요.",
+    "labels": {
+      "alertname": "OutboxDeadLetterHigh",
+      "severity": "warning",
+      "job": "prod-app"
+    }
+  },
+  "logSamples": [
+    "[2026-08-26 08:12:06.281] [ERROR] [,] --- [pool-3-thread-2] c.global.outbox.OutboxEventProcessor : Outbox 이벤트 최대 재시도 초과, DEAD_LETTER 전환: id=90412, streamKey=speedtouch",
+    "[2026-08-26 08:12:39.744] [ERROR] [,] --- [pool-3-thread-2] c.global.outbox.OutboxEventProcessor : Outbox 이벤트 최대 재시도 초과, DEAD_LETTER 전환: id=90418, streamKey=speedtouch",
+    "[2026-08-26 08:13:11.052] [ERROR] [,] --- [pool-3-thread-5] c.global.outbox.OutboxEventProcessor : Outbox 이벤트 최대 재시도 초과, DEAD_LETTER 전환: id=90423, streamKey=speedtouch",
+    "[2026-08-26 08:13:48.617] [ERROR] [,] --- [pool-3-thread-2] c.global.outbox.OutboxEventProcessor : Outbox 이벤트 최대 재시도 초과, DEAD_LETTER 전환: id=90431, streamKey=speedtouch",
+    "[2026-08-26 08:14:20.930] [ERROR] [,] --- [pool-3-thread-5] c.global.outbox.OutboxEventProcessor : Outbox 이벤트 최대 재시도 초과, DEAD_LETTER 전환: id=90437, streamKey=speedtouch",
+    "[2026-08-26 08:14:57.365] [ERROR] [,] --- [pool-3-thread-2] c.global.outbox.OutboxEventProcessor : Outbox 이벤트 최대 재시도 초과, DEAD_LETTER 전환: id=90444, streamKey=speedtouch",
+    "[2026-08-26 08:15:29.808] [ERROR] [,] --- [pool-3-thread-2] c.global.outbox.OutboxEventProcessor : Outbox 이벤트 최대 재시도 초과, DEAD_LETTER 전환: id=90452, streamKey=speedtouch",
+    "[2026-08-26 08:15:58.124] [ERROR] [,] --- [pool-3-thread-5] c.global.outbox.OutboxEventProcessor : Outbox 이벤트 최대 재시도 초과, DEAD_LETTER 전환: id=90459, streamKey=speedtouch",
+    "[2026-08-26 08:16:31.577] [ERROR] [,] --- [pool-3-thread-2] c.global.outbox.OutboxEventProcessor : Outbox 이벤트 최대 재시도 초과, DEAD_LETTER 전환: id=90466, streamKey=speedtouch"
+  ],
+  "logEnvironment": "prod",
+  "expected": "예",
+  "axis": "positive-dense"
+}

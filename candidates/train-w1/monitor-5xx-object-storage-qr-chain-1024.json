@@ -1,0 +1,33 @@
+{
+  "name": "monitor-5xx-object-storage-qr-chain-1024",
+  "question": "알림 Http5xxRatioHigh(critical)가 prod에서 발화했다 - 최근 5분 5xx 비율이 임계 5%를 넘겼다. 봇에는 최근 30분 ERROR 로그 샘플 10줄(Object Storage 연결 타임아웃과 그에 뒤따른 QR 코드 생성 실패 및 방 생성 요청 5xx)이 주어졌다.",
+  "rubric": "주어진 ERROR 로그는 07:44부터 Oracle Object Storage 업로드와 Public URL 생성이 모두 연결 타임아웃으로 실패하고, 같은 joinCode(C6YT, V2NQ, G9DM)에 대해 QR 코드 생성 실패가 뒤따른 뒤 마지막으로 POST /rooms 요청이 QR 코드 생성 실패로 5xx가 되는 순서를 보여주며, 실패가 스토리지에서 시작해 QR 생성을 거쳐 HTTP 응답으로 전파된다. '근거 발견: 예'로 판정하고 Oracle Object Storage 연결 타임아웃(외부 스토리지 장애 또는 네트워크 단절)을 근본 원인으로, QR 코드 생성 실패와 POST /rooms의 5xx는 그 파급 증상으로 구분해 가설을 제시하면 정답. '근거 발견: 아니오'로 판정하거나 QR 코드 생성 로직 결함 또는 방 생성 API 자체의 버그를 근본 원인으로 지목해 근본과 파급을 뒤집으면 오답.",
+  "source": "MANUAL",
+  "alert": {
+    "alertname": "Http5xxRatioHigh",
+    "severity": "critical",
+    "fingerprint": "golden-gen-cc-1024",
+    "summary": "HTTP 5xx 비율 5% 초과 (prod-app)",
+    "description": "최근 5분 5xx 비율이 14.3%. 서버 측 광범위 실패 가능성.",
+    "labels": {
+      "alertname": "Http5xxRatioHigh",
+      "severity": "critical",
+      "job": "prod-app"
+    }
+  },
+  "logSamples": [
+    "[2026-08-26 07:44:12.507] [ERROR] [,] --- [] c.r.infra.OracleObjectStorageService : Oracle Object Storage QR 코드 업로드 실패: contents=zzol-qr-C6YT.png, error=ConnectTimeoutException: connect timed out",
+    "[2026-08-26 07:44:26.981] [ERROR] [,] --- [] c.r.infra.OracleObjectStorageService : Oracle Object Storage QR 코드 업로드 실패: contents=zzol-qr-V2NQ.png, error=ConnectTimeoutException: connect timed out",
+    "[2026-08-26 07:44:41.334] [ERROR] [,] --- [] c.r.infra.OracleObjectStorageService : Oracle Object Storage Public URL 생성 실패: storageKey=qr/2026/08/26/C6YT.png, error=ConnectTimeoutException: connect timed out",
+    "[2026-08-26 07:44:55.760] [ERROR] [,] --- [] c.r.application.service.QrCodeService : QR 코드 생성 실패: joinCode=C6YT, error=Object Storage upload failed",
+    "[2026-08-26 07:45:08.212] [ERROR] [,] --- [] c.r.application.service.QrCodeService : QR 코드 생성 실패: joinCode=V2NQ, error=Object Storage upload failed",
+    "[2026-08-26 07:45:19.845] [ERROR] [3efdad5215cdf3be4f7eb107b2ad88cc,3956e992421c11ff] --- [http-nio-8080-exec-09] c.web.exception.RestExceptionHandler : method=POST uri=/rooms exception=QrCodeGenerationException message=QR code generation failed for joinCode C6YT",
+    "[2026-08-26 07:45:33.470] [ERROR] [a53a9c5d83d79a23bf700ffd640fe4d9,7490bde019d08ce3] --- [http-nio-8080-exec-26] c.web.exception.RestExceptionHandler : method=POST uri=/rooms exception=QrCodeGenerationException message=QR code generation failed for joinCode V2NQ",
+    "[2026-08-26 07:45:52.128] [ERROR] [,] --- [] c.r.infra.OracleObjectStorageService : Oracle Object Storage QR 코드 업로드 실패: contents=zzol-qr-G9DM.png, error=ConnectTimeoutException: connect timed out",
+    "[2026-08-26 07:46:04.693] [ERROR] [,] --- [] c.r.application.service.QrCodeService : QR 코드 생성 실패: joinCode=G9DM, error=Object Storage upload failed",
+    "[2026-08-26 07:46:17.256] [ERROR] [8614eb8528c3744bedcb8b3ac2dd8478,07ce366eede5fd58] --- [http-nio-8080-exec-14] c.web.exception.RestExceptionHandler : method=POST uri=/rooms exception=QrCodeGenerationException message=QR code generation failed for joinCode G9DM"
+  ],
+  "logEnvironment": "prod",
+  "expected": "예",
+  "axis": "compound-cause"
+}

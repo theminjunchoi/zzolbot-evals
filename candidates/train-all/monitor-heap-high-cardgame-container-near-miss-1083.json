@@ -1,0 +1,28 @@
+{
+  "name": "monitor-heap-high-cardgame-container-near-miss-1083",
+  "question": "알림 JvmHeapUsageHigh(critical)가 prod에서 발화했다 - JVM 힙 사용률이 91%로 임계 85%를 넘었다. 봇에는 최근 30분 창에서 조회된 prod ERROR 로그 샘플 5줄이 주어졌다.",
+  "rubric": "알림이 가리키는 대상은 JVM 힙 메모리 사용률이지만, 주어진 5줄은 전부 cardgame:select 스트림의 Redis Stream container 계층 오류다. RedisStreamContainerRecovery가 08:41:05 상태 확인 예외, 08:43:35과 08:48:34 복구 중 예외, 08:51:03 복구 포기와 HealthIndicator DOWN 보고를 남겼고, 그 사이 08:46:04에 RedisStreamListenerStarter가 스트림 처리 오류를 기록했다. 같은 런타임 리소스 계열로 보이지만 이는 Redis 연결과 리스너 컨테이너 문제이며, 힙 점유나 GC를 보여주는 로그는 한 줄도 없어 힙 사용률 91%의 원인을 설명하지 못한다. '근거 발견: 아니오'로 판정하고, 컨테이너 복구 실패는 힙과 별개의 사안으로 분리해 언급하면 정답. 컨테이너 복구 실패를 힙 상승의 원인으로 지목하거나 로그에 없는 메모리 누수, OutOfMemoryError를 단정하면 오답.",
+  "source": "MANUAL",
+  "alert": {
+    "alertname": "JvmHeapUsageHigh",
+    "severity": "critical",
+    "fingerprint": "golden-gen-nmc-1083",
+    "summary": "JVM 힙 사용률 > 85% (prod-app)",
+    "description": "힙 사용률이 91%. GC 오버헤드 증가 및 OOM 위험.",
+    "labels": {
+      "alertname": "JvmHeapUsageHigh",
+      "severity": "critical",
+      "job": "prod-app"
+    }
+  },
+  "logSamples": [
+    "[2026-08-26 08:41:05.612] [ERROR] [,] --- [pool-7-thread-2] c.g.h.RedisStreamContainerRecovery : Redis Stream container 상태 확인 중 예외: stream=cardgame:select",
+    "[2026-08-26 08:43:35.220] [ERROR] [,] --- [pool-7-thread-2] c.g.h.RedisStreamContainerRecovery : Redis Stream container 복구 중 예외 발생: stream=cardgame:select",
+    "[2026-08-26 08:46:04.877] [ERROR] [9bae28dc16131bd58d989dcdc252add1,4cee49aa8d736b93] --- [redis-stream-thread-pool-cardgame:select1] c.g.r.c.RedisStreamListenerStarter : Redis Stream 처리 중 오류가 발생했습니다.",
+    "[2026-08-26 08:48:34.309] [ERROR] [,] --- [pool-7-thread-2] c.g.h.RedisStreamContainerRecovery : Redis Stream container 복구 중 예외 발생: stream=cardgame:select",
+    "[2026-08-26 08:51:03.744] [ERROR] [,] --- [pool-7-thread-2] c.g.h.RedisStreamContainerRecovery : Redis Stream container 복구 포기: stream=cardgame:select. HealthIndicator에 DOWN 보고"
+  ],
+  "logEnvironment": "prod",
+  "expected": "아니오",
+  "axis": "near-miss-component"
+}

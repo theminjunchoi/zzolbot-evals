@@ -1,0 +1,32 @@
+{
+  "name": "monitor-error-spike-blockstacking-container-compound-1065",
+  "question": "알림 AppErrorLogSpike(warning)가 prod에서 발화했다 - 최근 5분 ERROR 로그가 임계 30건을 넘었다. 봇에는 최근 30분 ERROR 로그 샘플 9줄(blockstacking Redis Stream 컨테이너 복구 실패와 그 뒤에 이어진 스트림 처리, 이벤트 디스패치, 아웃박스 실패)이 주어졌다.",
+  "rubric": "주어진 ERROR 로그는 pool-3-thread-1에서 blockstacking 스트림에 대한 RedisStreamContainerRecovery의 상태 확인 예외 1건과 복구 중 예외 2건이 기록된 뒤 '복구 포기: stream=blockstacking. HealthIndicator에 DOWN 보고'가 남았고, 그 직후 redis-stream-thread-pool-blockstacking 스레드에서 RedisStreamListenerStarter 처리 오류 2건과 EventDispatcher 이벤트 처리 실패 2건(StopCommandEventConsumer, PlayerDisconnectedConsumer)이 이어지며 마지막에 streamKey=blockstacking Outbox 이벤트 1건이 DEAD_LETTER로 전환된 순서를 보여준다. '근거 발견: 예'로 판정하고 blockstacking Redis Stream 컨테이너 복구 실패(DOWN 보고)를 근본 원인으로, 리스너 처리 오류와 이벤트 디스패치 실패, Outbox DEAD_LETTER 전환을 그 파급 증상으로 명확히 구분해 가설을 제시하면 정답. '근거 발견: 아니오'로 판정하거나, EventDispatcher 실패 또는 Outbox DEAD_LETTER 전환 자체를 근본 원인으로 지목해 근본과 파급을 뒤집으면 오답.",
+  "source": "MANUAL",
+  "alert": {
+    "alertname": "AppErrorLogSpike",
+    "severity": "warning",
+    "fingerprint": "golden-gen-cc-1065",
+    "summary": "ERROR 로그 급증(최근 5분, prod-app)",
+    "description": "ERROR 로그가 74건(임계 30/5m)입니다. zzol-bot이 근본원인을 분석합니다.",
+    "labels": {
+      "alertname": "AppErrorLogSpike",
+      "severity": "warning",
+      "job": "prod-app"
+    }
+  },
+  "logSamples": [
+    "[2026-08-26 13:41:02.318] [ERROR] [,] --- [pool-3-thread-1] c.g.h.RedisStreamContainerRecovery : Redis Stream container 상태 확인 중 예외: stream=blockstacking",
+    "[2026-08-26 13:41:22.446] [ERROR] [,] --- [pool-3-thread-1] c.g.h.RedisStreamContainerRecovery : Redis Stream container 복구 중 예외 발생: stream=blockstacking",
+    "[2026-08-26 13:41:52.771] [ERROR] [,] --- [pool-3-thread-1] c.g.h.RedisStreamContainerRecovery : Redis Stream container 복구 중 예외 발생: stream=blockstacking",
+    "[2026-08-26 13:42:22.905] [ERROR] [,] --- [pool-3-thread-1] c.g.h.RedisStreamContainerRecovery : Redis Stream container 복구 포기: stream=blockstacking. HealthIndicator에 DOWN 보고",
+    "[2026-08-26 13:42:41.118] [ERROR] [3f770b1b0940db318213a3bf49391272,e41e579d5c807046] --- [redis-stream-thread-pool-blockstacking1] c.g.r.c.RedisStreamListenerStarter : Redis Stream 처리 중 오류가 발생했습니다.",
+    "[2026-08-26 13:43:09.554] [ERROR] [960ce7c2609a80385a881f73c72cbe97,589c833b68599809] --- [redis-stream-thread-pool-blockstacking2] c.g.r.c.RedisStreamListenerStarter : Redis Stream 처리 중 오류가 발생했습니다.",
+    "[2026-08-26 13:43:47.902] [ERROR] [3bb9fc27ca13e6e3497166f2e56f0776,f595971993329731] --- [redis-stream-thread-pool-blockstacking1] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=StopCommandEventConsumer, message=StopCommandEvent[joinCode=T7QD, playerName=서준, eventId=911ec659-57ab-437d-b101-e94eb7293c7f]",
+    "[2026-08-26 13:44:26.371] [ERROR] [af7a370f7d4f741d81da82931d36c9e4,8803e42773b464d1] --- [redis-stream-thread-pool-blockstacking2] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=PlayerDisconnectedConsumer, message=PlayerDisconnectedEvent[joinCode=T7QD, playerName=하윤, eventId=75600370-4899-48f9-bf5c-08c1a17d7d07]",
+    "[2026-08-26 13:45:03.640] [ERROR] [,] --- [pool-6-thread-2] c.global.outbox.OutboxEventProcessor : Outbox 이벤트 최대 재시도 초과, DEAD_LETTER 전환: id=41207, streamKey=blockstacking"
+  ],
+  "logEnvironment": "prod",
+  "expected": "예",
+  "axis": "compound-cause"
+}

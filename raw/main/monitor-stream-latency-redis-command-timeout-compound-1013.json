@@ -1,0 +1,34 @@
+{
+  "name": "monitor-stream-latency-redis-command-timeout-compound-1013",
+  "question": "알림 RedisStreamE2eLatencyHigh(warning)가 prod에서 발화했다 - Redis Stream E2E 지연 p95가 500ms를 초과. 봇에는 최근 30분 ERROR 로그 샘플 11줄(Redis 커맨드 타임아웃과 여러 스트림의 이벤트 처리 실패 연쇄)이 주어졌다.",
+  "rubric": "주어진 ERROR 로그는 RestExceptionHandler에 두 차례 기록된 RedisCommandTimeoutException(Command timed out after 3 second(s))이라는 근본 원인과, 그 여파로 cardgame:select와 speedtouch 등 여러 스트림에서 EventDispatcher 이벤트 처리 실패, RedisStreamListenerStarter 오류, cardgame:select 컨테이너 상태 확인 및 복구 예외가 동시다발로 발생하는 파급 증상을 함께 담고 있다. '근거 발견: 예'로 판정하고 Redis 커맨드 응답 지연 및 타임아웃(Redis 서버 또는 커넥션 레벨 문제)을 근본 원인으로, 여러 스트림의 컨슈머 처리 실패와 E2E 지연을 파급 증상으로 구분해 가설을 제시하면 정답. '근거 발견: 아니오'로 판정하거나 특정 게임(카드게임, 스피드터치) 로직 버그를 근본 원인으로 지목하고 여러 스트림에 걸친 Redis 타임아웃 공통 원인을 놓치면 오답.",
+  "source": "MANUAL",
+  "alert": {
+    "alertname": "RedisStreamE2eLatencyHigh",
+    "severity": "warning",
+    "fingerprint": "golden-gen-cc-1013",
+    "summary": "Redis Stream E2E 지연 p95 > 500ms (prod-app)",
+    "description": "스트림 처리 p95 지연이 3.4s. 컨슈머 처리 적체 또는 다운스트림(App Service) 지연 가능성.",
+    "labels": {
+      "alertname": "RedisStreamE2eLatencyHigh",
+      "severity": "warning",
+      "job": "prod-app"
+    }
+  },
+  "logSamples": [
+    "[2026-08-26 13:07:44.902] [ERROR] [b6709d024b25edba8895efb974b28b7c,7bcbcb42e96ab4e0] --- [http-nio-8080-exec-9] c.web.exception.RestExceptionHandler : method=GET uri=/rooms/PXMH/probabilities exception=RedisCommandTimeoutException message=Command timed out after 3 second(s)",
+    "[2026-08-26 13:08:19.336] [ERROR] [71c9354b43c2c2b51f8d3ac69b21e9ac,dbb3167085e43632] --- [redis-stream-thread-pool-cardgame:select1] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=SelectCardCommandEventConsumer, message=SelectCardCommandEvent[joinCode=PXMH, playerName=수현, cardIndex=3]",
+    "[2026-08-26 13:08:51.114] [ERROR] [6a8bec9bec38cf75bc779847f179f511,6fa151248a1146a5] --- [redis-stream-thread-pool-cardgame:select2] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=SelectCardCommandEventConsumer, message=SelectCardCommandEvent[joinCode=PXMH, playerName=도현, cardIndex=7]",
+    "[2026-08-26 13:09:26.780] [ERROR] [8c6a6505011970d856d0195d4d9f3f60,e398aa210c82fc3c] --- [redis-stream-thread-pool-speedtouch1] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=TouchProgressEventConsumer, message=TouchProgressEvent[joinCode=D8LC, playerName=하늘, progress=42]",
+    "[2026-08-26 13:10:02.559] [ERROR] [b5fcf1a4648a1b21d14f8e980b9796f9,79dcd167e390e672] --- [redis-stream-thread-pool-cardgame:select1] c.g.r.c.RedisStreamListenerStarter : Redis Stream 처리 중 오류가 발생했습니다.",
+    "[2026-08-26 13:11:37.245] [ERROR] [,] --- [pool-2-thread-1] c.g.h.RedisStreamContainerRecovery : Redis Stream container 상태 확인 중 예외: stream=cardgame:select",
+    "[2026-08-26 13:12:20.663] [ERROR] [bbbdf8542d48682cc1b2bbef1bcecaa6,962dc6f0a4379d68] --- [http-nio-8080-exec-18] c.web.exception.RestExceptionHandler : method=GET uri=/rooms/D8LC/settings exception=RedisCommandTimeoutException message=Command timed out after 3 second(s)",
+    "[2026-08-26 13:13:08.441] [ERROR] [6c1e49564e1caf7e8b2ecffedced3a4d,631ae5d24f7ae982] --- [redis-stream-thread-pool-speedtouch1] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=TapCommandEventConsumer, message=TapCommandEvent[joinCode=D8LC, playerName=서윤, tapCount=25]",
+    "[2026-08-26 13:14:41.907] [ERROR] [b3efc55601af136743061b8b3905222c,121708a7e95c4453] --- [redis-stream-thread-pool-cardgame:select2] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=SelectCardCommandEventConsumer, message=SelectCardCommandEvent[joinCode=R4ZK, playerName=민재, cardIndex=1]",
+    "[2026-08-26 13:15:55.130] [ERROR] [,] --- [pool-2-thread-1] c.g.h.RedisStreamContainerRecovery : Redis Stream container 복구 중 예외 발생: stream=cardgame:select",
+    "[2026-08-26 13:16:33.288] [ERROR] [32153d3def1565c045cb1f824ccf7625,1900179b9d658f57] --- [redis-stream-thread-pool-speedtouch1] c.g.r.c.RedisStreamListenerStarter : Redis Stream 처리 중 오류가 발생했습니다."
+  ],
+  "logEnvironment": "prod",
+  "expected": "예",
+  "axis": "compound-cause"
+}

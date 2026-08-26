@@ -1,0 +1,32 @@
+{
+  "name": "monitor-stream-backlog-blindtimer-stop-dense-1027",
+  "question": "알림 RedisStreamBacklogHigh(warning)가 prod에서 발화했다 - blindtimer 스트림 길이가 임계 1000을 넘겨 적체됐다. 봇에는 최근 30분 ERROR 로그 샘플 9줄(약 4분 사이 blindtimer 스트림에 밀집된 STOP 커맨드 이벤트 처리 실패)이 주어졌다.",
+  "rubric": "주어진 ERROR 로그는 알림 시각과 정합하는 약 4분의 좁은 창에 blindtimer 스트림 컨슈머 스레드(redis-stream-thread-pool-blindtimer1~3)에서 StopCommandEventConsumer의 이벤트 처리 실패가 7건 밀집 반복되고 blindtimer 게임 스케줄러 예외가 2건 섞여 있음을 보여준다. '근거 발견: 예'로 판정하고 blindtimer 스트림의 STOP 커맨드 이벤트 처리 실패와 그에 따른 재전달, 소비 지연을 적체의 원인 가설로 제시하면 정답. '근거 발견: 아니오'로 판정하거나 로그가 알림과 무관하다고 하거나 정산, 방 참가 등 다른 스트림을 원인으로 지목하면 오답.",
+  "source": "MANUAL",
+  "alert": {
+    "alertname": "RedisStreamBacklogHigh",
+    "severity": "warning",
+    "fingerprint": "golden-gen-pd-1027",
+    "summary": "Redis Stream 적체 (length > 1000, prod-app)",
+    "description": "스트림 길이가 3480. 컨슈머 처리 속도가 발행을 못 따라가고 있습니다.",
+    "labels": {
+      "alertname": "RedisStreamBacklogHigh",
+      "severity": "warning",
+      "job": "prod-app"
+    }
+  },
+  "logSamples": [
+    "[2026-08-26 21:02:10.514] [ERROR] [77bdf6a90011d8e84feb666cf455450f,25a8bbd65abef99c] --- [redis-stream-thread-pool-blindtimer1] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=StopCommandEventConsumer, message=StopCommandEvent[joinCode=H4NP, playerName=주원, stoppedAt=12480]",
+    "[2026-08-26 21:02:39.877] [ERROR] [6a3e25d5e0e762d7e684a6f112828f30,f00f3a9c05aff7ab] --- [redis-stream-thread-pool-blindtimer2] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=StopCommandEventConsumer, message=StopCommandEvent[joinCode=H4NP, playerName=나윤, stoppedAt=9930]",
+    "[2026-08-26 21:03:04.238] [ERROR] [,] --- [blindtimer-task-1] c.g.s.GameTaskSchedulerFactory : [blindtimer] 스케줄 실행 중 예외가 발생했습니다.",
+    "[2026-08-26 21:03:31.660] [ERROR] [8185b2c4f2f4d07820ecdb92e7c7b3a3,edc5609e3e5e804b] --- [redis-stream-thread-pool-blindtimer3] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=StopCommandEventConsumer, message=StopCommandEvent[joinCode=D5JQ, playerName=건우, stoppedAt=15120]",
+    "[2026-08-26 21:04:02.945] [ERROR] [150f54b9d9551d2f3e76df313086becb,e5c4295743392856] --- [redis-stream-thread-pool-blindtimer1] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=StopCommandEventConsumer, message=StopCommandEvent[joinCode=D5JQ, playerName=소율, stoppedAt=10240]",
+    "[2026-08-26 21:04:37.318] [ERROR] [cedfb13bbc2c4331b6709d024b25edba,8895efb974b28b7c] --- [redis-stream-thread-pool-blindtimer2] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=StopCommandEventConsumer, message=StopCommandEvent[joinCode=H4NP, playerName=지안, stoppedAt=13005]",
+    "[2026-08-26 21:05:11.702] [ERROR] [,] --- [blindtimer-task-2] c.g.s.GameTaskSchedulerFactory : [blindtimer] 스케줄 실행 중 예외가 발생했습니다.",
+    "[2026-08-26 21:05:40.183] [ERROR] [7bcbcb42e96ab4e071c9354b43c2c2b5,1f8d3ac69b21e9ac] --- [redis-stream-thread-pool-blindtimer3] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=StopCommandEventConsumer, message=StopCommandEvent[joinCode=D5JQ, playerName=유하, stoppedAt=11760]",
+    "[2026-08-26 21:06:05.926] [ERROR] [dbb3167085e436326a8bec9bec38cf75,bc779847f179f511] --- [redis-stream-thread-pool-blindtimer1] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=StopCommandEventConsumer, message=StopCommandEvent[joinCode=H4NP, playerName=주원, stoppedAt=14310]"
+  ],
+  "logEnvironment": "prod",
+  "expected": "예",
+  "axis": "positive-dense"
+}

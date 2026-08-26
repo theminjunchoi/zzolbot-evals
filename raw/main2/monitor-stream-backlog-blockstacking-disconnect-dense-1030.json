@@ -1,0 +1,31 @@
+{
+  "name": "monitor-stream-backlog-blockstacking-disconnect-dense-1030",
+  "question": "알림 RedisStreamBacklogHigh(warning)가 prod에서 발화했다 - blockstacking 스트림 길이가 임계 1000을 넘겨 적체됐다. 봇에는 최근 30분 ERROR 로그 샘플 8줄(약 4분 사이 blockstacking 스트림에 밀집된 플레이어 연결 종료 이벤트 처리 실패)이 주어졌다.",
+  "rubric": "주어진 ERROR 로그는 알림 시각과 정합하는 약 4분의 좁은 창에 blockstacking 스트림 컨슈머 스레드(redis-stream-thread-pool-blockstacking1~3)에서 PlayerDisconnectedConsumer의 이벤트 처리 실패가 6건 밀집 반복되고 같은 stream=blockstacking에 대한 컨테이너 상태 확인 예외가 2건 함께 나타남을 보여준다. '근거 발견: 예'로 판정하고 blockstacking 스트림의 플레이어 연결 종료 이벤트 처리 실패로 소비가 지연되어 적체가 쌓였다는 원인 가설을 제시하면 정답. '근거 발견: 아니오'로 판정하거나 로그가 알림과 무관하다고 하거나 방 참가, 정산 등 다른 스트림을 원인으로 지목하면 오답.",
+  "source": "MANUAL",
+  "alert": {
+    "alertname": "RedisStreamBacklogHigh",
+    "severity": "warning",
+    "fingerprint": "golden-gen-pd-1030",
+    "summary": "Redis Stream 적체 (length > 1000, prod-app)",
+    "description": "스트림 길이가 2740. 컨슈머 처리 속도가 발행을 못 따라가고 있습니다.",
+    "labels": {
+      "alertname": "RedisStreamBacklogHigh",
+      "severity": "warning",
+      "job": "prod-app"
+    }
+  },
+  "logSamples": [
+    "[2026-08-26 09:12:14.276] [ERROR] [17372b13d6e97d83fe1076a446855703,b5edf27031ce65aa] --- [redis-stream-thread-pool-blockstacking1] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=PlayerDisconnectedConsumer, message=PlayerDisconnectedEvent[joinCode=C7YB, playerName=민준, reason=SESSION_CLOSED]",
+    "[2026-08-26 09:12:47.803] [ERROR] [64835597983aaa91e204b45de54547f9,576d44095ca5a014] --- [redis-stream-thread-pool-blockstacking2] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=PlayerDisconnectedConsumer, message=PlayerDisconnectedEvent[joinCode=C7YB, playerName=수빈, reason=SESSION_CLOSED]",
+    "[2026-08-26 09:13:22.159] [ERROR] [,] --- [pool-3-thread-1] c.g.h.RedisStreamContainerRecovery : Redis Stream container 상태 확인 중 예외: stream=blockstacking",
+    "[2026-08-26 09:13:55.634] [ERROR] [cc4c9d5e8b04cf93760e1a332a7c89ff,715efb438a09745c] --- [redis-stream-thread-pool-blockstacking3] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=PlayerDisconnectedConsumer, message=PlayerDisconnectedEvent[joinCode=G4TQ, playerName=은서, reason=PING_TIMEOUT]",
+    "[2026-08-26 09:14:30.017] [ERROR] [130860b17c8e548fdcb3a51fec4a79e4,5e96682fe67b1fe2] --- [redis-stream-thread-pool-blockstacking1] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=PlayerDisconnectedConsumer, message=PlayerDisconnectedEvent[joinCode=G4TQ, playerName=재민, reason=PING_TIMEOUT]",
+    "[2026-08-26 09:15:03.482] [ERROR] [,] --- [pool-3-thread-1] c.g.h.RedisStreamContainerRecovery : Redis Stream container 상태 확인 중 예외: stream=blockstacking",
+    "[2026-08-26 09:15:38.925] [ERROR] [1e96b04cf1ef8a78035db0768d7a9a75,c8dc0b07435e50a6] --- [redis-stream-thread-pool-blockstacking2] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=PlayerDisconnectedConsumer, message=PlayerDisconnectedEvent[joinCode=C7YB, playerName=다인, reason=SESSION_CLOSED]",
+    "[2026-08-26 09:16:11.360] [ERROR] [23e21018b1096347980ab59cac0d7030,5fad39c043c01523] --- [redis-stream-thread-pool-blockstacking3] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=PlayerDisconnectedConsumer, message=PlayerDisconnectedEvent[joinCode=G4TQ, playerName=민준, reason=PING_TIMEOUT]"
+  ],
+  "logEnvironment": "prod",
+  "expected": "예",
+  "axis": "positive-dense"
+}

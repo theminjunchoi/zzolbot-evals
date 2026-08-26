@@ -1,0 +1,30 @@
+{
+  "name": "monitor-error-spike-stale-reingest-prevday-1088",
+  "question": "알림 AppErrorLogSpike(warning)가 prod에서 발화했다 - 최근 5분 ERROR 로그가 51건으로 임계 30건을 넘었다. 봇에는 최근 30분 창에서 조회된 prod ERROR 로그 샘플 7줄이 주어졌다.",
+  "rubric": "조회 창은 최근 30분인데 7줄 중 6줄의 본문 타임스탬프가 2026-08-25 03:12:44부터 22:57:50까지 전날 하루에 흩어져 있어(카드게임 select 컨슈머 실패, outbox DEAD_LETTER 전환 id=8241, QR 코드 생성 실패, POST /rooms/check-joinCode 실패, racinggame 스케줄러 예외, blockstacking StopCommandEvent 처리 실패) 조회 창과 맞지 않는 재적재 아티팩트로 보인다. 창 안에 들어오는 것은 2026-08-26 11:31:18의 TaskUtils 스케줄 작업 오류 1줄뿐이다. 타임스탬프 불일치를 지적하고 '근거 발견: 아니오'로 판정해야 정답. 전날 로그를 최근 5분 51건 급증의 근거로 집계하거나 그 중 하나를 급증의 원인으로 지목하면 오답.",
+  "source": "MANUAL",
+  "alert": {
+    "alertname": "AppErrorLogSpike",
+    "severity": "warning",
+    "fingerprint": "golden-gen-st-1088",
+    "summary": "ERROR 로그 급증(최근 5분, prod-app)",
+    "description": "ERROR 로그가 51건(임계 30/5m)입니다. zzol-bot이 근본원인을 분석합니다.",
+    "labels": {
+      "alertname": "AppErrorLogSpike",
+      "severity": "warning",
+      "job": "prod-app"
+    }
+  },
+  "logSamples": [
+    "[2026-08-25 03:12:44.109] [ERROR] [dccb49d12bc5af06faf005a1d671d1e2,ea1534b0f0858680] --- [redis-stream-thread-pool-cardgame:select1] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=SelectCardCommandEventConsumer, message=SelectCardCommandEvent[eventId=5448853f-4f09-4b64-afb0-cac2caffce6f, timestamp=2026-08-24T18:12:44.105000240Z, joinCode=ZM71, playerName=USER3, cardIndex=4]",
+    "[2026-08-25 07:48:19.732] [ERROR] [,] --- [pool-6-thread-1] c.global.outbox.OutboxEventProcessor : Outbox 이벤트 최대 재시도 초과, DEAD_LETTER 전환: id=8241, streamKey=cardgame:select",
+    "[2026-08-25 11:20:56.318] [ERROR] [,] --- [] c.r.application.service.QrCodeService : QR 코드 생성 실패: joinCode=ZM71, error=java.io.IOException: Broken pipe",
+    "[2026-08-25 16:05:31.470] [ERROR] [e7c7c21019536537e6ed2129fadfec47,35230739cf76c9e7] --- [http-nio-8080-exec-09] c.web.exception.RestExceptionHandler : method=POST uri=/rooms/check-joinCode exception=IllegalArgumentException message=Invalid join code format",
+    "[2026-08-25 19:33:07.845] [ERROR] [,] --- [racinggame-task-2] c.g.s.GameTaskSchedulerFactory : [racinggame] 스케줄 실행 중 예외가 발생했습니다.",
+    "[2026-08-25 22:57:50.226] [ERROR] [ba17b631b9e00f5ffd5e5c68f0da5171,af99f3f9e4755612] --- [redis-stream-thread-pool-blockstacking1] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=StopCommandEventConsumer, message=StopCommandEvent[eventId=1da61a71-501e-4130-bcaf-46abb53a6217, timestamp=2026-08-25T13:57:50.222000528Z, joinCode=ZM71, playerName=USER6]",
+    "[2026-08-26 11:31:18.593] [ERROR] [,] --- [pool-6-thread-1] o.s.s.s.TaskUtils$LoggingErrorHandler : Unexpected error occurred in scheduled task"
+  ],
+  "logEnvironment": "prod",
+  "expected": "아니오",
+  "axis": "stale-reingested"
+}

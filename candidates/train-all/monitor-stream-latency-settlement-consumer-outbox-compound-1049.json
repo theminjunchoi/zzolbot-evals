@@ -1,0 +1,32 @@
+{
+  "name": "monitor-stream-latency-settlement-consumer-outbox-compound-1049",
+  "question": "알림 RedisStreamE2eLatencyHigh(warning)가 prod에서 발화했다 - Redis Stream E2E 지연 p95가 500ms를 초과했다. 봇에는 최근 30분 ERROR 로그 샘플 9줄(정산 스트림 컨슈머 처리 실패와 ACK 보류, pending 재처리 실패, outbox DEAD_LETTER 전환)이 주어졌다.",
+  "rubric": "주어진 ERROR 로그는 settlement:result 스트림 컨슈머(SettlementStreamConsumer)가 정산 처리에 실패해 ACK를 3회 보류한 뒤, 보류된 동일 recordId들을 SettlementPendingSweeper가 3회 재처리 실패하고 마지막에 OutboxEventProcessor가 streamKey=settlement:result 이벤트 1건을 DEAD_LETTER로 전환한 내용으로, 정산 컨슈머의 반복 처리 실패가 근본 원인이고 pending 재처리 실패와 DEAD_LETTER 전환은 그 파급 증상이다. '근거 발견: 예'로 판정하고 SettlementStreamConsumer의 반복 처리 실패로 인한 미확인(pending) 메시지 적체를 근본 원인으로, SettlementPendingSweeper 재처리 실패와 DEAD_LETTER 전환을 파급 증상으로 구분해 가설을 제시하면 정답. '근거 발견: 아니오'로 판정하거나 DEAD_LETTER 전환 또는 sweeper 재처리 실패 자체를 근본 원인으로 지목하면 오답.",
+  "source": "MANUAL",
+  "alert": {
+    "alertname": "RedisStreamE2eLatencyHigh",
+    "severity": "warning",
+    "fingerprint": "golden-gen-cc-1049",
+    "summary": "Redis Stream E2E 지연 p95 > 500ms (prod-app)",
+    "description": "스트림 처리 p95 지연이 1.87s. 컨슈머 처리 적체 또는 다운스트림(App Service) 지연 가능성.",
+    "labels": {
+      "alertname": "RedisStreamE2eLatencyHigh",
+      "severity": "warning",
+      "job": "prod-app"
+    }
+  },
+  "logSamples": [
+    "[2026-08-26 09:12:41.207] [ERROR] [0bc10ef89aa8ff5d8809725879776653,12d46de4d42aa302] --- [redis-stream-thread-pool-settlement:result1] c.s.i.c.SettlementStreamConsumer : 정산 스트림 처리 중 오류가 발생했습니다.",
+    "[2026-08-26 09:12:41.318] [ERROR] [82f1ac56276db3714f433f2fa020f0e3,207b925e3490e7cc] --- [redis-stream-thread-pool-settlement:result1] c.s.i.c.SettlementStreamConsumer : 정산 처리 실패 — ACK 보류, 재전달 대기: recordId=1756172841203-0",
+    "[2026-08-26 09:13:55.884] [ERROR] [2ce7b94d12101c54655a43231db3160e,996f68c41bbe39bc] --- [redis-stream-thread-pool-settlement:result2] c.s.i.c.SettlementStreamConsumer : 정산 스트림 처리 중 오류가 발생했습니다.",
+    "[2026-08-26 09:14:02.451] [ERROR] [1e5502dc36a5cf590b93eb51dfca32f3,249df3c717b5300a] --- [redis-stream-thread-pool-settlement:result2] c.s.i.c.SettlementStreamConsumer : 정산 처리 실패 — ACK 보류, 재전달 대기: recordId=1756172892118-0",
+    "[2026-08-26 09:15:30.660] [ERROR] [,] --- [pool-2-thread-1] c.s.i.c.SettlementPendingSweeper : pending 정산 메시지 재처리 실패: recordId=1756172841203-0",
+    "[2026-08-26 09:16:30.702] [ERROR] [,] --- [pool-2-thread-1] c.s.i.c.SettlementPendingSweeper : pending 정산 메시지 재처리 실패: recordId=1756172892118-0",
+    "[2026-08-26 09:17:12.339] [ERROR] [7ca41f1f661770089106c557082c1085,d567f93f3b83b2ca] --- [redis-stream-thread-pool-settlement:result3] c.s.i.c.SettlementStreamConsumer : 정산 처리 실패 — ACK 보류, 재전달 대기: recordId=1756172931045-0",
+    "[2026-08-26 09:18:30.774] [ERROR] [,] --- [pool-2-thread-1] c.s.i.c.SettlementPendingSweeper : pending 정산 메시지 재처리 실패: recordId=1756172931045-0",
+    "[2026-08-26 09:19:04.512] [ERROR] [,] --- [pool-2-thread-4] c.global.outbox.OutboxEventProcessor : Outbox 이벤트 최대 재시도 초과, DEAD_LETTER 전환: id=8241, streamKey=settlement:result"
+  ],
+  "logEnvironment": "prod",
+  "expected": "예",
+  "axis": "compound-cause"
+}

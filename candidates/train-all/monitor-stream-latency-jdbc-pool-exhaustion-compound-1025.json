@@ -1,0 +1,32 @@
+{
+  "name": "monitor-stream-latency-jdbc-pool-exhaustion-compound-1025",
+  "question": "알림 RedisStreamE2eLatencyHigh(warning)가 prod에서 발화했다 - Redis Stream E2E 지연 p95가 임계 500ms를 넘겼다. 봇에는 최근 30분 ERROR 로그 샘플 9줄(JDBC 커넥션 확보 실패가 먼저 발생하고 뒤이어 카드게임 선택 이벤트 처리가 실패한 내용)이 주어졌다.",
+  "rubric": "주어진 ERROR 로그는 16:02부터 여러 HTTP 요청이 JDBCConnectionException(Unable to acquire JDBC Connection)으로 실패한 뒤, 약 1분 후부터 cardgame:select 스트림 컨슈머(SelectCardCommandEventConsumer)의 이벤트 처리 실패와 스트림 처리 오류가 이어졌음을 보여준다. '근거 발견: 예'로 판정하고 DB 커넥션 확보 실패(커넥션 풀 고갈 또는 MySQL 장애)를 근본 원인으로, cardgame:select 스트림 컨슈머의 처리 실패와 재전달로 인한 E2E 지연을 그 파급 증상으로 구분해 가설을 제시하면 정답. '근거 발견: 아니오'로 판정하거나 근본/파급을 뒤집어 스트림 컨슈머 로직 자체나 Redis 장애를 근본 원인으로 지목하면 오답.",
+  "source": "MANUAL",
+  "alert": {
+    "alertname": "RedisStreamE2eLatencyHigh",
+    "severity": "warning",
+    "fingerprint": "golden-gen-cc-1025",
+    "summary": "Redis Stream E2E 지연 p95 > 500ms (prod-app)",
+    "description": "스트림 처리 p95 지연이 3.7s. 컨슈머 처리 적체 또는 다운스트림(App Service) 지연 가능성.",
+    "labels": {
+      "alertname": "RedisStreamE2eLatencyHigh",
+      "severity": "warning",
+      "job": "prod-app"
+    }
+  },
+  "logSamples": [
+    "[2026-08-26 16:02:11.348] [ERROR] [f1294643c253163241cf73ef38178393,49bfeb585d57edbf] --- [http-nio-8080-exec-11] c.web.exception.RestExceptionHandler : method=POST uri=/rooms exception=JDBCConnectionException message=Unable to acquire JDBC Connection",
+    "[2026-08-26 16:02:44.902] [ERROR] [e3c24bd7f0df90507ef590d838351591,e7e94e0b3b083bcd] --- [http-nio-8080-exec-04] c.web.exception.RestExceptionHandler : method=GET uri=/rooms/K7DP/settings exception=JDBCConnectionException message=Unable to acquire JDBC Connection",
+    "[2026-08-26 16:03:20.517] [ERROR] [a025f7735986e93eb0d45770d84f7e6a,f6211683043f3af6] --- [http-nio-8080-exec-18] c.web.exception.RestExceptionHandler : method=GET uri=/rooms/K7DP/probabilities exception=JDBCConnectionException message=Unable to acquire JDBC Connection",
+    "[2026-08-26 16:03:58.771] [ERROR] [b2897441d53bc6de252ad7275ac03d1e,32f6029125445248] --- [redis-stream-thread-pool-cardgame:select1] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=SelectCardCommandEventConsumer, message=SelectCardCommandEvent[joinCode=K7DP, playerName=지우, cardIndex=3]",
+    "[2026-08-26 16:04:35.226] [ERROR] [6fc5152634139a0213f3d1ae8499944e,2a77bfe662ecbc1b] --- [redis-stream-thread-pool-cardgame:select2] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=SelectCardCommandEventConsumer, message=SelectCardCommandEvent[joinCode=K7DP, playerName=서윤, cardIndex=7]",
+    "[2026-08-26 16:05:12.884] [ERROR] [84fc4d6538eefafa2ff3d80e7a837a06,0ceecade5cd0fdef] --- [redis-stream-thread-pool-cardgame:select1] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=SelectCardCommandEventConsumer, message=SelectCardCommandEvent[joinCode=B9RT, playerName=하준, cardIndex=1]",
+    "[2026-08-26 16:06:03.457] [ERROR] [96b07dcdd4b5418013ab3daf39cdf2ec,5d30188f656636a3] --- [redis-stream-thread-pool-cardgame:select3] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=SelectCardCommandEventConsumer, message=SelectCardCommandEvent[joinCode=B9RT, playerName=민재, cardIndex=5]",
+    "[2026-08-26 16:06:49.130] [ERROR] [958619af8cde12c420bf5810c3fa677e,69b4314a70f03be6] --- [redis-stream-thread-pool-cardgame:select2] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=SelectCardCommandEventConsumer, message=SelectCardCommandEvent[joinCode=K7DP, playerName=수아, cardIndex=2]",
+    "[2026-08-26 16:07:31.695] [ERROR] [014565f72752fea7217252fbf6c2e400,e0c3f152b0e34bf1] --- [redis-stream-thread-pool-cardgame:select1] c.g.r.c.RedisStreamListenerStarter : Redis Stream 처리 중 오류가 발생했습니다."
+  ],
+  "logEnvironment": "prod",
+  "expected": "예",
+  "axis": "compound-cause"
+}

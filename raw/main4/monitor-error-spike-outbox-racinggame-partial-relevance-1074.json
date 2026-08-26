@@ -1,0 +1,31 @@
+{
+  "name": "monitor-error-spike-outbox-racinggame-partial-relevance-1074",
+  "question": "알림 AppErrorLogSpike(warning)가 prod에서 발화했다 - 최근 5분 ERROR 로그가 임계 30건을 넘었다. 봇에는 최근 30분 ERROR 로그 샘플 8줄(Outbox DEAD_LETTER 전환 밀집과 그와 무관한 산발 에러)이 주어졌다.",
+  "rubric": "주어진 ERROR 로그 중 15:18:07부터 15:20:57까지 약 3분 구간에 pool-2-thread-1 스레드에서 OutboxEventProcessor가 기록한 'Outbox 이벤트 최대 재시도 초과, DEAD_LETTER 전환' 5건(모두 streamKey=racinggame, id=9137, 9142, 9151, 9163, 9178)이 알림과 직접 관련된 근거이고, 15:02:19의 RoomEventWaitManager 방 이벤트 자동 정리 (실패) 1건, 15:27:35의 OracleObjectStorageService QR 코드 업로드 실패 1건, 15:31:02의 GameTaskSchedulerFactory [speedtouch] 스케줄 예외 1건은 outbox 발행 경로와 무관한 산발 에러다. '근거 발견: 예'로 판정하고 racinggame 스트림으로의 outbox 이벤트 발행이 반복 실패해 재시도 한도를 넘기면서 ERROR 로그가 급증했다는 가설을 제시하면 정답. '근거 발견: 아니오'로 판정하거나, 무관한 방 이벤트 자동 정리 실패나 QR 코드 업로드 실패, speedtouch 스케줄 예외를 급증의 원인으로 지목하면 오답.",
+  "source": "MANUAL",
+  "alert": {
+    "alertname": "AppErrorLogSpike",
+    "severity": "warning",
+    "fingerprint": "golden-gen-pr-1074",
+    "summary": "ERROR 로그 급증(최근 5분, prod-app)",
+    "description": "ERROR 로그가 37건(임계 30/5m)입니다. zzol-bot이 근본원인을 분석합니다.",
+    "labels": {
+      "alertname": "AppErrorLogSpike",
+      "severity": "warning",
+      "job": "prod-app"
+    }
+  },
+  "logSamples": [
+    "[2026-08-26 15:02:19.774] [ERROR] [,] --- [pool-6-thread-3] c.r.i.messaging.RoomEventWaitManager : 방 이벤트 자동 정리 (실패): eventId=e8a057ca-70d3-4be2-b9b9-752cc018f450",
+    "[2026-08-26 15:18:07.221] [ERROR] [,] --- [pool-2-thread-1] c.global.outbox.OutboxEventProcessor : Outbox 이벤트 최대 재시도 초과, DEAD_LETTER 전환: id=9137, streamKey=racinggame",
+    "[2026-08-26 15:18:44.503] [ERROR] [,] --- [pool-2-thread-1] c.global.outbox.OutboxEventProcessor : Outbox 이벤트 최대 재시도 초과, DEAD_LETTER 전환: id=9142, streamKey=racinggame",
+    "[2026-08-26 15:19:26.918] [ERROR] [,] --- [pool-2-thread-1] c.global.outbox.OutboxEventProcessor : Outbox 이벤트 최대 재시도 초과, DEAD_LETTER 전환: id=9151, streamKey=racinggame",
+    "[2026-08-26 15:20:11.337] [ERROR] [,] --- [pool-2-thread-1] c.global.outbox.OutboxEventProcessor : Outbox 이벤트 최대 재시도 초과, DEAD_LETTER 전환: id=9163, streamKey=racinggame",
+    "[2026-08-26 15:20:57.664] [ERROR] [,] --- [pool-2-thread-1] c.global.outbox.OutboxEventProcessor : Outbox 이벤트 최대 재시도 초과, DEAD_LETTER 전환: id=9178, streamKey=racinggame",
+    "[2026-08-26 15:27:35.109] [ERROR] [f907834c232e2f854ffb8c2d13612630,55823dad4d443404] --- [] c.r.infra.OracleObjectStorageService : Oracle Object Storage QR 코드 업로드 실패: contents=https://zzol.site/rooms/W6PK, error=SdkClientException: Unable to execute HTTP request: connect timed out",
+    "[2026-08-26 15:31:02.845] [ERROR] [,] --- [speedtouch-task-1] c.g.s.GameTaskSchedulerFactory : [speedtouch] 스케줄 실행 중 예외가 발생했습니다."
+  ],
+  "logEnvironment": "prod",
+  "expected": "예",
+  "axis": "partial-relevance"
+}

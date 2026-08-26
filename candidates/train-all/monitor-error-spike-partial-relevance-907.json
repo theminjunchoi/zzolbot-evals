@@ -1,0 +1,32 @@
+{
+  "name": "monitor-error-spike-partial-relevance-907",
+  "question": "알림 AppErrorLogSpike(warning)가 prod에서 발화했다 - 최근 5분 ERROR 로그가 임계 30건을 초과. 봇에는 최근 30분 ERROR 로그 샘플 9줄(밀집한 정산 스트림 처리 실패와 앞뒤로 흩어진 QR, HTTP 요청 오류)이 주어졌다.",
+  "rubric": "주어진 ERROR 로그에서 알림 직전 약 4분 구간에 밀집한 여섯 줄은 settlement:result 스트림의 정산 처리가 ACK 보류 상태로 계속 실패하고 pending 스윕 재처리까지 같은 recordId에서 반복 실패하는 내용이라 ERROR 건수 급증의 직접 근거이고, 그 앞뒤로 한 줄씩 떨어져 있는 QR 코드 업로드/생성 실패와 /rooms/nickname/random 요청 실패는 정산 스트림과 무관한 산발적 배경 오류다. '근거 발견: 예'로 판정하고 밀집한 정산 스트림 처리 실패와 pending 재처리 실패의 반복(재전달 루프)을 ERROR 급증의 근본 원인 가설로 제시하면 정답. '근거 발견: 아니오'로 판정하거나, QR 코드 실패 또는 닉네임 조회 요청 실패를 급증의 원인으로 지목하면 오답.",
+  "source": "MANUAL",
+  "alert": {
+    "alertname": "AppErrorLogSpike",
+    "severity": "warning",
+    "fingerprint": "golden-gen-pr-907",
+    "summary": "ERROR 로그 급증(최근 5분, prod-app)",
+    "description": "ERROR 로그가 74건(임계 30/5m)입니다. zzol-bot이 근본원인을 분석합니다.",
+    "labels": {
+      "alertname": "AppErrorLogSpike",
+      "severity": "warning",
+      "job": "prod-app"
+    }
+  },
+  "logSamples": [
+    "[2026-08-26 16:04:33.117] [ERROR] [,] --- [] c.r.infra.OracleObjectStorageService : Oracle Object Storage QR 코드 업로드 실패: contents=qr/9TB2.png, error=Connection reset by peer",
+    "[2026-08-26 16:11:58.492] [ERROR] [7ccd37e2743046217b6b5c51bc717e56,9756fe818a4795f0] --- [http-nio-8080-exec-06] c.web.exception.RestExceptionHandler : method=GET uri=/rooms/nickname/random exception=IllegalStateException message=nickname pool exhausted",
+    "[2026-08-26 16:22:07.845] [ERROR] [14910ef3b4045581e0c94e7fcc7b4f0c,57597f39bfef6c1e] --- [redis-stream-thread-pool-settlement:result1] c.s.i.c.SettlementStreamConsumer : 정산 처리 실패 — ACK 보류, 재전달 대기: recordId=1787759527612-0",
+    "[2026-08-26 16:22:39.203] [ERROR] [7a740e990cd4af0bf365bd0f33f47d09,e1ae40a256c81ee2] --- [redis-stream-thread-pool-settlement:result2] c.s.i.c.SettlementStreamConsumer : 정산 처리 실패 — ACK 보류, 재전달 대기: recordId=1787759559041-0",
+    "[2026-08-26 16:23:14.660] [ERROR] [bbe4747481cc2ebb236bfc7923337e33,f7e460a069296408] --- [redis-stream-thread-pool-settlement:result1] c.s.i.c.SettlementStreamConsumer : 정산 스트림 처리 중 오류가 발생했습니다.",
+    "[2026-08-26 16:23:52.318] [ERROR] [,] --- [pool-2-thread-1] c.s.i.c.SettlementPendingSweeper : pending 정산 메시지 재처리 실패: recordId=1787759527612-0",
+    "[2026-08-26 16:24:35.907] [ERROR] [3ebeabc866df174dece510087e353da9,8b60194e55cc756f] --- [redis-stream-thread-pool-settlement:result2] c.s.i.c.SettlementStreamConsumer : 정산 처리 실패 — ACK 보류, 재전달 대기: recordId=1787759527612-0",
+    "[2026-08-26 16:25:41.284] [ERROR] [,] --- [pool-2-thread-1] c.s.i.c.SettlementPendingSweeper : pending 정산 메시지 재처리 실패: recordId=1787759559041-0",
+    "[2026-08-26 16:27:19.556] [ERROR] [,] --- [] c.r.application.service.QrCodeService : QR 코드 생성 실패: joinCode=3XQD, error=Object Storage 업로드 실패"
+  ],
+  "logEnvironment": "prod",
+  "expected": "예",
+  "axis": "partial-relevance"
+}

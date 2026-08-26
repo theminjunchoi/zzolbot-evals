@@ -1,0 +1,31 @@
+{
+  "name": "monitor-stream-latency-laddergame-scheduler-compound-1051",
+  "question": "알림 RedisStreamE2eLatencyHigh(warning)가 prod에서 발화했다 - Redis Stream E2E 지연 p95가 500ms를 초과했다. 봇에는 최근 30분 ERROR 로그 샘플 8줄(사다리게임 스케줄 태스크 예외와 그에 뒤따른 사다리 커맨드 이벤트 처리 실패)이 주어졌다.",
+  "rubric": "주어진 ERROR 로그는 GameTaskSchedulerFactory의 [laddergame] 스케줄 실행이 2회 예외로 끝나고 같은 시각 TaskUtils$LoggingErrorHandler가 2회 스케줄 태스크 예외를 기록한 뒤, laddergame 스트림 스레드에서 EventDispatcher의 consumer=LadderDrawCommandEventConsumer 이벤트 처리 실패가 3회, RedisStreamListenerStarter의 스트림 처리 오류가 1회 이어진 내용으로, 사다리게임 스케줄 태스크의 반복 예외가 근본 원인이고 사다리 커맨드 이벤트 처리 실패와 스트림 처리 오류는 그 파급 증상이다. '근거 발견: 예'로 판정하고 laddergame 스케줄 태스크 예외를 근본 원인으로, LadderDrawCommandEventConsumer 처리 실패와 스트림 처리 오류를 파급 증상으로 구분해 가설을 제시하면 정답. '근거 발견: 아니오'로 판정하거나 이벤트 컨슈머 자체 또는 Redis 연결을 근본 원인으로 단정하면 오답.",
+  "source": "MANUAL",
+  "alert": {
+    "alertname": "RedisStreamE2eLatencyHigh",
+    "severity": "warning",
+    "fingerprint": "golden-gen-cc-1051",
+    "summary": "Redis Stream E2E 지연 p95 > 500ms (prod-app)",
+    "description": "스트림 처리 p95 지연이 2.43s. 컨슈머 처리 적체 또는 다운스트림(App Service) 지연 가능성.",
+    "labels": {
+      "alertname": "RedisStreamE2eLatencyHigh",
+      "severity": "warning",
+      "job": "prod-app"
+    }
+  },
+  "logSamples": [
+    "[2026-08-26 20:57:03.221] [ERROR] [,] --- [laddergame-task-1] c.g.s.GameTaskSchedulerFactory : [laddergame] 스케줄 실행 중 예외가 발생했습니다.",
+    "[2026-08-26 20:57:03.238] [ERROR] [,] --- [pool-4-thread-2] o.s.s.s.TaskUtils$LoggingErrorHandler : Unexpected error occurred in scheduled task",
+    "[2026-08-26 20:58:11.470] [ERROR] [f2dae59564106d76b96858d21c223a77,c83f58ef9371ac5a] --- [redis-stream-thread-pool-laddergame1] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=LadderDrawCommandEventConsumer, message=LadderDrawCommandEvent[joinCode=Q4LT, playerName=도리, eventId=752cdf98-fdbc-40b8-bbb0-32635a95e4f2]",
+    "[2026-08-26 20:58:44.905] [ERROR] [,] --- [laddergame-task-2] c.g.s.GameTaskSchedulerFactory : [laddergame] 스케줄 실행 중 예외가 발생했습니다.",
+    "[2026-08-26 20:58:44.921] [ERROR] [,] --- [pool-4-thread-2] o.s.s.s.TaskUtils$LoggingErrorHandler : Unexpected error occurred in scheduled task",
+    "[2026-08-26 20:59:32.618] [ERROR] [e5f7563ab0e728dc5cc13baf20236cd9,ffeec0eb6c600ac7] --- [redis-stream-thread-pool-laddergame2] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=LadderDrawCommandEventConsumer, message=LadderDrawCommandEvent[joinCode=Q4LT, playerName=제이, eventId=a4e8a2b5-1474-4671-bf69-08d1a227acee]",
+    "[2026-08-26 21:00:16.284] [ERROR] [c1e485c1b693ffe5b88007a43b7fef8a,85e0287c7b5e3425] --- [redis-stream-thread-pool-laddergame1] c.g.r.c.RedisStreamListenerStarter : Redis Stream 처리 중 오류가 발생했습니다.",
+    "[2026-08-26 21:01:05.733] [ERROR] [9c0bd1fb4c377ef7fd7c876b786ef716,d0fd85b3c6ef3979] --- [redis-stream-thread-pool-laddergame2] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=LadderDrawCommandEventConsumer, message=LadderDrawCommandEvent[joinCode=D8HN, playerName=배키, eventId=81a1e6b2-d764-474e-a957-aee305cc9a71]"
+  ],
+  "logEnvironment": "prod",
+  "expected": "예",
+  "axis": "compound-cause"
+}

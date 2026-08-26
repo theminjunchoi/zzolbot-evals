@@ -1,0 +1,31 @@
+{
+  "name": "monitor-stream-backlog-room-join-dense-1028",
+  "question": "알림 RedisStreamBacklogHigh(warning)가 prod에서 발화했다 - room:join 스트림 길이가 임계 1000을 넘겨 적체됐다. 봇에는 최근 30분 ERROR 로그 샘플 8줄(약 4분 사이 room:join 스트림에 밀집된 방 참가 이벤트 처리 실패)이 주어졌다.",
+  "rubric": "주어진 ERROR 로그는 알림 시각과 정합하는 약 4분의 좁은 창에 room:join 스트림 컨슈머 스레드(redis-stream-thread-pool-room:join1~3)에서 RoomJoinConsumer의 이벤트 처리 실패 5건과 같은 eventId에 대한 RoomService의 방 참가 비동기 처리 실패 3건이 짝을 이루어 밀집 반복됨을 보여준다. '근거 발견: 예'로 판정하고 방 참가 비동기 처리 실패로 room:join 이벤트가 소비되지 못하고 재전달, 적체된 것을 원인 가설로 제시하면 정답. '근거 발견: 아니오'로 판정하거나 로그가 알림과 무관하다고 하거나 게임 스트림, 정산 스트림을 원인으로 지목하면 오답.",
+  "source": "MANUAL",
+  "alert": {
+    "alertname": "RedisStreamBacklogHigh",
+    "severity": "warning",
+    "fingerprint": "golden-gen-pd-1028",
+    "summary": "Redis Stream 적체 (length > 1000, prod-app)",
+    "description": "스트림 길이가 5120. 컨슈머 처리 속도가 발행을 못 따라가고 있습니다.",
+    "labels": {
+      "alertname": "RedisStreamBacklogHigh",
+      "severity": "warning",
+      "job": "prod-app"
+    }
+  },
+  "logSamples": [
+    "[2026-08-26 12:31:08.442] [ERROR] [a1146a58c6a6505011970d856d0195d4,d9f3f60e398aa210] --- [redis-stream-thread-pool-room:join1] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=RoomJoinConsumer, message=RoomJoinEvent[eventId=80f8ec9d-b215-432d-b586-3c4da965cb68, joinCode=T6VX, playerName=현우]",
+    "[2026-08-26 12:31:33.905] [ERROR] [c82fc3cb5fcf1a4648a1b21d14f8e980,b9796f979dcd167e] --- [redis-stream-thread-pool-room:join1] c.r.application.service.RoomService : 방 참가 비동기 처리 실패: eventId=80f8ec9d-b215-432d-b586-3c4da965cb68, joinCode=T6VX, playerName=현우",
+    "[2026-08-26 12:32:01.377] [ERROR] [390e672bbbdf8542d48682cc1b2bbef1,bcecaa6962dc6f0a] --- [redis-stream-thread-pool-room:join2] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=RoomJoinConsumer, message=RoomJoinEvent[eventId=c786cb5e-afd2-49a7-94bd-bd927ab5ae07, joinCode=T6VX, playerName=서아]",
+    "[2026-08-26 12:32:29.814] [ERROR] [4379d686c1e49564e1caf7e8b2ecffed,ced3a4d631ae5d24] --- [redis-stream-thread-pool-room:join2] c.r.application.service.RoomService : 방 참가 비동기 처리 실패: eventId=c786cb5e-afd2-49a7-94bd-bd927ab5ae07, joinCode=T6VX, playerName=서아",
+    "[2026-08-26 12:33:12.260] [ERROR] [f7ae982b3efc55601af136743061b8b3,905222c121708a7e] --- [redis-stream-thread-pool-room:join1] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=RoomJoinConsumer, message=RoomJoinEvent[eventId=08ad2d50-ef74-4290-82c2-ba245264f493, joinCode=N2KB, playerName=도현]",
+    "[2026-08-26 12:33:47.638] [ERROR] [95c445332153d3def1565c045cb1f824,ccf76251900179b9] --- [redis-stream-thread-pool-room:join3] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=RoomJoinConsumer, message=RoomJoinEvent[eventId=08e49a3e-d827-49a0-ae6c-4b07d7c78812, joinCode=N2KB, playerName=예나]",
+    "[2026-08-26 12:34:20.093] [ERROR] [d658f57b8f4454c153b15113519ce9c0,0be71394467619be] --- [redis-stream-thread-pool-room:join3] c.r.application.service.RoomService : 방 참가 비동기 처리 실패: eventId=08e49a3e-d827-49a0-ae6c-4b07d7c78812, joinCode=N2KB, playerName=예나",
+    "[2026-08-26 12:34:58.571] [ERROR] [f4d9ca91c30976828d4c6aadfb5b6d86,231a96a766fc1a17] --- [redis-stream-thread-pool-room:join2] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=RoomJoinConsumer, message=RoomJoinEvent[eventId=432113eb-247d-4706-94a2-fb72da51fe48, joinCode=T6VX, playerName=우진]"
+  ],
+  "logEnvironment": "prod",
+  "expected": "예",
+  "axis": "positive-dense"
+}

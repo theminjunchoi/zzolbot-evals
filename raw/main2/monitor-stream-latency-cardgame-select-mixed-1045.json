@@ -1,0 +1,31 @@
+{
+ "name": "monitor-stream-latency-cardgame-select-mixed-1045",
+ "question": "알림 RedisStreamE2eLatencyHigh(warning)가 prod에서 발화했다 - 스트림 E2E 처리 p95가 500ms를 넘었다. 봇에는 최근 30분 ERROR 로그 샘플 8줄(카드 선택 스트림의 밀집 실패와 그 사이에 섞인 무관한 산발 오류)이 주어졌다.",
+ "rubric": "관련 로그는 알림 발화 직전 약 3분 동안 cardgame:select 스트림에서 SelectCardCommandEventConsumer의 이벤트 처리가 밀집 반복 실패하고 해당 리스너도 오류를 낸 부분이며, Oracle Object Storage Public URL 생성 실패와 laddergame, racinggame 스케줄 실행 예외는 스트림 지연과 무관한 산발 오류다. '근거 발견: 예'로 판정하고 cardgame:select 컨슈머의 반복 실패와 재전달을 지연 상승의 원인 가설로 제시하면 정답. '근거 발견: 아니오'로 판정하거나, 무관한 스토리지 URL 생성 실패 또는 게임 스케줄러 예외를 원인으로 끌어들이면 오답.",
+ "source": "MANUAL",
+ "alert": {
+  "alertname": "RedisStreamE2eLatencyHigh",
+  "severity": "warning",
+  "fingerprint": "golden-gen-rse-1045",
+  "summary": "Redis Stream E2E 지연 p95 > 500ms (prod-app)",
+  "description": "스트림 처리 p95 지연이 1.3s. 컨슈머 처리 적체 또는 다운스트림(App Service) 지연 가능성.",
+  "labels": {
+   "alertname": "RedisStreamE2eLatencyHigh",
+   "severity": "warning",
+   "job": "prod-app"
+  }
+ },
+ "logSamples": [
+  "[2026-08-26 15:19:52.611] [ERROR] [,] --- [] c.r.infra.OracleObjectStorageService : Oracle Object Storage Public URL 생성 실패: storageKey=qr/2026/08/26/GH40.png, error=ObjectStorageException: 404 Not Found",
+  "[2026-08-26 15:21:38.204] [ERROR] [,] --- [laddergame-task-1] c.g.s.GameTaskSchedulerFactory : [laddergame] 스케줄 실행 중 예외가 발생했습니다.",
+  "[2026-08-26 15:22:47.930] [ERROR] [6089a75d46a47a4a98db8ddfd58f075f,9b2d2291fa43a11f] --- [redis-stream-thread-pool-cardgame:select1] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=SelectCardCommandEventConsumer, message=SelectCardCommandEvent[eventId=a29539b7-bdac-4011-8546-d35f3def9bee, joinCode=RB18, playerName=코난, cardIndex=3]",
+  "[2026-08-26 15:23:19.455] [ERROR] [f7982f1c5f1930619831063b2b5c6478,f9d27a9012ec2b66] --- [redis-stream-thread-pool-cardgame:select2] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=SelectCardCommandEventConsumer, message=SelectCardCommandEvent[eventId=99a7a709-90b8-4ffd-8fb9-590b55f37f63, joinCode=RB18, playerName=미르, cardIndex=7]",
+  "[2026-08-26 15:23:58.102] [ERROR] [1659aa1cadbdd08970c1b3ffccb39430,ac83c7046d7386c6] --- [redis-stream-thread-pool-cardgame:select1] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=SelectCardCommandEventConsumer, message=SelectCardCommandEvent[eventId=93bcf9f4-1ab2-4d01-a53e-cba21c502672, joinCode=RB18, playerName=코난, cardIndex=5]",
+  "[2026-08-26 15:24:33.719] [ERROR] [3628ddf1c20606bd7096b7fad42593a6,cbad911869e2837c] --- [redis-stream-thread-pool-cardgame:select3] c.g.r.c.RedisStreamListenerStarter : Redis Stream 처리 중 오류가 발생했습니다.",
+  "[2026-08-26 15:25:11.286] [ERROR] [8a8a7ec57d01b6b2f5167cdc71e48fe0,a7092a95b827252b] --- [redis-stream-thread-pool-cardgame:select2] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=SelectCardCommandEventConsumer, message=SelectCardCommandEvent[eventId=49cafa27-ba83-47d6-bdb0-a7fe950a7531, joinCode=RB18, playerName=하루, cardIndex=2]",
+  "[2026-08-26 15:25:47.640] [ERROR] [,] --- [racinggame-task-2] c.g.s.GameTaskSchedulerFactory : [racinggame] 스케줄 실행 중 예외가 발생했습니다."
+ ],
+ "logEnvironment": "prod",
+ "expected": "예",
+ "axis": "partial-relevance"
+}

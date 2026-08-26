@@ -1,0 +1,33 @@
+{
+  "name": "monitor-stream-latency-cardgame-container-compound-1062",
+  "question": "알림 RedisStreamE2eLatencyHigh(warning)가 prod에서 발화했다 - 스트림 처리 p95 지연이 임계 500ms를 넘었다. 봇에는 최근 30분 ERROR 로그 샘플 10줄(cardgame:select 컨테이너 상태 확인과 복구 실패, 그리고 그 뒤의 리스너와 카드 선택 처리 실패)이 주어졌다.",
+  "rubric": "주어진 ERROR 로그 10줄은 22:05부터 22:10까지 RedisStreamContainerRecovery가 cardgame:select 스트림 컨테이너의 상태 확인에 2번, 복구 시도에 2번 실패하는 동안 같은 스트림에서 RedisStreamListenerStarter의 스트림 처리 오류 2건과 EventDispatcher의 SelectCardCommandEventConsumer 처리 실패 4건이 뒤따랐고, 가장 이른 두 줄이 컨테이너 상태 확인 실패라는 것을 보여준다. '근거 발견: 예'로 판정하고 cardgame:select 스트림 컨테이너의 상태 확인 및 복구 실패를 근본 원인으로, 리스너 오류와 SelectCardCommandEvent 처리 실패는 그로 인한 파급 증상으로 구분해 가설을 제시하면 정답. '근거 발견: 아니오'로 판정하거나 카드 선택 처리 실패 자체를 근본 원인으로 지목해 컨테이너 복구 실패를 파급으로 뒤집어 설명하면 오답.",
+  "source": "MANUAL",
+  "alert": {
+    "alertname": "RedisStreamE2eLatencyHigh",
+    "severity": "warning",
+    "fingerprint": "golden-gen-slcc-1062",
+    "summary": "Redis Stream E2E 지연 p95 > 500ms (prod-app)",
+    "description": "스트림 처리 p95 지연이 2.6s. 컨슈머 처리 적체 또는 다운스트림(App Service) 지연 가능성.",
+    "labels": {
+      "alertname": "RedisStreamE2eLatencyHigh",
+      "severity": "warning",
+      "job": "prod-app"
+    }
+  },
+  "logSamples": [
+    "[2026-08-26 22:05:11.204] [ERROR] [,] --- [pool-1-thread-3] c.g.h.RedisStreamContainerRecovery : Redis Stream container 상태 확인 중 예외: stream=cardgame:select",
+    "[2026-08-26 22:05:41.658] [ERROR] [,] --- [pool-1-thread-3] c.g.h.RedisStreamContainerRecovery : Redis Stream container 상태 확인 중 예외: stream=cardgame:select",
+    "[2026-08-26 22:06:12.093] [ERROR] [,] --- [pool-1-thread-3] c.g.h.RedisStreamContainerRecovery : Redis Stream container 복구 중 예외 발생: stream=cardgame:select",
+    "[2026-08-26 22:06:47.529] [ERROR] [6611784005df5753882764c16988a9fb,4f74687fd4382d6d] --- [redis-stream-thread-pool-cardgame:select1] c.g.r.c.RedisStreamListenerStarter : Redis Stream 처리 중 오류가 발생했습니다.",
+    "[2026-08-26 22:07:20.966] [ERROR] [076cd463df4b19d798961ff135756bdd,7015491ba8f3f5ee] --- [redis-stream-thread-pool-cardgame:select2] c.g.r.c.RedisStreamListenerStarter : Redis Stream 처리 중 오류가 발생했습니다.",
+    "[2026-08-26 22:07:55.401] [ERROR] [19403cd87f664bf84d052f23470869f5,731d0d92e31f8643] --- [redis-stream-thread-pool-cardgame:select1] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=SelectCardCommandEventConsumer, message=SelectCardCommandEvent[joinCode=P7QD, playerName=은우, cardIndex=2, eventId=1b5b7c5b-515f-4abf-a789-0aad621991da]",
+    "[2026-08-26 22:08:29.847] [ERROR] [8d432827a9ec426178087e210db925df,ba2c2209b747b98b] --- [redis-stream-thread-pool-cardgame:select2] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=SelectCardCommandEventConsumer, message=SelectCardCommandEvent[joinCode=P7QD, playerName=나윤, cardIndex=5, eventId=6d01a832-5408-415b-af2f-56ec8e61e9f0]",
+    "[2026-08-26 22:09:03.282] [ERROR] [,] --- [pool-1-thread-3] c.g.h.RedisStreamContainerRecovery : Redis Stream container 복구 중 예외 발생: stream=cardgame:select",
+    "[2026-08-26 22:09:37.715] [ERROR] [e86b59288e1930891c387e96740614e2,9669ef008d469e4d] --- [redis-stream-thread-pool-cardgame:select1] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=SelectCardCommandEventConsumer, message=SelectCardCommandEvent[joinCode=M3VF, playerName=은우, cardIndex=1, eventId=46aceea7-9223-4a9b-bccb-af306c517317]",
+    "[2026-08-26 22:10:11.150] [ERROR] [5381814e5ffe2ddc4fe00619d0cb9188,1e524cd54925d1a6] --- [redis-stream-thread-pool-cardgame:select2] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=SelectCardCommandEventConsumer, message=SelectCardCommandEvent[joinCode=M3VF, playerName=태오, cardIndex=4, eventId=8b6a02b6-59e7-44cc-86a6-0e71e06ee3b6]"
+  ],
+  "logEnvironment": "prod",
+  "expected": "예",
+  "axis": "compound-cause"
+}

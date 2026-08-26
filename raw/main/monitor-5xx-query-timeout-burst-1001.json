@@ -1,0 +1,33 @@
+{
+ "name": "monitor-5xx-query-timeout-burst-1001",
+ "question": "알림 Http5xxRatioHigh(critical)가 prod에서 발화했다 - 최근 5분 5xx 비율 5% 초과. 봇에는 최근 30분 ERROR 로그 샘플 10줄(여러 엔드포인트에서 반복된 쿼리 타임아웃 실패)이 주어졌다.",
+ "rubric": "주어진 ERROR 로그는 알림 직전 약 4분 사이에 /rooms, /rooms/check-joinCode, /rooms/check-guestName, /rooms/B4XN/probabilities, /rooms/B4XN/settings 등 서로 다른 엔드포인트가 모두 동일한 QueryTimeoutException(Statement cancelled due to timeout or client request)으로 실패했고 방 참가 비동기 처리까지 같은 구간에 실패한 내용으로, 특정 기능이 아니라 DB 질의 응답 지연이 광범위한 5xx를 만든 직접 근거다. '근거 발견: 예'로 판정하고 반복되는 QueryTimeoutException을 인용해 DB 쿼리 타임아웃(슬로우 쿼리 또는 DB 부하)을 근본 원인 가설로 제시하면 정답. '근거 발견: 아니오'로 판정하거나, 5xx 발생 사실만 되풀이하고 공통 예외를 짚지 못하거나, Redis Stream 적체나 게임 로직처럼 로그에 없는 원인을 지목하면 오답.",
+ "source": "MANUAL",
+ "alert": {
+  "alertname": "Http5xxRatioHigh",
+  "severity": "critical",
+  "fingerprint": "golden-gen-5xx-1001",
+  "summary": "HTTP 5xx 비율 5% 초과 (prod-app)",
+  "description": "최근 5분 5xx 비율이 6.9%. 서버 측 광범위 실패 가능성.",
+  "labels": {
+   "alertname": "Http5xxRatioHigh",
+   "severity": "critical",
+   "job": "prod-app"
+  }
+ },
+ "logSamples": [
+  "[2026-08-26 10:42:36.114] [ERROR] [12e41df6878d7309bc34ed039d5303e2,4f3613ebd738491d] --- [http-nio-8080-exec-19] c.web.exception.RestExceptionHandler : method=POST uri=/rooms exception=QueryTimeoutException message=Statement cancelled due to timeout or client request",
+  "[2026-08-26 10:43:02.487] [ERROR] [b75ab14d12cfdfb4fa8601134c2c43ba,10a1e4b2ee5087c3] --- [http-nio-8080-exec-27] c.web.exception.RestExceptionHandler : method=GET uri=/rooms/check-joinCode exception=QueryTimeoutException message=Statement cancelled due to timeout or client request",
+  "[2026-08-26 10:43:31.902] [ERROR] [923feebfe7c1f0fc4bc49fa1484857cb,7607fac1c2724f4e] --- [http-nio-8080-exec-04] c.web.exception.RestExceptionHandler : method=GET uri=/rooms/B4XN/probabilities exception=QueryTimeoutException message=Statement cancelled due to timeout or client request",
+  "[2026-08-26 10:44:08.255] [ERROR] [7afdf8a04064cb66683c704ac5fb77e1,04080197073d046e] --- [http-nio-8080-exec-33] c.web.exception.RestExceptionHandler : method=POST uri=/rooms exception=QueryTimeoutException message=Statement cancelled due to timeout or client request",
+  "[2026-08-26 10:44:47.613] [ERROR] [cf7b8cb02d3bedb827f6410fc1d943c3,19a884aac4740dc6] --- [http-nio-8080-exec-11] c.web.exception.RestExceptionHandler : method=PATCH uri=/rooms/B4XN/settings exception=QueryTimeoutException message=Statement cancelled due to timeout or client request",
+  "[2026-08-26 10:45:19.078] [ERROR] [a6bb9a9fc575a56f3093bf96afadd1eb,301e37de18515246] --- [http-nio-8080-exec-22] c.web.exception.RestExceptionHandler : method=GET uri=/rooms/check-guestName exception=QueryTimeoutException message=Statement cancelled due to timeout or client request",
+  "[2026-08-26 10:45:41.336] [ERROR] [7bd3353b56a183c01b7f276828abcf5a,f4f5ffa96c97317b] --- [redis-stream-thread-pool-room:join1] c.r.application.service.RoomService : 방 참가 비동기 처리 실패: eventId=4b74d138-477b-42f5-8d14-dd9623a62b2f, joinCode=B4XN, playerName=PLAYER_3",
+  "[2026-08-26 10:45:58.440] [ERROR] [7c973457fdc93140e65ac4cb63233e17,c6b6f4b9e90c358b] --- [http-nio-8080-exec-08] c.web.exception.RestExceptionHandler : method=POST uri=/rooms exception=QueryTimeoutException message=Statement cancelled due to timeout or client request",
+  "[2026-08-26 10:46:27.916] [ERROR] [1e10d12681f233dde7895899f5a11600,ca7dceb40509fb9e] --- [http-nio-8080-exec-15] c.web.exception.RestExceptionHandler : method=GET uri=/rooms/9KTD/probabilities exception=QueryTimeoutException message=Statement cancelled due to timeout or client request",
+  "[2026-08-26 10:46:59.301] [ERROR] [90eb582dc9355399ece797ea7c9db033,97d4793dc64eca12] --- [http-nio-8080-exec-30] c.web.exception.RestExceptionHandler : method=POST uri=/rooms exception=QueryTimeoutException message=Statement cancelled due to timeout or client request"
+ ],
+ "logEnvironment": "prod",
+ "expected": "예",
+ "axis": "positive-dense"
+}

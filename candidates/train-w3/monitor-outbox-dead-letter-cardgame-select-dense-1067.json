@@ -1,0 +1,31 @@
+{
+  "name": "monitor-outbox-dead-letter-cardgame-select-dense-1067",
+  "question": "알림 OutboxDeadLetterHigh(warning)가 prod에서 발화했다 - 재시도 초과로 DEAD_LETTER 전환된 outbox 이벤트가 적체됐다. 봇에는 최근 30분 ERROR 로그 샘플 8줄(cardgame:select 스트림 발행 이벤트의 DEAD_LETTER 전환이 좁은 구간에 밀집)이 주어졌다.",
+  "rubric": "주어진 ERROR 로그 8줄은 모두 OutboxEventProcessor가 pool-2-thread-1에서 기록한 'Outbox 이벤트 최대 재시도 초과, DEAD_LETTER 전환' 로그이고, streamKey가 8건 전부 cardgame:select이며 id는 50812부터 50836까지 04:12:08에서 04:15:41 사이 약 3분 30초 구간에 30초 간격으로 연속 증가한다. '근거 발견: 예'로 판정하고 cardgame:select 스트림으로의 outbox 발행이 반복 실패해 재시도가 소진되면서 DEAD_LETTER 적체가 발생했다는 가설을 제시하면 정답. '근거 발견: 아니오'로 판정하거나, cardgame:select가 아닌 다른 스트림 또는 로그에 등장하지 않는 컴포넌트를 원인으로 지목하면 오답.",
+  "source": "MANUAL",
+  "alert": {
+    "alertname": "OutboxDeadLetterHigh",
+    "severity": "warning",
+    "fingerprint": "golden-gen-pd-1067",
+    "summary": "Outbox DEAD_LETTER 적체 (> 10, prod-app)",
+    "description": "재시도 초과로 DEAD_LETTER 전환된 outbox 이벤트가 23건. 다운스트림 발행 경로 점검 필요.",
+    "labels": {
+      "alertname": "OutboxDeadLetterHigh",
+      "severity": "warning",
+      "job": "prod-app"
+    }
+  },
+  "logSamples": [
+    "[2026-08-26 04:12:08.204] [ERROR] [,] --- [pool-2-thread-1] c.global.outbox.OutboxEventProcessor : Outbox 이벤트 최대 재시도 초과, DEAD_LETTER 전환: id=50812, streamKey=cardgame:select",
+    "[2026-08-26 04:12:38.641] [ERROR] [,] --- [pool-2-thread-1] c.global.outbox.OutboxEventProcessor : Outbox 이벤트 최대 재시도 초과, DEAD_LETTER 전환: id=50815, streamKey=cardgame:select",
+    "[2026-08-26 04:13:09.117] [ERROR] [,] --- [pool-2-thread-1] c.global.outbox.OutboxEventProcessor : Outbox 이벤트 최대 재시도 초과, DEAD_LETTER 전환: id=50819, streamKey=cardgame:select",
+    "[2026-08-26 04:13:39.552] [ERROR] [,] --- [pool-2-thread-1] c.global.outbox.OutboxEventProcessor : Outbox 이벤트 최대 재시도 초과, DEAD_LETTER 전환: id=50822, streamKey=cardgame:select",
+    "[2026-08-26 04:14:10.008] [ERROR] [,] --- [pool-2-thread-1] c.global.outbox.OutboxEventProcessor : Outbox 이벤트 최대 재시도 초과, DEAD_LETTER 전환: id=50826, streamKey=cardgame:select",
+    "[2026-08-26 04:14:40.473] [ERROR] [,] --- [pool-2-thread-1] c.global.outbox.OutboxEventProcessor : Outbox 이벤트 최대 재시도 초과, DEAD_LETTER 전환: id=50829, streamKey=cardgame:select",
+    "[2026-08-26 04:15:10.926] [ERROR] [,] --- [pool-2-thread-1] c.global.outbox.OutboxEventProcessor : Outbox 이벤트 최대 재시도 초과, DEAD_LETTER 전환: id=50833, streamKey=cardgame:select",
+    "[2026-08-26 04:15:41.388] [ERROR] [,] --- [pool-2-thread-1] c.global.outbox.OutboxEventProcessor : Outbox 이벤트 최대 재시도 초과, DEAD_LETTER 전환: id=50836, streamKey=cardgame:select"
+  ],
+  "logEnvironment": "prod",
+  "expected": "예",
+  "axis": "positive-dense"
+}

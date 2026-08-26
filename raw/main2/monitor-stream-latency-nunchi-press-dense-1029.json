@@ -1,0 +1,32 @@
+{
+  "name": "monitor-stream-latency-nunchi-press-dense-1029",
+  "question": "알림 RedisStreamE2eLatencyHigh(warning)가 prod에서 발화했다 - Redis Stream E2E 지연 p95가 임계 500ms를 넘겼다. 봇에는 최근 30분 ERROR 로그 샘플 9줄(약 4분 사이 nunchi 스트림에 밀집된 press 처리 오류)이 주어졌다.",
+  "rubric": "주어진 ERROR 로그는 알림 시각과 정합하는 약 4분의 좁은 창에 nunchi 스트림 컨슈머 스레드(redis-stream-thread-pool-nunchi1~3)에서 NunchiCommandEventConsumer의 눈치게임 press 처리 오류 6건이 밀집 반복되고 같은 스레드 풀의 Redis Stream 처리 오류 3건이 섞여 있음을 보여준다. '근거 발견: 예'로 판정하고 눈치게임 press 커맨드 처리 실패와 그에 따른 재시도, 소비 지연을 E2E 지연의 원인 가설로 제시하면 정답. '근거 발견: 아니오'로 판정하거나 로그가 알림과 무관하다고 하거나 카드게임, 방 참가 등 다른 스트림을 원인으로 지목하면 오답.",
+  "source": "MANUAL",
+  "alert": {
+    "alertname": "RedisStreamE2eLatencyHigh",
+    "severity": "warning",
+    "fingerprint": "golden-gen-pd-1029",
+    "summary": "Redis Stream E2E 지연 p95 > 500ms (prod-app)",
+    "description": "스트림 처리 p95 지연이 2.9s. 컨슈머 처리 적체 또는 다운스트림(App Service) 지연 가능성.",
+    "labels": {
+      "alertname": "RedisStreamE2eLatencyHigh",
+      "severity": "warning",
+      "job": "prod-app"
+    }
+  },
+  "logSamples": [
+    "[2026-08-26 18:22:06.331] [ERROR] [84846d76b7afb6afd44f41874849cf11,ca0e05e5e239a403] --- [redis-stream-thread-pool-nunchi1] c.n.i.m.c.NunchiCommandEventConsumer : 눈치게임 press 처리 중 오류: joinCode=F9LM, playerName=아린, eventId=8fe2de9a-7920-4a34-baed-3ea151451bce",
+    "[2026-08-26 18:22:35.774] [ERROR] [6c3fb68a3feb5a29dfae620904efb149,e730ccb26f7057df] --- [redis-stream-thread-pool-nunchi2] c.n.i.m.c.NunchiCommandEventConsumer : 눈치게임 press 처리 중 오류: joinCode=F9LM, playerName=준서, eventId=a9ce6d1d-bbda-4976-9d4c-43cfaa0b4cfb",
+    "[2026-08-26 18:23:02.918] [ERROR] [25c3c93acb272cb4076463d9c8421789,300b58b35c5b695a] --- [redis-stream-thread-pool-nunchi2] c.g.r.c.RedisStreamListenerStarter : Redis Stream 처리 중 오류가 발생했습니다.",
+    "[2026-08-26 18:23:31.405] [ERROR] [52eb4a58f20962e3dd0fca69d6c14db5,0a7ef9377598eb73] --- [redis-stream-thread-pool-nunchi3] c.n.i.m.c.NunchiCommandEventConsumer : 눈치게임 press 처리 중 오류: joinCode=R3WD, playerName=하윤, eventId=7781ae42-b3a3-4bf9-a6bb-ea5f119c5acf",
+    "[2026-08-26 18:24:09.862] [ERROR] [aa40d8323409bea0d3daef577090f450,6f91fb5313bf82bf] --- [redis-stream-thread-pool-nunchi1] c.n.i.m.c.NunchiCommandEventConsumer : 눈치게임 press 처리 중 오류: joinCode=R3WD, playerName=지훈, eventId=f7e5625f-20ce-48e4-84a8-bc6151fa9007",
+    "[2026-08-26 18:24:44.237] [ERROR] [3d25e94fb93fdfa267fc78a8d155d914,2f1148bac89d8c57] --- [redis-stream-thread-pool-nunchi3] c.g.r.c.RedisStreamListenerStarter : Redis Stream 처리 중 오류가 발생했습니다.",
+    "[2026-08-26 18:25:18.690] [ERROR] [31aa832db19a17f03f48eeb89b5369b5,e56f4dcacc3eeadc] --- [redis-stream-thread-pool-nunchi2] c.n.i.m.c.NunchiCommandEventConsumer : 눈치게임 press 처리 중 오류: joinCode=F9LM, playerName=서진, eventId=32226a5f-4f63-475d-b62f-5c81eab8a581",
+    "[2026-08-26 18:25:52.146] [ERROR] [abab06130c8c2a77bcbc7b011f5259e1,d24342bea44c68f9] --- [redis-stream-thread-pool-nunchi1] c.n.i.m.c.NunchiCommandEventConsumer : 눈치게임 press 처리 중 오류: joinCode=R3WD, playerName=아린, eventId=744b0769-004c-46bc-8617-15c3257dc7ac",
+    "[2026-08-26 18:26:20.583] [ERROR] [bf7078072e136cd2fd1d68595503b77c,c7ad1b424157f7a1] --- [redis-stream-thread-pool-nunchi3] c.g.r.c.RedisStreamListenerStarter : Redis Stream 처리 중 오류가 발생했습니다."
+  ],
+  "logEnvironment": "prod",
+  "expected": "예",
+  "axis": "positive-dense"
+}

@@ -1,0 +1,32 @@
+{
+  "name": "monitor-stream-latency-stop-command-partial-1072",
+  "question": "알림 RedisStreamE2eLatencyHigh(warning)가 prod에서 발화했다 - Redis Stream E2E 지연 p95가 500ms를 넘었다. 봇에는 최근 30분 ERROR 로그 샘플 9줄(스톱 커맨드 이벤트 처리 실패 밀집과 그와 무관한 산발 에러)이 주어졌다.",
+  "rubric": "주어진 ERROR 로그 중 11:58:12부터 12:01:40까지 약 3분 30초 구간에 redis-stream-thread-pool-concurrent1, redis-stream-thread-pool-concurrent2, redis-stream-thread-pool-concurrent3 스레드에서 EventDispatcher가 기록한 '이벤트 처리 실패: consumer=StopCommandEventConsumer, message=StopCommandEvent' 6건(joinCode=J6XT 3건, joinCode=P4VG 3건)이 알림과 직접 관련된 근거이고, 11:52:31과 12:09:04의 OracleObjectStorageService QR 코드 업로드 실패 2건과 11:52:31의 QrCodeService QR 코드 생성 실패 1건은 스트림 소비 경로와 무관한 산발 에러다. '근거 발견: 예'로 판정하고 StopCommandEvent를 처리하는 컨슈머 스레드 풀에서 처리 실패가 반복돼 스트림 소비가 적체되면서 E2E 지연이 올라갔다는 가설을 제시하면 정답. '근거 발견: 아니오'로 판정하거나, 무관한 Oracle Object Storage QR 업로드 실패나 QR 코드 생성 실패를 스트림 지연의 원인으로 지목하면 오답.",
+  "source": "MANUAL",
+  "alert": {
+    "alertname": "RedisStreamE2eLatencyHigh",
+    "severity": "warning",
+    "fingerprint": "golden-gen-pr-1072",
+    "summary": "Redis Stream E2E 지연 p95 > 500ms (prod-app)",
+    "description": "스트림 처리 p95 지연이 2.7s. 컨슈머 처리 적체 또는 다운스트림(App Service) 지연 가능성.",
+    "labels": {
+      "alertname": "RedisStreamE2eLatencyHigh",
+      "severity": "warning",
+      "job": "prod-app"
+    }
+  },
+  "logSamples": [
+    "[2026-08-26 11:52:31.108] [ERROR] [7a4aaebe35436e490a26ec7f35b222e3,3c999fef16177110] --- [] c.r.infra.OracleObjectStorageService : Oracle Object Storage QR 코드 업로드 실패: contents=https://zzol.site/rooms/D5NR, error=SdkClientException: Unable to execute HTTP request: connect timed out",
+    "[2026-08-26 11:52:31.446] [ERROR] [7a4aaebe35436e490a26ec7f35b222e3,229568ecbe719250] --- [] c.r.application.service.QrCodeService : QR 코드 생성 실패: joinCode=D5NR, error=ObjectStorageUploadException: QR 이미지 업로드에 실패했습니다",
+    "[2026-08-26 11:58:12.774] [ERROR] [0ec2f9008d7591eeb54380f46e86e414,da784ee3aa49924e] --- [redis-stream-thread-pool-concurrent1] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=StopCommandEventConsumer, message=StopCommandEvent[joinCode=J6XT, playerName=서준, eventId=5ecfd9b5-d98a-4d79-aed6-1e9124fa0d6a]",
+    "[2026-08-26 11:58:47.203] [ERROR] [ee1a714b2ef0f534d3f7855a87d2ce8d,ac29c977052e0185] --- [redis-stream-thread-pool-concurrent2] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=StopCommandEventConsumer, message=StopCommandEvent[joinCode=J6XT, playerName=하윤, eventId=a7fb5ccb-e56c-48f0-83f3-8cb4d996ec89]",
+    "[2026-08-26 11:59:26.551] [ERROR] [f661eaea2a4839e80bc7f00c971d90d8,f76a709a8f291916] --- [redis-stream-thread-pool-concurrent1] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=StopCommandEventConsumer, message=StopCommandEvent[joinCode=J6XT, playerName=민서, eventId=65c48590-07ce-41af-b637-a34ca05d59d6]",
+    "[2026-08-26 12:00:09.918] [ERROR] [54d29d1d54ebd87149ec9f192034fd6d,550a3809b2b9e5ab] --- [redis-stream-thread-pool-concurrent3] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=StopCommandEventConsumer, message=StopCommandEvent[joinCode=P4VG, playerName=나윤, eventId=c89b3cfa-01a8-4960-bb0e-59820cf5c72e]",
+    "[2026-08-26 12:00:53.335] [ERROR] [4cbb6716816d4cac21ea3a458c2b759e,c1e4901c16b92689] --- [redis-stream-thread-pool-concurrent2] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=StopCommandEventConsumer, message=StopCommandEvent[joinCode=P4VG, playerName=시우, eventId=9251de85-d2e3-4777-94d5-b660009f753d]",
+    "[2026-08-26 12:01:40.662] [ERROR] [f5c1ae19fcc52091b83216d1d202f3dc,b3723a1123610238] --- [redis-stream-thread-pool-concurrent1] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=StopCommandEventConsumer, message=StopCommandEvent[joinCode=P4VG, playerName=채원, eventId=108406a9-421e-43b6-b63e-c1dd650514b7]",
+    "[2026-08-26 12:09:04.517] [ERROR] [ee2f067662868756775961f76fa8c398,785512239ea30d70] --- [] c.r.infra.OracleObjectStorageService : Oracle Object Storage QR 코드 업로드 실패: contents=https://zzol.site/rooms/Z8MK, error=SdkClientException: Unable to execute HTTP request: connect timed out"
+  ],
+  "logEnvironment": "prod",
+  "expected": "예",
+  "axis": "partial-relevance"
+}

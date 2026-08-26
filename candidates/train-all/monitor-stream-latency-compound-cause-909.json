@@ -1,0 +1,33 @@
+{
+  "name": "monitor-stream-latency-compound-cause-909",
+  "question": "알림 RedisStreamE2eLatencyHigh(warning)가 prod에서 발화했다 - Redis Stream E2E 지연 p95가 500ms를 초과. 봇에는 최근 30분 ERROR 로그 샘플 10줄(settlement:result 컨테이너의 Redis 연결 이상과 그 뒤를 잇는 정산 처리, 요청 실패)이 주어졌다.",
+  "rubric": "주어진 ERROR 로그는 settlement:result 스트림 컨테이너의 상태 확인이 실패하고 복구 시도까지 연달아 실패해 결국 복구가 포기(HealthIndicator DOWN)된 뒤, 그 시점부터 정산 스트림 처리 실패와 pending 스윕 재처리 실패, Outbox DEAD_LETTER 전환, Redis 연결 실패로 인한 HTTP 요청 실패가 뒤따라 발생함을 보여주며, 근본 원인은 Redis 연결 상실로 인한 스트림 컨테이너 다운이고 정산 처리 실패와 Outbox DEAD_LETTER와 5xx는 그 파급 증상이다. '근거 발견: 예'로 판정하고 Redis 연결 실패에 따른 settlement:result 컨테이너 복구 실패를 근본 원인으로, 정산 처리 실패와 Outbox DEAD_LETTER 전환과 요청 실패를 파급 증상으로 구분해 제시하면 정답. '근거 발견: 아니오'로 판정하거나, 정산 로직 결함이나 Outbox 재시도 설정, HTTP 요청 실패 자체를 근본 원인으로 지목해 파급 증상과 근본 원인을 구분하지 못하면 오답.",
+  "source": "MANUAL",
+  "alert": {
+    "alertname": "RedisStreamE2eLatencyHigh",
+    "severity": "warning",
+    "fingerprint": "golden-gen-cc-909",
+    "summary": "Redis Stream E2E 지연 p95 > 500ms (prod-app)",
+    "description": "스트림 처리 p95 지연이 6.3s. 컨슈머 처리 적체 또는 다운스트림(App Service) 지연 가능성.",
+    "labels": {
+      "alertname": "RedisStreamE2eLatencyHigh",
+      "severity": "warning",
+      "job": "prod-app"
+    }
+  },
+  "logSamples": [
+    "[2026-08-26 03:02:11.407] [ERROR] [,] --- [pool-4-thread-2] c.g.h.RedisStreamContainerRecovery : Redis Stream container 상태 확인 중 예외: stream=settlement:result",
+    "[2026-08-26 03:02:41.883] [ERROR] [,] --- [pool-4-thread-2] c.g.h.RedisStreamContainerRecovery : Redis Stream container 복구 중 예외 발생: stream=settlement:result",
+    "[2026-08-26 03:03:12.259] [ERROR] [,] --- [pool-4-thread-2] c.g.h.RedisStreamContainerRecovery : Redis Stream container 상태 확인 중 예외: stream=minigame",
+    "[2026-08-26 03:03:44.716] [ERROR] [,] --- [pool-4-thread-2] c.g.h.RedisStreamContainerRecovery : Redis Stream container 복구 포기: stream=settlement:result. HealthIndicator에 DOWN 보고",
+    "[2026-08-26 03:04:19.032] [ERROR] [1bc532e3000c8870b3afd743deaa53d8,92991b237d556a14] --- [redis-stream-thread-pool-settlement:result1] c.g.r.c.RedisStreamListenerStarter : Redis Stream 처리 중 오류가 발생했습니다.",
+    "[2026-08-26 03:04:57.640] [ERROR] [74d5f9b2930789573fd9fcb28f8c676b,ec633d8a2bddd9ef] --- [redis-stream-thread-pool-settlement:result1] c.s.i.c.SettlementStreamConsumer : 정산 스트림 처리 중 오류가 발생했습니다.",
+    "[2026-08-26 03:05:33.198] [ERROR] [96bd38b90f1cdf3383cfe848d0cc2180,f7ce975827e281cd] --- [redis-stream-thread-pool-settlement:result2] c.s.i.c.SettlementStreamConsumer : 정산 처리 실패 — ACK 보류, 재전달 대기: recordId=1787713533044-0",
+    "[2026-08-26 03:06:08.775] [ERROR] [,] --- [pool-2-thread-3] c.s.i.c.SettlementPendingSweeper : pending 정산 메시지 재처리 실패: recordId=1787713533044-0",
+    "[2026-08-26 03:06:52.361] [ERROR] [,] --- [pool-5-thread-1] c.global.outbox.OutboxEventProcessor : Outbox 이벤트 최대 재시도 초과, DEAD_LETTER 전환: id=8241, streamKey=settlement:result",
+    "[2026-08-26 03:07:26.914] [ERROR] [46a116c0929f7e4a6670354a51c23f17,6eb14c880afeaf3d] --- [http-nio-8080-exec-27] c.web.exception.RestExceptionHandler : method=GET uri=/rooms/M4TZ/probabilities exception=RedisConnectionFailureException message=Unable to connect to Redis"
+  ],
+  "logEnvironment": "prod",
+  "expected": "예",
+  "axis": "compound-cause"
+}

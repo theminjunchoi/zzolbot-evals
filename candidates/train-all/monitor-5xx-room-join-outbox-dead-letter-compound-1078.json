@@ -1,0 +1,33 @@
+{
+  "name": "monitor-5xx-room-join-outbox-dead-letter-compound-1078",
+  "question": "알림 Http5xxRatioHigh(critical)가 prod에서 발화했다 - 최근 5분 5xx 비율이 5%를 넘었다. 봇에는 최근 30분 ERROR 로그 샘플 10줄(room:join outbox 이벤트의 DEAD_LETTER 전환과 그 뒤의 방 참가 요청 실패)이 주어졌다.",
+  "rubric": "주어진 ERROR 로그는 19:31:17부터 19:32:59까지 pool-5-thread-2에서 OutboxEventProcessor가 streamKey=room:join 이벤트 4건(id=10432, 10437, 10441, 10448)을 재시도 한도 초과로 DEAD_LETTER 전환한 뒤, 19:33:36부터 19:35:49까지 RoomEventWaitManager의 방 이벤트 자동 정리 (실패) 3건과 19:34:41부터 19:36:22까지 RestExceptionHandler의 POST /rooms 요청 예외 3건(RoomJoinTimeoutException)이 뒤따랐음을 보여준다. '근거 발견: 예'로 판정하고 room:join 스트림으로의 outbox 이벤트 발행 실패(DEAD_LETTER 전환)를 근본 원인으로, 방 이벤트 대기 정리 실패와 방 참가 요청의 타임아웃 예외를 그 파급 증상으로 구분해 가설을 제시하면 정답. '근거 발견: 아니오'로 판정하거나, 방 참가 요청 타임아웃이나 이벤트 정리 실패 자체를 근본 원인으로 지목해 outbox 발행 실패가 선행했다는 점을 놓치면 오답.",
+  "source": "MANUAL",
+  "alert": {
+    "alertname": "Http5xxRatioHigh",
+    "severity": "critical",
+    "fingerprint": "golden-gen-cc-1078",
+    "summary": "HTTP 5xx 비율 5% 초과 (prod-app)",
+    "description": "최근 5분 5xx 비율이 6.1%. 서버 측 광범위 실패 가능성.",
+    "labels": {
+      "alertname": "Http5xxRatioHigh",
+      "severity": "critical",
+      "job": "prod-app"
+    }
+  },
+  "logSamples": [
+    "[2026-08-26 19:31:17.226] [ERROR] [,] --- [pool-5-thread-2] c.global.outbox.OutboxEventProcessor : Outbox 이벤트 최대 재시도 초과, DEAD_LETTER 전환: id=10432, streamKey=room:join",
+    "[2026-08-26 19:31:48.771] [ERROR] [,] --- [pool-5-thread-2] c.global.outbox.OutboxEventProcessor : Outbox 이벤트 최대 재시도 초과, DEAD_LETTER 전환: id=10437, streamKey=room:join",
+    "[2026-08-26 19:32:24.503] [ERROR] [,] --- [pool-5-thread-2] c.global.outbox.OutboxEventProcessor : Outbox 이벤트 최대 재시도 초과, DEAD_LETTER 전환: id=10441, streamKey=room:join",
+    "[2026-08-26 19:32:59.918] [ERROR] [,] --- [pool-5-thread-2] c.global.outbox.OutboxEventProcessor : Outbox 이벤트 최대 재시도 초과, DEAD_LETTER 전환: id=10448, streamKey=room:join",
+    "[2026-08-26 19:33:36.244] [ERROR] [,] --- [pool-8-thread-1] c.r.i.messaging.RoomEventWaitManager : 방 이벤트 자동 정리 (실패): eventId=629cc87a-98e3-4ce5-ae87-48221883657c",
+    "[2026-08-26 19:34:05.660] [ERROR] [,] --- [pool-8-thread-1] c.r.i.messaging.RoomEventWaitManager : 방 이벤트 자동 정리 (실패): eventId=680e6788-b652-4a80-ae39-a5c4fab41507",
+    "[2026-08-26 19:34:41.185] [ERROR] [a93594215db19ac04aae8206680f4fe4,3a985d7eb8de8cfc] --- [http-nio-8080-exec-13] c.web.exception.RestExceptionHandler : method=POST uri=/rooms exception=RoomJoinTimeoutException message=방 참가 이벤트 응답 대기 시간을 초과했습니다",
+    "[2026-08-26 19:35:12.907] [ERROR] [86e3650494c1e16bf837613226efe7f2,b8c8a977dfb006e0] --- [http-nio-8080-exec-21] c.web.exception.RestExceptionHandler : method=POST uri=/rooms exception=RoomJoinTimeoutException message=방 참가 이벤트 응답 대기 시간을 초과했습니다",
+    "[2026-08-26 19:35:49.332] [ERROR] [,] --- [pool-8-thread-1] c.r.i.messaging.RoomEventWaitManager : 방 이벤트 자동 정리 (실패): eventId=641b5498-066b-45c8-9837-bbb6c906e24b",
+    "[2026-08-26 19:36:22.078] [ERROR] [02d2f2dffed8b01061398406dc7304a5,03f49204bcf80442] --- [http-nio-8080-exec-6] c.web.exception.RestExceptionHandler : method=POST uri=/rooms exception=RoomJoinTimeoutException message=방 참가 이벤트 응답 대기 시간을 초과했습니다"
+  ],
+  "logEnvironment": "prod",
+  "expected": "예",
+  "axis": "compound-cause"
+}

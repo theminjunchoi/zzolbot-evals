@@ -1,0 +1,32 @@
+{
+  "name": "monitor-stream-latency-room-join-async-1005",
+  "question": "알림 RedisStreamE2eLatencyHigh(warning)가 prod에서 발화했다 - Redis Stream E2E 처리 지연 p95가 500ms를 크게 넘었다. 봇에는 최근 30분 ERROR 로그 샘플 9줄(방 참가 스트림 이벤트 처리와 비동기 후처리 실패)이 주어졌다.",
+  "rubric": "주어진 ERROR 로그는 알림 직전 약 5분 사이에 room:join 컨슈머 스레드에서 RoomJoinEvent 처리가 실패하면 곧바로 같은 eventId의 방 참가 비동기 처리도 실패하는 짝이 세 차례 반복되고, 그 사이에 방 이벤트 대기 정리 실패와 room 스트림의 연결 해제 이벤트 처리 실패, Redis Stream 리스너 오류까지 이어진 내용으로, 방 참가 이벤트가 재시도와 대기를 반복하며 스트림 종단 지연을 끌어올렸음을 보여준다. '근거 발견: 예'로 판정하고 room:join 이벤트 처리와 비동기 후처리의 연쇄 실패를 E2E 지연의 원인 가설로 제시하면 정답. '근거 발견: 아니오'로 판정하거나, 지연 수치만 언급하고 방 참가 경로의 실패 연쇄를 근거로 삼지 못하거나, 정산 스트림이나 QR처럼 로그에 없는 경로를 원인으로 지목하면 오답.",
+  "source": "MANUAL",
+  "alert": {
+    "alertname": "RedisStreamE2eLatencyHigh",
+    "severity": "warning",
+    "fingerprint": "golden-gen-rse-1005",
+    "summary": "Redis Stream E2E 지연 p95 > 500ms (prod-app)",
+    "description": "스트림 처리 p95 지연이 4.1s. 컨슈머 처리 적체 또는 다운스트림(App Service) 지연 가능성.",
+    "labels": {
+      "alertname": "RedisStreamE2eLatencyHigh",
+      "severity": "warning",
+      "job": "prod-app"
+    }
+  },
+  "logSamples": [
+    "[2026-08-26 12:35:22.408] [ERROR] [dcbbd7b1a9943268108497252de4ddb5,9c1be7a4415c254c] --- [redis-stream-thread-pool-room:join1] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=RoomJoinConsumer, message=RoomJoinEvent[eventId=3e9c6067-c798-42db-8057-7b298273bf66, timestamp=2026-08-26T03:35:22.408117905Z, joinCode=H6BX, playerName=PLAYER_1]",
+    "[2026-08-26 12:35:44.917] [ERROR] [ba67786413a45055bc8945a7faa24c8a,e4220c5979ae1f8d] --- [redis-stream-thread-pool-room:join1] c.r.application.service.RoomService : 방 참가 비동기 처리 실패: eventId=3e9c6067-c798-42db-8057-7b298273bf66, joinCode=H6BX, playerName=PLAYER_1",
+    "[2026-08-26 12:36:19.335] [ERROR] [4bdde429c9695c7da46eb6b65a070b11,faa26b36a692ac98] --- [redis-stream-thread-pool-room:join2] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=RoomJoinConsumer, message=RoomJoinEvent[eventId=9ccb93d9-f08e-45b0-a131-d58714b491cc, timestamp=2026-08-26T03:36:19.335620481Z, joinCode=H6BX, playerName=PLAYER_4]",
+    "[2026-08-26 12:36:52.760] [ERROR] [eb33c834526f20db896cac4ee18888d4,5d999c6b52f6dd0f] --- [redis-stream-thread-pool-room:join2] c.r.application.service.RoomService : 방 참가 비동기 처리 실패: eventId=9ccb93d9-f08e-45b0-a131-d58714b491cc, joinCode=H6BX, playerName=PLAYER_4",
+    "[2026-08-26 12:37:28.144] [ERROR] [62f2b944ddff66690c0e3731e6e78a33,60763a797e66fe58] --- [redis-stream-thread-pool-room:join2] c.r.i.messaging.RoomEventWaitManager : 방 이벤트 자동 정리 (실패): eventId=9ccb93d9-f08e-45b0-a131-d58714b491cc",
+    "[2026-08-26 12:38:03.579] [ERROR] [ecc2dfe27b8a439dcb9c357cd24591f9,dcbc9e5ca6b9b9e0] --- [redis-stream-thread-pool-room1] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=PlayerDisconnectedConsumer, message=PlayerDisconnectedEvent[eventId=756796bf-15af-4c57-8bce-51adbb0dc35a, timestamp=2026-08-26T03:38:03.579244160Z, joinCode=H6BX, playerName=PLAYER_4]",
+    "[2026-08-26 12:38:41.026] [ERROR] [732d7e65cb5049dbf042a7fdb36f5204,7be9d6f530779cf2] --- [redis-stream-thread-pool-room:join1] c.g.r.c.RedisStreamListenerStarter : Redis Stream 처리 중 오류가 발생했습니다.",
+    "[2026-08-26 12:39:17.482] [ERROR] [2eb0532eb9a576d45eec329a97620410,27c4b2ba25944e45] --- [redis-stream-thread-pool-room:join1] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=RoomJoinConsumer, message=RoomJoinEvent[eventId=2d8ef690-6dfd-4f9f-93d6-9107f5773f2d, timestamp=2026-08-26T03:39:17.482905337Z, joinCode=Q3ND, playerName=PLAYER_2]",
+    "[2026-08-26 12:39:55.913] [ERROR] [e02ba750bdc92b0967b4cf1efde15981,d00b256d9ac7235c] --- [redis-stream-thread-pool-room:join1] c.r.application.service.RoomService : 방 참가 비동기 처리 실패: eventId=2d8ef690-6dfd-4f9f-93d6-9107f5773f2d, joinCode=Q3ND, playerName=PLAYER_2"
+  ],
+  "logEnvironment": "prod",
+  "expected": "예",
+  "axis": "positive-dense"
+}

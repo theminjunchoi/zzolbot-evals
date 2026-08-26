@@ -1,0 +1,32 @@
+{
+  "name": "monitor-stream-latency-speedtouch-progress-mixed-1047",
+  "question": "알림 RedisStreamE2eLatencyHigh(warning)가 prod에서 발화했다 - 스트림 E2E 처리 p95가 500ms를 넘었다. 봇에는 최근 30분 ERROR 로그 샘플 9줄(스피드터치 진행 이벤트 처리 실패와 그 사이에 섞인 무관한 산발 오류)이 주어졌다.",
+  "rubric": "관련 로그는 speedtouch 스트림 컨슈머 스레드에서 TouchProgressEventConsumer의 이벤트 처리가 여섯 차례 반복 실패하고 해당 리스너도 오류를 낸 부분이며, QR 코드 생성 실패와 /rooms/nickname/random 요청 실패는 스트림 처리 지연과 무관한 산발 오류다. '근거 발견: 예'로 판정하고 speedtouch 진행 이벤트 처리 실패와 그에 따른 재전달을 E2E 지연 상승의 원인 가설로 제시하면 정답. '근거 발견: 아니오'로 판정하거나, 무관한 QR 코드 생성 실패 또는 닉네임 조회 API 오류를 지연의 원인으로 끌어들이면 오답.",
+  "source": "MANUAL",
+  "alert": {
+    "alertname": "RedisStreamE2eLatencyHigh",
+    "severity": "warning",
+    "fingerprint": "golden-gen-rse-1047",
+    "summary": "Redis Stream E2E 지연 p95 > 500ms (prod-app)",
+    "description": "스트림 처리 p95 지연이 0.9s. 컨슈머 처리 적체 또는 다운스트림(App Service) 지연 가능성.",
+    "labels": {
+      "alertname": "RedisStreamE2eLatencyHigh",
+      "severity": "warning",
+      "job": "prod-app"
+    }
+  },
+  "logSamples": [
+    "[2026-08-26 18:40:33.774] [ERROR] [edaee80546eb711e523de62bfa33f643,b2d727088ab27e31] --- [redis-stream-thread-pool-speedtouch1] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=TouchProgressEventConsumer, message=TouchProgressEvent[eventId=5fe33a26-9252-4bea-974e-3f6f0b93f7f6, joinCode=LN95, playerName=토리, touchCount=42]",
+    "[2026-08-26 18:41:16.209] [ERROR] [,] --- [] c.r.application.service.QrCodeService : QR 코드 생성 실패: joinCode=DT07, error=IOException: Broken pipe",
+    "[2026-08-26 18:42:04.531] [ERROR] [b7989c0deb1b57370b6094f3bbd225cd,cd77375f00768ca2] --- [redis-stream-thread-pool-speedtouch2] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=TouchProgressEventConsumer, message=TouchProgressEvent[eventId=e5a517cd-7336-4136-a83e-8129391a456b, joinCode=LN95, playerName=제리, touchCount=57]",
+    "[2026-08-26 18:42:47.966] [ERROR] [1ca67e709f2ff911ba6718448eefe838,d1d0ef0e6c5061cb] --- [redis-stream-thread-pool-speedtouch1] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=TouchProgressEventConsumer, message=TouchProgressEvent[eventId=56969b93-d9da-4c70-aa8f-f9e43c29c5df, joinCode=LN95, playerName=토리, touchCount=63]",
+    "[2026-08-26 18:43:35.180] [ERROR] [41dab77a0be0dd87dac9bf2144d57caa,8595aacc6e85c149] --- [http-nio-8080-exec-06] c.web.exception.RestExceptionHandler : method=GET uri=/rooms/nickname/random exception=IllegalStateException message=사용 가능한 닉네임 후보를 찾지 못했습니다",
+    "[2026-08-26 18:44:22.607] [ERROR] [a58022a429746a5c496f4900e8c017fe,94976934b5f871c3] --- [redis-stream-thread-pool-speedtouch3] c.g.r.c.RedisStreamListenerStarter : Redis Stream 처리 중 오류가 발생했습니다.",
+    "[2026-08-26 18:45:08.043] [ERROR] [2f97b7ba87d708833f2d1d997c429720,192d5a94b1bb2316] --- [redis-stream-thread-pool-speedtouch2] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=TouchProgressEventConsumer, message=TouchProgressEvent[eventId=5d7b5179-005b-45e4-b355-5eb512226101, joinCode=LN95, playerName=하늘, touchCount=71]",
+    "[2026-08-26 18:45:59.318] [ERROR] [af25975b7e3f6f4ff7c32a7acd481649,d69bcebcbd23e976] --- [redis-stream-thread-pool-speedtouch1] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=TouchProgressEventConsumer, message=TouchProgressEvent[eventId=ed880992-9926-41b5-af6f-99995a13a9f4, joinCode=LN95, playerName=제리, touchCount=88]",
+    "[2026-08-26 18:46:52.760] [ERROR] [0b02fbed79359951f19b3968c9c0f4d1,e4b2438c4c5e65f9] --- [redis-stream-thread-pool-speedtouch3] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=TouchProgressEventConsumer, message=TouchProgressEvent[eventId=23c0c1e9-53db-4961-8772-2a599b4dcd34, joinCode=LN95, playerName=토리, touchCount=95]"
+  ],
+  "logEnvironment": "prod",
+  "expected": "예",
+  "axis": "partial-relevance"
+}

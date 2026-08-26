@@ -1,0 +1,26 @@
+{
+ "name": "monitor-error-budget-burn-slow-settlement-async-unrelated-1092",
+ "question": "알림 ErrorBudgetBurnSlow(warning)가 prod에서 발화했다 - 5xx 비율이 6시간과 30분 양 창에서 3%를 넘어 에러버짓이 느리게 소진되고 있다. 봇에는 최근 30분 창에서 조회된 prod ERROR 로그 샘플 3줄이 주어졌다.",
+ "rubric": "주어진 3줄은 정산 스트림 처리 실패로 ACK를 보류한 건 1건, pending 정산 메시지 재처리 실패 1건, Outbox 이벤트 DEAD_LETTER 전환 1건으로 모두 HTTP 요청 처리 밖의 비동기 경로(Redis Stream 컨슈머와 스케줄러)에서 발생했고, 22분에 걸쳐 한 건씩 흩어져 있다. HTTP 응답 상태를 알 수 있는 RestExceptionHandler 로그는 한 줄도 없어 5xx 비율 상승을 설명하지 못한다. '근거 발견: 아니오'로 판정하고 표본에 HTTP 요청 경로 에러가 없다는 점을 밝혀야 정답. 정산 실패나 Outbox DEAD_LETTER 전환이 5xx를 유발했다고 단정하면 오답.",
+ "source": "MANUAL",
+ "alert": {
+  "alertname": "ErrorBudgetBurnSlow",
+  "severity": "warning",
+  "fingerprint": "golden-gen-ebsset-1092",
+  "summary": "에러버짓 느린 소진 (SLO 99.5%, burn-rate 6×)",
+  "description": "prod-app 5xx 비율이 6h·30m 양 창에서 3%를 초과. 누적 시 에러버짓 위협.",
+  "labels": {
+   "alertname": "ErrorBudgetBurnSlow",
+   "severity": "warning",
+   "job": "prod-app"
+  }
+ },
+ "logSamples": [
+  "[2026-08-26 16:02:39.147] [ERROR] [84da3ca5cef57da1c838cc1045c80c32,5b586ad39d9ac099] --- [redis-stream-thread-pool-settlement:result1] c.s.i.c.SettlementStreamConsumer : 정산 처리 실패 — ACK 보류, 재전달 대기: recordId=1756190559041-0",
+  "[2026-08-26 16:11:26.803] [ERROR] [,] --- [pool-6-thread-2] c.s.i.c.SettlementPendingSweeper : pending 정산 메시지 재처리 실패: recordId=1756191086615-0",
+  "[2026-08-26 16:24:52.219] [ERROR] [,] --- [pool-3-thread-1] c.global.outbox.OutboxEventProcessor : Outbox 이벤트 최대 재시도 초과, DEAD_LETTER 전환: id=5162, streamKey=settlement:result"
+ ],
+ "logEnvironment": "prod",
+ "expected": "아니오",
+ "axis": "unrelated-trap"
+}

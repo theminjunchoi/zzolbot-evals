@@ -1,0 +1,33 @@
+{
+  "name": "monitor-stream-backlog-speedtouch-dense-1016",
+  "question": "알림 RedisStreamBacklogHigh(warning)가 prod에서 발화했다 - Redis Stream 길이가 1000을 초과해 적체. 봇에는 최근 30분 ERROR 로그 샘플 10줄(약 4분 사이 speedtouch 스트림에 밀집된 컨슈머 처리 실패)이 주어졌다.",
+  "rubric": "주어진 ERROR 로그는 알림 시각과 정합하는 약 4분의 좁은 창에 speedtouch 스트림 컨슈머 스레드에서 TouchProgressEventConsumer와 StopCommandEventConsumer의 이벤트 처리 실패가 7건 밀집 반복되고, RedisStreamListenerStarter의 스트림 처리 오류 2건과 speedtouch 컨테이너 상태 확인 예외 1건이 같은 창에 함께 기록됨을 보여준다. '근거 발견: 예'로 판정하고 speedtouch 스트림 컨슈머가 이벤트 처리에 반복 실패해 ACK되지 못한 메시지가 쌓이면서 스트림 길이가 늘었다는 원인 가설을 제시하면 정답. '근거 발견: 아니오'로 판정하거나 로그가 알림과 무관하다고 하거나 발행 측 트래픽 급증만을 단정하고 컨슈머 처리 실패 근거를 놓치면 오답.",
+  "source": "MANUAL",
+  "alert": {
+    "alertname": "RedisStreamBacklogHigh",
+    "severity": "warning",
+    "fingerprint": "golden-gen-pd-1016",
+    "summary": "Redis Stream 적체 (length > 1000, prod-app)",
+    "description": "스트림 길이가 3480. 컨슈머 처리 속도가 발행을 못 따라가고 있습니다.",
+    "labels": {
+      "alertname": "RedisStreamBacklogHigh",
+      "severity": "warning",
+      "job": "prod-app"
+    }
+  },
+  "logSamples": [
+    "[2026-08-26 22:18:11.507] [ERROR] [eadc40eabab06130c8c2a77bcbc7b011,f5259e1d24342bea] --- [redis-stream-thread-pool-speedtouch1] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=TouchProgressEventConsumer, message=TouchProgressEvent[joinCode=C5WD, playerName=태윤, progress=18]",
+    "[2026-08-26 22:18:39.942] [ERROR] [44c68f9bf7078072e136cd2fd1d68595,503b77cc7ad1b424] --- [redis-stream-thread-pool-speedtouch2] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=TouchProgressEventConsumer, message=TouchProgressEvent[joinCode=C5WD, playerName=서아, progress=24]",
+    "[2026-08-26 22:19:08.376] [ERROR] [157f7a117372b13d6e97d83fe1076a44,6855703b5edf2703] --- [redis-stream-thread-pool-speedtouch1] c.g.r.c.RedisStreamListenerStarter : Redis Stream 처리 중 오류가 발생했습니다.",
+    "[2026-08-26 22:19:36.815] [ERROR] [1ce65aa64835597983aaa91e204b45de,54547f9576d44095] --- [redis-stream-thread-pool-speedtouch3] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=StopCommandEventConsumer, message=StopCommandEvent[joinCode=C5WD, playerName=태윤]",
+    "[2026-08-26 22:20:05.243] [ERROR] [ca5a014cc4c9d5e8b04cf93760e1a332,a7c89ff715efb438] --- [redis-stream-thread-pool-speedtouch2] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=TouchProgressEventConsumer, message=TouchProgressEvent[joinCode=J8RK, playerName=하람, progress=31]",
+    "[2026-08-26 22:20:33.688] [ERROR] [,] --- [pool-1-thread-4] c.g.h.RedisStreamContainerRecovery : Redis Stream container 상태 확인 중 예외: stream=speedtouch",
+    "[2026-08-26 22:21:02.114] [ERROR] [a09745c130860b17c8e548fdcb3a51fe,c4a79e45e96682fe] --- [redis-stream-thread-pool-speedtouch1] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=TouchProgressEventConsumer, message=TouchProgressEvent[joinCode=J8RK, playerName=은우, progress=44]",
+    "[2026-08-26 22:21:30.559] [ERROR] [67b1fe21e96b04cf1ef8a78035db0768,d7a9a75c8dc0b074] --- [redis-stream-thread-pool-speedtouch3] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=TouchProgressEventConsumer, message=TouchProgressEvent[joinCode=Q3NP, playerName=다인, progress=12]",
+    "[2026-08-26 22:21:58.977] [ERROR] [35e50a623e21018b1096347980ab59ca,c0d70305fad39c04] --- [redis-stream-thread-pool-speedtouch2] c.g.r.c.RedisStreamListenerStarter : Redis Stream 처리 중 오류가 발생했습니다.",
+    "[2026-08-26 22:22:27.402] [ERROR] [3c01523bff0d7a2fc621e6c92a43521d,7f0528b8da009235] --- [redis-stream-thread-pool-speedtouch1] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=StopCommandEventConsumer, message=StopCommandEvent[joinCode=J8RK, playerName=하람]"
+  ],
+  "logEnvironment": "prod",
+  "expected": "예",
+  "axis": "positive-dense"
+}

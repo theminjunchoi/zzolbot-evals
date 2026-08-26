@@ -1,0 +1,33 @@
+{
+  "name": "monitor-error-spike-laddergame-mixed-1007",
+  "question": "알림 AppErrorLogSpike(warning)가 prod에서 발화했다 - 최근 5분 ERROR 로그가 임계 30건을 초과. 봇에는 최근 30분 ERROR 로그 샘플 10줄(알림 직전에 밀집한 사다리게임 처리 실패와 앞서 흩어진 요청, 스토리지, 정산 오류)이 주어졌다.",
+  "rubric": "주어진 ERROR 로그에서 알림 직전 약 5분에 밀집한 일곱 줄은 laddergame 컨슈머 스레드 두 개에서 LadderDrawCommandEvent 처리가 반복 실패하고 같은 구간에 laddergame 게임 스케줄 예외까지 두 차례 발생한 내용이라 ERROR 급증의 직접 근거이고, 그보다 10분 이상 앞서 한 줄씩 떨어져 있는 /rooms/check-guestName 요청 실패, Oracle Object Storage Public URL 생성 실패, pending 정산 재처리 실패는 사다리게임 경로와 무관한 산발적 배경 오류다. '근거 발견: 예'로 판정하고 밀집한 사다리게임 이벤트 처리 실패와 그 게임 스케줄 예외를 급증의 근본 원인 가설로 제시하면 정답. '근거 발견: 아니오'로 판정하거나, 게스트 이름 조회 실패, QR Public URL 생성 실패, 정산 재처리 실패를 급증의 원인으로 끌어들이면 오답.",
+  "source": "MANUAL",
+  "alert": {
+    "alertname": "AppErrorLogSpike",
+    "severity": "warning",
+    "fingerprint": "golden-gen-aes-1007",
+    "summary": "ERROR 로그 급증(최근 5분, prod-app)",
+    "description": "ERROR 로그가 46건(임계 30/5m)입니다. zzol-bot이 근본원인을 분석합니다.",
+    "labels": {
+      "alertname": "AppErrorLogSpike",
+      "severity": "warning",
+      "job": "prod-app"
+    }
+  },
+  "logSamples": [
+    "[2026-08-26 23:15:04.372] [ERROR] [9e1d68ff4abfd72ee37c5e1106348ce1,f34b074e5cee603f] --- [http-nio-8080-exec-13] c.web.exception.RestExceptionHandler : method=GET uri=/rooms/check-guestName exception=IllegalStateException message=guest name pool exhausted",
+    "[2026-08-26 23:22:47.910] [ERROR] [f77b68020fc40edebd41eff18c0a94f1,6ce755ae0168f1df] --- [] c.r.infra.OracleObjectStorageService : Oracle Object Storage Public URL 생성 실패: storageKey=qr/F4TJ.png, error=Connection reset by peer",
+    "[2026-08-26 23:29:11.548] [ERROR] [,] --- [pool-5-thread-1] c.s.i.c.SettlementPendingSweeper : pending 정산 메시지 재처리 실패: recordId=1787842151548-1",
+    "[2026-08-26 23:36:18.205] [ERROR] [a185cbc3bb0dcf34de4e586479ce9a43,c77dbb79095d43f9] --- [redis-stream-thread-pool-laddergame1] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=LadderDrawCommandEventConsumer, message=LadderDrawCommandEvent[eventId=a23099cb-a091-4cb0-bc81-d2a6728e6372, timestamp=2026-08-26T14:36:18.205663170Z, joinCode=P2CK, playerName=PLAYER_2]",
+    "[2026-08-26 23:36:52.771] [ERROR] [908eaf9b25b94914cc24b05e6f7385e6,65d86c3a4f6f176a] --- [redis-stream-thread-pool-laddergame2] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=LadderDrawCommandEventConsumer, message=LadderDrawCommandEvent[eventId=b004b790-e2d8-489b-887b-e3b03d9f13f8, timestamp=2026-08-26T14:36:52.771049238Z, joinCode=P2CK, playerName=PLAYER_5]",
+    "[2026-08-26 23:37:30.114] [ERROR] [,] --- [laddergame-task-1] c.g.s.GameTaskSchedulerFactory : [laddergame] 스케줄 실행 중 예외가 발생했습니다.",
+    "[2026-08-26 23:38:07.663] [ERROR] [b87fc4465386fbd80bbbd76c7c5568e2,66202507165c9413] --- [redis-stream-thread-pool-laddergame1] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=LadderDrawCommandEventConsumer, message=LadderDrawCommandEvent[eventId=6372b5b9-265f-4b8c-8e58-75f70e8babba, timestamp=2026-08-26T14:38:07.663512904Z, joinCode=P2CK, playerName=PLAYER_1]",
+    "[2026-08-26 23:39:14.328] [ERROR] [e933c18dbacf191fd2a3f05f629e65f0,6b7ea667981f2250] --- [redis-stream-thread-pool-laddergame2] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=LadderDrawCommandEventConsumer, message=LadderDrawCommandEvent[eventId=817e7be7-08fa-4f7f-8655-87b2ac1051c1, timestamp=2026-08-26T14:39:14.328775611Z, joinCode=J9WD, playerName=PLAYER_3]",
+    "[2026-08-26 23:40:02.856] [ERROR] [,] --- [laddergame-task-2] c.g.s.GameTaskSchedulerFactory : [laddergame] 스케줄 실행 중 예외가 발생했습니다.",
+    "[2026-08-26 23:40:49.437] [ERROR] [497e6155e455586ac0c20e78cd40dbdf,c9381daf3a7d9cb2] --- [redis-stream-thread-pool-laddergame1] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=LadderDrawCommandEventConsumer, message=LadderDrawCommandEvent[eventId=9450ecc5-225d-4f15-8026-669b46e0cacd, timestamp=2026-08-26T14:40:49.437208193Z, joinCode=J9WD, playerName=PLAYER_4]"
+  ],
+  "logEnvironment": "prod",
+  "expected": "예",
+  "axis": "partial-relevance"
+}

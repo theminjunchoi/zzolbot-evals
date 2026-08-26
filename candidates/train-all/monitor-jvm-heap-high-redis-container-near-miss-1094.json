@@ -1,0 +1,27 @@
+{
+  "name": "monitor-jvm-heap-high-redis-container-near-miss-1094",
+  "question": "알림 JvmHeapUsageHigh(critical)가 prod에서 발화했다 - JVM 힙 사용률이 91%로 임계 85%를 넘었다. 봇에는 최근 30분 창에서 조회된 prod ERROR 로그 샘플 4줄이 주어졌다.",
+  "rubric": "주어진 4줄은 blockstacking 스트림 컨테이너의 상태 확인 예외 1건, 복구 중 예외 1건, 복구 포기 후 HealthIndicator DOWN 보고 1건과 blockstacking 스트림 처리 오류 1건으로, 22:41부터 22:48까지 약 7분간 이어진 하나의 Redis Stream 컨테이너 장애다. 자원 고갈처럼 보이지만 이 알림의 대상은 JVM 힙이고 로그가 가리키는 것은 외부 Redis 연결에 붙은 스트림 컨테이너라 대상 컴포넌트가 다르며, GC나 OutOfMemoryError, 힙 점유를 보여주는 로그는 한 줄도 없다. '근거 발견: 아니오'로 판정하고 로그가 힙이 아닌 다른 컴포넌트의 장애임을 밝혀야 정답. Redis Stream 컨테이너 복구 실패를 힙 사용률 상승의 원인으로 지목하면 오답.",
+  "source": "MANUAL",
+  "alert": {
+    "alertname": "JvmHeapUsageHigh",
+    "severity": "critical",
+    "fingerprint": "golden-gen-heapred-1094",
+    "summary": "JVM 힙 사용률 > 85% (prod-app)",
+    "description": "힙 사용률이 91%. GC 오버헤드 증가 및 OOM 위험.",
+    "labels": {
+      "alertname": "JvmHeapUsageHigh",
+      "severity": "critical",
+      "job": "prod-app"
+    }
+  },
+  "logSamples": [
+    "[2026-08-26 22:41:07.336] [ERROR] [,] --- [pool-5-thread-2] c.g.h.RedisStreamContainerRecovery : Redis Stream container 상태 확인 중 예외: stream=blockstacking",
+    "[2026-08-26 22:43:52.881] [ERROR] [,] --- [pool-5-thread-2] c.g.h.RedisStreamContainerRecovery : Redis Stream container 복구 중 예외 발생: stream=blockstacking",
+    "[2026-08-26 22:46:18.240] [ERROR] [,] --- [pool-5-thread-2] c.g.h.RedisStreamContainerRecovery : Redis Stream container 복구 포기: stream=blockstacking. HealthIndicator에 DOWN 보고",
+    "[2026-08-26 22:48:04.517] [ERROR] [4ce0da4cb77b3f90db5ecab954eabf0c,a3d6431dff580dda] --- [redis-stream-thread-pool-blockstacking1] c.g.r.c.RedisStreamListenerStarter : Redis Stream 처리 중 오류가 발생했습니다."
+  ],
+  "logEnvironment": "prod",
+  "expected": "아니오",
+  "axis": "near-miss-component"
+}

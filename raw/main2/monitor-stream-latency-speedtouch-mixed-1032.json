@@ -1,0 +1,32 @@
+{
+  "name": "monitor-stream-latency-speedtouch-mixed-1032",
+  "question": "알림 RedisStreamE2eLatencyHigh(warning)가 prod에서 발화했다 - Redis Stream E2E 지연 p95가 임계 500ms를 넘겼다. 봇에는 최근 30분 ERROR 로그 샘플 9줄(speedtouch 스트림 이벤트 처리 실패 밀집과 그와 무관한 산발 에러)이 주어졌다.",
+  "rubric": "관련 로그는 14:20부터 약 4분 창에 speedtouch 스트림 컨슈머 스레드(redis-stream-thread-pool-speedtouch1~3)에서 TouchProgressEventConsumer의 이벤트 처리 실패 5건과 Redis Stream 처리 오류 1건이 밀집한 부분이고, 무관 로그는 스케줄 태스크의 일반 예외 1건과 게스트 이름 중복, 닉네임 풀 고갈로 인한 HTTP 요청 실패 2건이다. '근거 발견: 예'로 판정하고 speedtouch 스트림의 터치 진행 이벤트 처리 실패로 컨슈머 소비가 늦어져 E2E 지연이 발생했다는 원인 가설을 밀집 로그만 근거로 제시하면 정답. '근거 발견: 아니오'로 판정하거나 게스트 이름 중복, 닉네임 풀 고갈, 스케줄 태스크 예외 같은 무관 로그를 원인으로 끌어들이면 오답.",
+  "source": "MANUAL",
+  "alert": {
+    "alertname": "RedisStreamE2eLatencyHigh",
+    "severity": "warning",
+    "fingerprint": "golden-gen-pr-1032",
+    "summary": "Redis Stream E2E 지연 p95 > 500ms (prod-app)",
+    "description": "스트림 처리 p95 지연이 1.8s. 컨슈머 처리 적체 또는 다운스트림(App Service) 지연 가능성.",
+    "labels": {
+      "alertname": "RedisStreamE2eLatencyHigh",
+      "severity": "warning",
+      "job": "prod-app"
+    }
+  },
+  "logSamples": [
+    "[2026-08-26 14:05:33.712] [ERROR] [,] --- [pool-5-thread-1] o.s.s.s.TaskUtils$LoggingErrorHandler : Unexpected error occurred in scheduled task",
+    "[2026-08-26 14:11:48.205] [ERROR] [bff0d7a2fc621e6c92a43521d7f0528b,8da009235a5aa7cd] --- [http-nio-8080-exec-06] c.web.exception.RestExceptionHandler : method=POST uri=/rooms/check-guestName exception=DuplicateGuestNameException message=Guest name already exists",
+    "[2026-08-26 14:20:02.471] [ERROR] [83a6a5292d1f2aee3a25fb9536e33bee,ca4d09b115b29186] --- [redis-stream-thread-pool-speedtouch1] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=TouchProgressEventConsumer, message=TouchProgressEvent[joinCode=L5QN, playerName=시우, progress=42]",
+    "[2026-08-26 14:20:44.938] [ERROR] [c3932d9e7ced287b881cd953f2d94562,cde222224c92db5f] --- [redis-stream-thread-pool-speedtouch2] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=TouchProgressEventConsumer, message=TouchProgressEvent[joinCode=L5QN, playerName=하늘, progress=58]",
+    "[2026-08-26 14:21:29.316] [ERROR] [aad46500dd46129cd337dfa3c870397c,23a5fdb7d4e09fbc] --- [redis-stream-thread-pool-speedtouch1] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=TouchProgressEventConsumer, message=TouchProgressEvent[joinCode=X2MP, playerName=연우, progress=17]",
+    "[2026-08-26 14:22:11.783] [ERROR] [6935bc7313827ac94b7f352dfeed913c,671dddfe3227cf19] --- [redis-stream-thread-pool-speedtouch3] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=TouchProgressEventConsumer, message=TouchProgressEvent[joinCode=X2MP, playerName=주하, progress=73]",
+    "[2026-08-26 14:22:54.150] [ERROR] [2ab5154fb5ccc6ab369e0b6b14b3f2a7,f0fe9119c280a3c2] --- [redis-stream-thread-pool-speedtouch2] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=TouchProgressEventConsumer, message=TouchProgressEvent[joinCode=L5QN, playerName=시우, progress=61]",
+    "[2026-08-26 14:23:37.629] [ERROR] [2a39fbda98f70f8b5cca2afae01861a2,57ad0e66d0587698] --- [redis-stream-thread-pool-speedtouch3] c.g.r.c.RedisStreamListenerStarter : Redis Stream 처리 중 오류가 발생했습니다.",
+    "[2026-08-26 14:27:50.084] [ERROR] [4f555e83276b88c6650e5c2068fd4e0a,a64f83c4f888d2a9] --- [http-nio-8080-exec-13] c.web.exception.RestExceptionHandler : method=GET uri=/rooms/nickname/random exception=IllegalStateException message=Nickname pool temporarily empty"
+  ],
+  "logEnvironment": "prod",
+  "expected": "예",
+  "axis": "partial-relevance"
+}

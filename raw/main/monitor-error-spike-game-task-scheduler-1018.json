@@ -1,0 +1,33 @@
+{
+ "name": "monitor-error-spike-game-task-scheduler-1018",
+ "question": "알림 AppErrorLogSpike(warning)가 prod에서 발화했다 - 최근 5분 ERROR 로그가 임계 30건을 넘겨 급증했다. 봇에는 최근 30분 ERROR 로그 샘플 10줄(여러 게임의 스케줄 태스크 실행 예외 반복)이 주어졌다.",
+ "rubric": "주어진 ERROR 로그는 21:07부터 21:10까지 약 3분 동안 racinggame, blockstacking, speedtouch, blindtimer, laddergame 등 서로 다른 게임의 스케줄 태스크에서 실행 예외가 반복되고 같은 구간에 스케줄러 공용 에러 핸들러(TaskUtils)의 예외도 함께 기록된 내용으로, 특정 게임이 아니라 게임 스케줄러 전반이 동시에 실패했음을 보여준다. '근거 발견: 예'로 판정하고 게임 태스크 스케줄러 공통 경로의 실패(특정 게임 로직이 아닌 스케줄 실행 공통 의존성 문제)를 ERROR 급증의 원인 가설로 제시하면 정답. '근거 발견: 아니오'로 판정하거나 단일 게임의 버그 또는 HTTP 요청 실패를 원인으로 지목하면 오답.",
+ "source": "MANUAL",
+ "alert": {
+  "alertname": "AppErrorLogSpike",
+  "severity": "warning",
+  "fingerprint": "golden-gen-pd-1018",
+  "summary": "ERROR 로그 급증(최근 5분, prod-app)",
+  "description": "ERROR 로그가 118건(임계 30/5m)입니다. zzol-bot이 근본원인을 분석합니다.",
+  "labels": {
+   "alertname": "AppErrorLogSpike",
+   "severity": "warning",
+   "job": "prod-app"
+  }
+ },
+ "logSamples": [
+  "[2026-08-26 21:07:03.118] [ERROR] [,] --- [racinggame-task-1] c.g.s.GameTaskSchedulerFactory : [racinggame] 스케줄 실행 중 예외가 발생했습니다.",
+  "[2026-08-26 21:07:05.402] [ERROR] [,] --- [blockstacking-task-2] c.g.s.GameTaskSchedulerFactory : [blockstacking] 스케줄 실행 중 예외가 발생했습니다.",
+  "[2026-08-26 21:07:19.735] [ERROR] [,] --- [pool-2-thread-3] o.s.s.s.TaskUtils$LoggingErrorHandler : Unexpected error occurred in scheduled task",
+  "[2026-08-26 21:07:41.264] [ERROR] [,] --- [speedtouch-task-3] c.g.s.GameTaskSchedulerFactory : [speedtouch] 스케줄 실행 중 예외가 발생했습니다.",
+  "[2026-08-26 21:08:02.877] [ERROR] [,] --- [blindtimer-task-1] c.g.s.GameTaskSchedulerFactory : [blindtimer] 스케줄 실행 중 예외가 발생했습니다.",
+  "[2026-08-26 21:08:24.516] [ERROR] [,] --- [racinggame-task-1] c.g.s.GameTaskSchedulerFactory : [racinggame] 스케줄 실행 중 예외가 발생했습니다.",
+  "[2026-08-26 21:08:51.093] [ERROR] [,] --- [laddergame-task-2] c.g.s.GameTaskSchedulerFactory : [laddergame] 스케줄 실행 중 예외가 발생했습니다.",
+  "[2026-08-26 21:09:12.640] [ERROR] [,] --- [pool-2-thread-3] o.s.s.s.TaskUtils$LoggingErrorHandler : Unexpected error occurred in scheduled task",
+  "[2026-08-26 21:09:38.985] [ERROR] [,] --- [blockstacking-task-2] c.g.s.GameTaskSchedulerFactory : [blockstacking] 스케줄 실행 중 예외가 발생했습니다.",
+  "[2026-08-26 21:10:04.271] [ERROR] [,] --- [speedtouch-task-3] c.g.s.GameTaskSchedulerFactory : [speedtouch] 스케줄 실행 중 예외가 발생했습니다."
+ ],
+ "logEnvironment": "prod",
+ "expected": "예",
+ "axis": "positive-dense"
+}

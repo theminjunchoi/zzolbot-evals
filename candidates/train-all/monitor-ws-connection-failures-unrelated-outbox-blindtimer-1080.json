@@ -1,0 +1,27 @@
+{
+  "name": "monitor-ws-connection-failures-unrelated-outbox-blindtimer-1080",
+  "question": "알림 WsConnectionFailuresHigh(warning)가 prod에서 발화했다 - 최근 5분 WebSocket 연결 실패가 임계 10건을 넘었다. 봇에는 최근 30분 ERROR 로그 샘플 4줄이 주어졌다.",
+  "rubric": "주어진 로그는 23:02:14의 OutboxEventProcessor blindtimer 이벤트 DEAD_LETTER 전환 1건, 23:11:37의 RestExceptionHandler GET /rooms/nickname/random 예외 1건, 23:19:58의 GameTaskSchedulerFactory [laddergame] 스케줄 예외 1건, 23:26:40의 TaskUtils 스케줄 작업 예외 1건으로, 8분 이상 간격을 두고 서로 다른 경로에서 한 건씩 발생한 산발 오류다. 어느 줄도 WebSocket/STOMP 연결 단계나 연결 실패 누적을 가리키지 않는다. '근거 발견: 아니오'로 판정하고 주어진 로그가 WS 연결 실패 급증의 근거가 되지 못한다는 점을 언급해야 정답. '근거 발견: 예'로 판정하거나, outbox DEAD_LETTER 전환이나 스케줄 예외, 닉네임 조회 실패를 WebSocket 연결 실패의 원인으로 지목하면 오답.",
+  "source": "MANUAL",
+  "alert": {
+    "alertname": "WsConnectionFailuresHigh",
+    "severity": "warning",
+    "fingerprint": "golden-gen-ut-1080",
+    "summary": "WebSocket 연결 실패 급증 (prod-app)",
+    "description": "최근 5분 WS 연결 실패가 17건 (임계 10). STOMP 연결 단계 실패 누적.",
+    "labels": {
+      "alertname": "WsConnectionFailuresHigh",
+      "severity": "warning",
+      "job": "prod-app"
+    }
+  },
+  "logSamples": [
+    "[2026-08-26 23:02:14.906] [ERROR] [,] --- [pool-2-thread-4] c.global.outbox.OutboxEventProcessor : Outbox 이벤트 최대 재시도 초과, DEAD_LETTER 전환: id=7728, streamKey=blindtimer",
+    "[2026-08-26 23:11:37.415] [ERROR] [bf453f95b72184e8aadc6ab4f8f87d1a,6ba1fad023249b36] --- [http-nio-8080-exec-9] c.web.exception.RestExceptionHandler : method=GET uri=/rooms/nickname/random exception=IllegalStateException message=닉네임 후보를 가져오지 못했습니다",
+    "[2026-08-26 23:19:58.032] [ERROR] [,] --- [laddergame-task-2] c.g.s.GameTaskSchedulerFactory : [laddergame] 스케줄 실행 중 예외가 발생했습니다.",
+    "[2026-08-26 23:26:40.671] [ERROR] [,] --- [pool-6-thread-1] o.s.s.s.TaskUtils$LoggingErrorHandler : Unexpected error occurred in scheduled task"
+  ],
+  "logEnvironment": "prod",
+  "expected": "아니오",
+  "axis": "unrelated-trap"
+}

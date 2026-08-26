@@ -1,0 +1,31 @@
+{
+ "name": "monitor-error-spike-blockstacking-stop-partial-relevance-1059",
+ "question": "알림 AppErrorLogSpike(warning)가 prod에서 발화했다 - 최근 5분 ERROR 로그가 41건으로 임계 30건을 넘었다. 봇에는 최근 30분 ERROR 로그 샘플 8줄(블록쌓기 stop 커맨드 처리 실패 밀집과 그 밖의 산발 오류가 섞임)이 주어졌다.",
+ "rubric": "주어진 ERROR 로그 8줄 중 관련 로그는 07:22부터 07:24까지 약 3분 창에 몰린 EventDispatcher의 StopCommandEventConsumer 처리 실패 6건(blockstacking 스트림 스레드 3개에 걸침)이고, 무관 로그는 그보다 20분 가까이 앞선 blindtimer 게임 스케줄러 예외 1건과 /rooms/check-guestName 요청의 중복 게스트 이름 예외 1건이다. '근거 발견: 예'로 판정하고 blockstacking 스트림의 stop 커맨드 처리 반복 실패를 ERROR 급증의 원인 가설로 제시하면 정답. '근거 발견: 아니오'로 판정하거나 blindtimer 스케줄러 예외 또는 게스트 이름 검증 실패를 원인으로 지목하면 오답.",
+ "source": "MANUAL",
+ "alert": {
+  "alertname": "AppErrorLogSpike",
+  "severity": "warning",
+  "fingerprint": "golden-gen-esbs-1059",
+  "summary": "ERROR 로그 급증(최근 5분, prod-app)",
+  "description": "ERROR 로그가 41건(임계 30/5m)입니다. zzol-bot이 근본원인을 분석합니다.",
+  "labels": {
+   "alertname": "AppErrorLogSpike",
+   "severity": "warning",
+   "job": "prod-app"
+  }
+ },
+ "logSamples": [
+  "[2026-08-26 07:03:41.826] [ERROR] [,] --- [blindtimer-task-1] c.g.s.GameTaskSchedulerFactory : [blindtimer] 스케줄 실행 중 예외가 발생했습니다.",
+  "[2026-08-26 07:11:07.213] [ERROR] [0b09dc02eb4c6609ca04381fda055d36,8b0ce817347140f4] --- [http-nio-8080-exec-17] c.web.exception.RestExceptionHandler : method=GET uri=/rooms/check-guestName exception=DuplicateGuestNameException message=이미 사용 중인 게스트 이름입니다",
+  "[2026-08-26 07:22:09.554] [ERROR] [89985165d7ff4a9853acb0db61c7ee40,422e956f412f9fa3] --- [redis-stream-thread-pool-blockstacking1] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=StopCommandEventConsumer, message=StopCommandEvent[joinCode=H4RV, playerName=도윤, stackHeight=12, eventId=26292268-95ae-4728-9a47-2fb48ef68522]",
+  "[2026-08-26 07:22:38.017] [ERROR] [53fdcef23bca0f541f7e86332a43ebd1,03dd38f4594e0ddc] --- [redis-stream-thread-pool-blockstacking2] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=StopCommandEventConsumer, message=StopCommandEvent[joinCode=H4RV, playerName=수아, stackHeight=9, eventId=396a1fb1-8b58-4aed-afe3-b0082633cebf]",
+  "[2026-08-26 07:23:11.482] [ERROR] [ae24436f8cc1bef5f7621bb6cc1eb99f,2efb4499494733e8] --- [redis-stream-thread-pool-blockstacking3] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=StopCommandEventConsumer, message=StopCommandEvent[joinCode=H4RV, playerName=지호, stackHeight=15, eventId=7ff2be0a-26c8-474c-8758-2405083941e8]",
+  "[2026-08-26 07:23:44.930] [ERROR] [041ee090e8d299a3e11a2d77c8f7ce7b,3d45178dc884b024] --- [redis-stream-thread-pool-blockstacking1] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=StopCommandEventConsumer, message=StopCommandEvent[joinCode=N8FC, playerName=도윤, stackHeight=7, eventId=9fa21939-6534-40ed-96db-139d1b4c24d6]",
+  "[2026-08-26 07:24:18.365] [ERROR] [f70eb08b3baea91e8892e418a86a6533,cf4e57ec520740f1] --- [redis-stream-thread-pool-blockstacking2] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=StopCommandEventConsumer, message=StopCommandEvent[joinCode=N8FC, playerName=아린, stackHeight=11, eventId=879a9e3e-5b2e-4ed5-a16f-b6d2fed27560]",
+  "[2026-08-26 07:24:52.803] [ERROR] [204b12cd9593de0d7429bc6abbd94c9b,f5425eac4ebbf9ae] --- [redis-stream-thread-pool-blockstacking3] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=StopCommandEventConsumer, message=StopCommandEvent[joinCode=N8FC, playerName=수아, stackHeight=13, eventId=d423a536-3539-4cfd-813f-1b623a67f196]"
+ ],
+ "logEnvironment": "prod",
+ "expected": "예",
+ "axis": "partial-relevance"
+}

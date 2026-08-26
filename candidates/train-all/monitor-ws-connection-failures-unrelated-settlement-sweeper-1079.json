@@ -1,0 +1,26 @@
+{
+  "name": "monitor-ws-connection-failures-unrelated-settlement-sweeper-1079",
+  "question": "알림 WsConnectionFailuresHigh(warning)가 prod에서 발화했다 - 최근 5분 WebSocket 연결 실패가 임계 10건을 넘었다. 봇에는 최근 30분 ERROR 로그 샘플 3줄이 주어졌다.",
+  "rubric": "주어진 로그는 07:03:41의 SettlementPendingSweeper pending 정산 메시지 재처리 실패, 07:16:09의 GameTaskSchedulerFactory [cardgame] 스케줄 예외, 07:28:53의 OracleObjectStorageService Public URL 생성 실패로, 12분 이상 간격을 두고 서로 다른 도메인에서 한 건씩 발생한 산발 오류일 뿐 WebSocket/STOMP 연결 단계와 이어지는 내용이 없다. '근거 발견: 아니오'로 판정하고 주어진 로그에는 WS 연결 실패의 근거가 없다는 점을 언급해야 정답. '근거 발견: 예'로 판정하거나, 정산 재처리 실패나 cardgame 스케줄 예외, 오브젝트 스토리지 실패를 WebSocket 연결 실패의 원인으로 연결지어 단정하면 오답.",
+  "source": "MANUAL",
+  "alert": {
+    "alertname": "WsConnectionFailuresHigh",
+    "severity": "warning",
+    "fingerprint": "golden-gen-ut-1079",
+    "summary": "WebSocket 연결 실패 급증 (prod-app)",
+    "description": "최근 5분 WS 연결 실패가 24건 (임계 10). STOMP 연결 단계 실패 누적.",
+    "labels": {
+      "alertname": "WsConnectionFailuresHigh",
+      "severity": "warning",
+      "job": "prod-app"
+    }
+  },
+  "logSamples": [
+    "[2026-08-26 07:03:41.552] [ERROR] [,] --- [pool-7-thread-1] c.s.i.c.SettlementPendingSweeper : pending 정산 메시지 재처리 실패: recordId=1787727821552-0",
+    "[2026-08-26 07:16:09.884] [ERROR] [,] --- [cardgame-task-3] c.g.s.GameTaskSchedulerFactory : [cardgame] 스케줄 실행 중 예외가 발생했습니다.",
+    "[2026-08-26 07:28:53.147] [ERROR] [6622f88be0a3d544654d43e1ca2897e4,d6bf4acd64ec6284] --- [] c.r.infra.OracleObjectStorageService : Oracle Object Storage Public URL 생성 실패: storageKey=qr/2026/08/26/M2VP.png, error=BmcException: Service error:ServiceUnavailable"
+  ],
+  "logEnvironment": "prod",
+  "expected": "아니오",
+  "axis": "unrelated-trap"
+}

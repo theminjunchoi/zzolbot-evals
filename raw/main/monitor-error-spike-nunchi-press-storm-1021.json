@@ -1,0 +1,31 @@
+{
+ "name": "monitor-error-spike-nunchi-press-storm-1021",
+ "question": "알림 AppErrorLogSpike(warning)가 prod에서 발화했다 - 최근 5분 ERROR 로그가 임계 30건을 넘겨 급증했다. 봇에는 최근 30분 ERROR 로그 샘플 8줄(특정 방의 눈치게임 press 처리 실패 밀집과 그와 무관한 산발 에러)이 주어졌다.",
+ "rubric": "관련 로그는 20:19:02부터 20:19:23까지 21초 안에 밀집한 눈치게임 press 처리 실패 6건으로, 모두 joinCode=F5RJ라는 동일한 방에서 여러 플레이어의 press 이벤트가 연속 실패했음을 보여주는 ERROR 급증의 직접 근거다. 반면 20:14의 blockstacking 스트림 컨테이너 상태 확인 예외와 20:26의 랜덤 닉네임 조회 요청 실패는 시간대와 경로가 모두 떨어진 산발 에러다. '근거 발견: 예'로 판정하고 특정 방(F5RJ)의 눈치게임 press 처리 실패가 짧은 시간에 반복된 것을 ERROR 급증의 원인 가설로 제시하면 정답. '근거 발견: 아니오'로 판정하거나 blockstacking 컨테이너 예외 또는 랜덤 닉네임 조회 실패를 급증의 원인으로 끌어들이면 오답.",
+ "source": "MANUAL",
+ "alert": {
+  "alertname": "AppErrorLogSpike",
+  "severity": "warning",
+  "fingerprint": "golden-gen-pr-1021",
+  "summary": "ERROR 로그 급증(최근 5분, prod-app)",
+  "description": "ERROR 로그가 52건(임계 30/5m)입니다. zzol-bot이 근본원인을 분석합니다.",
+  "labels": {
+   "alertname": "AppErrorLogSpike",
+   "severity": "warning",
+   "job": "prod-app"
+  }
+ },
+ "logSamples": [
+  "[2026-08-26 20:14:38.221] [ERROR] [,] --- [pool-5-thread-4] c.g.h.RedisStreamContainerRecovery : Redis Stream container 상태 확인 중 예외: stream=blockstacking",
+  "[2026-08-26 20:19:02.874] [ERROR] [4fc75592188f1b92a2bb2792e7c11d07,9e6cd3ac3c3718b0] --- [redis-stream-thread-pool-nunchi1] c.n.i.m.c.NunchiCommandEventConsumer : 눈치게임 press 처리 중 오류: joinCode=F5RJ, playerName=서준, eventId=1245bc35-7a87-4c57-82ea-79e6453c7634",
+  "[2026-08-26 20:19:05.310] [ERROR] [f90a2b3d8b82196a467ac4e65a508105,3c280cf0c472751d] --- [redis-stream-thread-pool-nunchi1] c.n.i.m.c.NunchiCommandEventConsumer : 눈치게임 press 처리 중 오류: joinCode=F5RJ, playerName=하윤, eventId=3298c3dc-0ba5-4c06-bde8-edf6c5081593",
+  "[2026-08-26 20:19:07.946] [ERROR] [6545d38b4b24670c193b9dd9ed4d622a,9c9adf438e17fe03] --- [redis-stream-thread-pool-nunchi2] c.n.i.m.c.NunchiCommandEventConsumer : 눈치게임 press 처리 중 오류: joinCode=F5RJ, playerName=도윤, eventId=69bc7d14-109a-42a4-83ae-84bfffd8e2e8",
+  "[2026-08-26 20:19:11.588] [ERROR] [8335337d1413e231e58cc671a2b8695d,73027affac146836] --- [redis-stream-thread-pool-nunchi1] c.n.i.m.c.NunchiCommandEventConsumer : 눈치게임 press 처리 중 오류: joinCode=F5RJ, playerName=서준, eventId=f1488a1e-f152-47d5-9241-abc2a6728585",
+  "[2026-08-26 20:19:16.203] [ERROR] [dd88766f1df19474fc2df9c40833066f,8daffd62f5c9c22e] --- [redis-stream-thread-pool-nunchi2] c.n.i.m.c.NunchiCommandEventConsumer : 눈치게임 press 처리 중 오류: joinCode=F5RJ, playerName=민서, eventId=16c4dde0-c1fc-4784-ba77-e5151e99fbf7",
+  "[2026-08-26 20:19:23.759] [ERROR] [d57b8f973b1d6ca80de7cb2a56e4b047,a4d3f877a1fb0ca9] --- [redis-stream-thread-pool-nunchi1] c.n.i.m.c.NunchiCommandEventConsumer : 눈치게임 press 처리 중 오류: joinCode=F5RJ, playerName=하윤, eventId=f4cf5341-9ac6-48cb-ab9a-2348abe76cae",
+  "[2026-08-26 20:26:41.435] [ERROR] [7631c704bfa8647844102246bd5c213a,3e48df97b2d1e12a] --- [http-nio-8080-exec-04] c.web.exception.RestExceptionHandler : method=GET uri=/rooms/nickname/random exception=NicknameGenerationException message=Random nickname pool exhausted"
+ ],
+ "logEnvironment": "prod",
+ "expected": "예",
+ "axis": "partial-relevance"
+}

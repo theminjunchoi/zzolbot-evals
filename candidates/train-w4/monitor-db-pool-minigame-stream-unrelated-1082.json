@@ -1,0 +1,27 @@
+{
+  "name": "monitor-db-pool-minigame-stream-unrelated-1082",
+  "question": "알림 DbConnectionPoolHigh(warning)가 prod에서 발화했다 - DB 커넥션 풀 활성 연결이 10개로 임계 8을 넘었다. 봇에는 최근 30분 창에서 조회된 prod ERROR 로그 샘플 4줄이 주어졌다.",
+  "rubric": "주어진 ERROR 로그 4줄은 21:07:33 눈치게임 press 처리 오류, 21:13:56 blindtimer 게임 스케줄러 예외, 21:22:41 speedtouch 스트림의 TouchProgressEventConsumer 처리 실패, 21:30:12 Redis Stream 리스너 처리 오류로, 6분 이상 간격을 두고 서로 다른 미니게임 실시간 경로에서 산발적으로 발생했다. 모두 Redis 스트림과 게임 스케줄러 계층이며 JDBC 커넥션 획득 지연, 슬로우 쿼리, 트랜잭션 지연을 보여주는 로그는 없다. '근거 발견: 아니오'로 판정하고 커넥션 풀 상승의 원인을 단정하지 않아야 정답. 미니게임 스트림 오류를 커넥션 누수나 DB 부하의 근거로 삼으면 오답.",
+  "source": "MANUAL",
+  "alert": {
+    "alertname": "DbConnectionPoolHigh",
+    "severity": "warning",
+    "fingerprint": "golden-gen-ut-1082",
+    "summary": "DB 커넥션 풀 활성 > 8 (prod-app)",
+    "description": "활성 연결 10개 (최대 10). 슬로우 쿼리 또는 커넥션 누수 확인 필요.",
+    "labels": {
+      "alertname": "DbConnectionPoolHigh",
+      "severity": "warning",
+      "job": "prod-app"
+    }
+  },
+  "logSamples": [
+    "[2026-08-26 21:07:33.410] [ERROR] [c9ca0519cf0af2b13cc309b618e49a2f,00fcf33447783aac] --- [redis-stream-thread-pool-nunchi1] c.n.i.m.c.NunchiCommandEventConsumer : 눈치게임 press 처리 중 오류: joinCode=B4TM, playerName=USER2, eventId=39d03368-9958-4bf7-8e77-2f4d5a15d5f2",
+    "[2026-08-26 21:13:56.782] [ERROR] [,] --- [blindtimer-task-1] c.g.s.GameTaskSchedulerFactory : [blindtimer] 스케줄 실행 중 예외가 발생했습니다.",
+    "[2026-08-26 21:22:41.064] [ERROR] [aba0862c5a96546140bcb6b8f85cf818,ebd2eb814a858926] --- [redis-stream-thread-pool-speedtouch2] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=TouchProgressEventConsumer, message=TouchProgressEvent[eventId=18bef976-f87c-493f-b5fd-1c174bedf911, timestamp=2026-08-26T12:22:41.061000760Z, joinCode=B4TM, playerName=USER5, progress=63]",
+    "[2026-08-26 21:30:12.338] [ERROR] [b8d91df1300dfd8daf10fb21b069862a,46c542a12ae22ed7] --- [redis-stream-thread-pool-minigame1] c.g.r.c.RedisStreamListenerStarter : Redis Stream 처리 중 오류가 발생했습니다."
+  ],
+  "logEnvironment": "prod",
+  "expected": "아니오",
+  "axis": "unrelated-trap"
+}

@@ -1,0 +1,31 @@
+{
+  "name": "monitor-stream-latency-nunchi-scheduler-compound-1012",
+  "question": "알림 RedisStreamE2eLatencyHigh(warning)가 prod에서 발화했다 - Redis Stream E2E 지연 p95가 500ms를 초과. 봇에는 최근 30분 ERROR 로그 샘플 8줄(눈치게임 스케줄 태스크 예외와 nunchi 스트림 처리 실패 연쇄)이 주어졌다.",
+  "rubric": "주어진 ERROR 로그는 nunchi-task 스레드의 게임 스케줄 실행 예외와 스케줄러 풀의 태스크 오류가 먼저 나타나고, 그 뒤 nunchi 스트림에서 NunchiCommandEventConsumer의 press 처리 오류와 minigame 스트림의 이벤트 처리 실패, RedisStreamListenerStarter 오류가 이어지는 구조로, 게임 라운드 스케줄 실패가 근본 원인이고 스트림 컨슈머 처리 실패와 지연이 그 파급 증상임을 보여준다. '근거 발견: 예'로 판정하고 눈치게임 스케줄 태스크 실행 실패를 근본 원인으로, nunchi 스트림 press 처리 오류와 E2E 지연을 파급 증상으로 구분해 가설을 제시하면 정답. '근거 발견: 아니오'로 판정하거나 press 처리 오류 자체를 근본 원인으로 지목하고 게임 스케줄 실패를 놓치면 오답.",
+  "source": "MANUAL",
+  "alert": {
+    "alertname": "RedisStreamE2eLatencyHigh",
+    "severity": "warning",
+    "fingerprint": "golden-gen-cc-1012",
+    "summary": "Redis Stream E2E 지연 p95 > 500ms (prod-app)",
+    "description": "스트림 처리 p95 지연이 1.9s. 컨슈머 처리 적체 또는 다운스트림(App Service) 지연 가능성.",
+    "labels": {
+      "alertname": "RedisStreamE2eLatencyHigh",
+      "severity": "warning",
+      "job": "prod-app"
+    }
+  },
+  "logSamples": [
+    "[2026-08-26 21:33:20.514] [ERROR] [,] --- [nunchi-task-1] c.g.s.GameTaskSchedulerFactory : [nunchi] 스케줄 실행 중 예외가 발생했습니다.",
+    "[2026-08-26 21:33:41.882] [ERROR] [,] --- [pool-3-thread-1] o.s.s.s.TaskUtils$LoggingErrorHandler : Unexpected error occurred in scheduled task",
+    "[2026-08-26 21:34:16.203] [ERROR] [d6100a1abb916faa22f24423025daa23,77bdf6a90011d8e8] --- [redis-stream-thread-pool-nunchi1] c.n.i.m.c.NunchiCommandEventConsumer : 눈치게임 press 처리 중 오류: joinCode=H4RN, playerName=승우, eventId=5572ae7e-2ef5-42b0-b71e-933b65f716b6",
+    "[2026-08-26 21:34:58.741] [ERROR] [4feb666cf455450f25a8bbd65abef99c,6a3e25d5e0e762d7] --- [redis-stream-thread-pool-nunchi2] c.n.i.m.c.NunchiCommandEventConsumer : 눈치게임 press 처리 중 오류: joinCode=H4RN, playerName=예은, eventId=57ef4b91-4fa6-470f-a3b6-e3db4c6d3e34",
+    "[2026-08-26 21:35:44.339] [ERROR] [e684a6f112828f30f00f3a9c05aff7ab,8185b2c4f2f4d078] --- [redis-stream-thread-pool-minigame1] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=MiniGameStartConsumer, message=MiniGameStartEvent[joinCode=H4RN, gameType=nunchi, round=3]",
+    "[2026-08-26 21:36:12.008] [ERROR] [,] --- [nunchi-task-2] c.g.s.GameTaskSchedulerFactory : [nunchi] 스케줄 실행 중 예외가 발생했습니다.",
+    "[2026-08-26 21:37:05.667] [ERROR] [20ecdb92e7c7b3a3edc5609e3e5e804b,150f54b9d9551d2f] --- [redis-stream-thread-pool-nunchi3] c.n.i.m.c.NunchiCommandEventConsumer : 눈치게임 press 처리 중 오류: joinCode=V6PD, playerName=지안, eventId=f4a7f05d-df7b-4982-8fa5-2415137f1357",
+    "[2026-08-26 21:38:30.421] [ERROR] [3e76df313086becbe5c4295743392856,cedfb13bbc2c4331] --- [redis-stream-thread-pool-nunchi1] c.g.r.c.RedisStreamListenerStarter : Redis Stream 처리 중 오류가 발생했습니다."
+  ],
+  "logEnvironment": "prod",
+  "expected": "예",
+  "axis": "compound-cause"
+}

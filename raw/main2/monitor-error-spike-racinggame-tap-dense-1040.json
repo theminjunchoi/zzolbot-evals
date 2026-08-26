@@ -1,0 +1,33 @@
+{
+ "name": "monitor-error-spike-racinggame-tap-dense-1040",
+ "question": "알림 AppErrorLogSpike(warning)가 prod에서 발화했다 - 최근 5분 ERROR 로그가 96건으로 임계 30건을 넘었다. 봇에는 최근 30분 ERROR 로그 샘플 10줄(racinggame tap 커맨드 컨슈머 실패가 4분 창에 밀집)이 주어졌다.",
+ "rubric": "주어진 ERROR 로그는 11:30부터 11:33까지 약 4분 창 안에서 racinggame 스트림 스레드 세 개에 걸쳐 EventDispatcher의 TapCommandEventConsumer가 TapCommandEvent 처리에 아홉 번 연속 실패하고 racinggame 게임 스케줄러 태스크도 예외로 끝났음을 보여주며, 알림 시각과 정합하는 좁은 시간창에 관련 오류만 밀집해 있다. '근거 발견: 예'로 판정하고 racinggame tap 커맨드 처리 경로의 반복 실패를 ERROR 급증의 원인 가설로 제시하면 정답. '근거 발견: 아니오'로 판정하거나 로그가 알림과 무관하다고 결론 내리면 오답.",
+ "source": "MANUAL",
+ "alert": {
+  "alertname": "AppErrorLogSpike",
+  "severity": "warning",
+  "fingerprint": "golden-gen-esrt-1040",
+  "summary": "ERROR 로그 급증(최근 5분, prod-app)",
+  "description": "ERROR 로그가 96건(임계 30/5m)입니다. zzol-bot이 근본원인을 분석합니다.",
+  "labels": {
+   "alertname": "AppErrorLogSpike",
+   "severity": "warning",
+   "job": "prod-app"
+  }
+ },
+ "logSamples": [
+  "[2026-08-26 11:30:07.412] [ERROR] [e3f10d08f1f6cedeab403f4f04ce4f5a,3c882214a4f91ffd] --- [redis-stream-thread-pool-racinggame1] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=TapCommandEventConsumer, message=TapCommandEvent[joinCode=M9WD, playerName=하준, tapCount=17, eventId=11cfa3b3-5fb2-c2d4-b491-4992edf2f408]",
+  "[2026-08-26 11:30:26.845] [ERROR] [aa67d4ce52e3116b1a7385ecbd40a1e8,eebe15a381bfab76] --- [redis-stream-thread-pool-racinggame2] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=TapCommandEventConsumer, message=TapCommandEvent[joinCode=M9WD, playerName=예린, tapCount=21, eventId=e7e409b8-f1da-17ec-31bd-9761da6df993]",
+  "[2026-08-26 11:30:48.273] [ERROR] [47a343ce879df03513a92e4b1113589a,98211483fb5b9f1b] --- [redis-stream-thread-pool-racinggame3] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=TapCommandEventConsumer, message=TapCommandEvent[joinCode=M9WD, playerName=민재, tapCount=14, eventId=bc6b04bb-355c-befd-8c45-05a75116f381]",
+  "[2026-08-26 11:31:11.609] [ERROR] [b457ab55509a3e466e08c82eaf20631b,21aca7ff1ef441f5] --- [redis-stream-thread-pool-racinggame1] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=TapCommandEventConsumer, message=TapCommandEvent[joinCode=M9WD, playerName=하준, tapCount=19, eventId=43e7c7c5-82c0-3014-08d2-a6baede23130]",
+  "[2026-08-26 11:31:34.037] [ERROR] [3bc1fdb0c93c08f7f207649c50a453c3,b6af858f9ab9d5f7] --- [redis-stream-thread-pool-racinggame2] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=TapCommandEventConsumer, message=TapCommandEvent[joinCode=C6ZP, playerName=지우, tapCount=23, eventId=e6505fe8-9af9-f07e-8095-617692ba76e8]",
+  "[2026-08-26 11:32:02.451] [ERROR] [fa91554782b28d2828cfe92338855f3f,2f57de97fb136df9] --- [redis-stream-thread-pool-racinggame3] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=TapCommandEventConsumer, message=TapCommandEvent[joinCode=C6ZP, playerName=예린, tapCount=16, eventId=26377f5e-ca3a-f8e7-fd8c-47c7a3253629]",
+  "[2026-08-26 11:32:29.884] [ERROR] [cf20ecc6d92dd332b02accdde3d59a2d,7c96a8d0e1b1e554] --- [redis-stream-thread-pool-racinggame1] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=TapCommandEventConsumer, message=TapCommandEvent[joinCode=C6ZP, playerName=민재, tapCount=25, eventId=22e59021-e2eb-d3e4-ae6e-5673bdb4cb01]",
+  "[2026-08-26 11:32:57.316] [ERROR] [f1d4242a4467405e6065af6aaa72e6e2,eacdafe72b7b4bff] --- [redis-stream-thread-pool-racinggame2] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=TapCommandEventConsumer, message=TapCommandEvent[joinCode=C6ZP, playerName=하준, tapCount=12, eventId=b0cd80bb-caab-7e52-a996-536c3390fee8]",
+  "[2026-08-26 11:33:24.760] [ERROR] [9df98da713b2fab2c62be74d3c41acad,397197e2a232377c] --- [redis-stream-thread-pool-racinggame3] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=TapCommandEventConsumer, message=TapCommandEvent[joinCode=C6ZP, playerName=지우, tapCount=18, eventId=9c78b069-3af0-80b9-9784-6b6ba9163929]",
+  "[2026-08-26 11:33:52.198] [ERROR] [,] --- [racinggame-task-2] c.g.s.GameTaskSchedulerFactory : [racinggame] 스케줄 실행 중 예외가 발생했습니다."
+ ],
+ "logEnvironment": "prod",
+ "expected": "예",
+ "axis": "positive-dense"
+}

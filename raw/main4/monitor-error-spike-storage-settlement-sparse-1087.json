@@ -1,0 +1,25 @@
+{
+  "name": "monitor-error-spike-storage-settlement-sparse-1087",
+  "question": "알림 AppErrorLogSpike(warning)가 prod에서 발화했다 - 최근 5분 ERROR 로그가 44건으로 임계 30건을 넘었다. 봇에는 최근 30분 창에서 조회된 prod ERROR 로그 샘플 2줄이 주어졌다.",
+  "rubric": "주어진 로그는 14:41:12의 Oracle Object Storage Public URL 생성 실패와 15:03:39의 SettlementPendingSweeper pending 정산 메시지 재처리 실패 단 2줄이며, 약 22분 간격으로 떨어져 있어 5분 창 하나에 모이지 않는다. 하나는 외부 스토리지 호출, 다른 하나는 정산 스윕 스케줄러로 도메인도 무관하다. 44건 급증의 원인을 판단하기에는 표본이 부족하므로 '근거 발견: 아니오'로 판정하고 표본 부족을 명시해야 정답. 스토리지 오류나 정산 재처리 실패를 급증의 근본원인으로 단정하면 오답.",
+  "source": "MANUAL",
+  "alert": {
+    "alertname": "AppErrorLogSpike",
+    "severity": "warning",
+    "fingerprint": "golden-gen-sp-1087",
+    "summary": "ERROR 로그 급증(최근 5분, prod-app)",
+    "description": "ERROR 로그가 44건(임계 30/5m)입니다. zzol-bot이 근본원인을 분석합니다.",
+    "labels": {
+      "alertname": "AppErrorLogSpike",
+      "severity": "warning",
+      "job": "prod-app"
+    }
+  },
+  "logSamples": [
+    "[2026-08-26 14:41:12.507] [ERROR] [,] --- [] c.r.infra.OracleObjectStorageService : Oracle Object Storage Public URL 생성 실패: storageKey=qr/2026/08/26/HN52.png, error=com.oracle.bmc.model.BmcException: (404, NotAuthorizedOrNotFound)",
+    "[2026-08-26 15:03:39.884] [ERROR] [,] --- [pool-12-thread-2] c.s.i.c.SettlementPendingSweeper : pending 정산 메시지 재처리 실패: recordId=1756200219861-0"
+  ],
+  "logEnvironment": "prod",
+  "expected": "아니오",
+  "axis": "sparse-evidence"
+}

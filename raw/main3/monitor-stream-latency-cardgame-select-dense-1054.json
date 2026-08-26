@@ -1,0 +1,32 @@
+{
+ "name": "monitor-stream-latency-cardgame-select-dense-1054",
+ "question": "알림 RedisStreamE2eLatencyHigh(warning)가 prod에서 발화했다 - Redis Stream E2E 지연 p95가 500ms를 초과했다. 봇에는 최근 30분 ERROR 로그 샘플 9줄(카드게임 선택 커맨드 이벤트 처리 실패 반복)이 주어졌다.",
+ "rubric": "주어진 ERROR 로그는 22:41:09부터 22:45:33까지 약 4분 동안 cardgame:select 스트림 스레드 3개에서 EventDispatcher의 consumer=SelectCardCommandEventConsumer 이벤트 처리 실패가 9회 반복된 내용이며, 실패는 joinCode=F6QA와 joinCode=8XJP 두 방에 걸쳐 있고 알림 시간창과 정합하는 직접 근거다. '근거 발견: 예'로 판정하고 cardgame:select 스트림의 SelectCardCommandEventConsumer 반복 실패로 인한 컨슈머 처리 적체를 지연의 원인으로 제시하면 정답. '근거 발견: 아니오'로 판정하거나 로그에 없는 다른 스트림이나 스케줄러 경로를 원인으로 지목하면 오답.",
+ "source": "MANUAL",
+ "alert": {
+  "alertname": "RedisStreamE2eLatencyHigh",
+  "severity": "warning",
+  "fingerprint": "golden-gen-pd-1054",
+  "summary": "Redis Stream E2E 지연 p95 > 500ms (prod-app)",
+  "description": "스트림 처리 p95 지연이 1.32s. 컨슈머 처리 적체 또는 다운스트림(App Service) 지연 가능성.",
+  "labels": {
+   "alertname": "RedisStreamE2eLatencyHigh",
+   "severity": "warning",
+   "job": "prod-app"
+  }
+ },
+ "logSamples": [
+  "[2026-08-26 22:41:09.336] [ERROR] [d74cf9ee282d3b16a20e89f80fce365b,a8158e8a4e043962] --- [redis-stream-thread-pool-cardgame:select1] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=SelectCardCommandEventConsumer, message=SelectCardCommandEvent[joinCode=F6QA, playerName=삐약, eventId=2c4bf967-83d1-4d7a-9c4f-3940e159331f]",
+  "[2026-08-26 22:41:37.812] [ERROR] [a8d538208f807ff57353fcfb9d3ef407,ef2fa2af493707ab] --- [redis-stream-thread-pool-cardgame:select2] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=SelectCardCommandEventConsumer, message=SelectCardCommandEvent[joinCode=F6QA, playerName=구구, eventId=3bbba1a6-76e8-4fd0-8eab-f8d3eb4791c2]",
+  "[2026-08-26 22:42:04.155] [ERROR] [b46514cd7022e7faa38f8143d8c3b37e,bcdde8bf8cf5e525] --- [redis-stream-thread-pool-cardgame:select1] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=SelectCardCommandEventConsumer, message=SelectCardCommandEvent[joinCode=F6QA, playerName=탄탄, eventId=23dfa75b-e979-405a-85a9-241af0dbdfcf]",
+  "[2026-08-26 22:42:41.629] [ERROR] [fe37ae7583eb9c6f955c07231efc91e9,041a889458facf54] --- [redis-stream-thread-pool-cardgame:select3] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=SelectCardCommandEventConsumer, message=SelectCardCommandEvent[joinCode=8XJP, playerName=모카, eventId=c871a558-a644-4440-9e2e-0537077461f4]",
+  "[2026-08-26 22:43:18.074] [ERROR] [5ab43ea9aead0ae3f9de7e61b80aff5f,6811c14d6401822f] --- [redis-stream-thread-pool-cardgame:select2] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=SelectCardCommandEventConsumer, message=SelectCardCommandEvent[joinCode=8XJP, playerName=가리, eventId=e6eb4696-19af-40c4-8215-aca9c6810645]",
+  "[2026-08-26 22:43:52.490] [ERROR] [1325f1aade6ff803e0ab920baea77b23,2f84fbbab5b18fe5] --- [redis-stream-thread-pool-cardgame:select1] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=SelectCardCommandEventConsumer, message=SelectCardCommandEvent[joinCode=8XJP, playerName=루루, eventId=001ce097-cce7-4ddb-9727-92ba858ef837]",
+  "[2026-08-26 22:44:26.918] [ERROR] [891803adae59186418fc6c51890f9e4f,b7ea72cf2b95165d] --- [redis-stream-thread-pool-cardgame:select3] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=SelectCardCommandEventConsumer, message=SelectCardCommandEvent[joinCode=8XJP, playerName=노아, eventId=3d30d75d-3ec9-461b-bf17-d810f130e66e]",
+  "[2026-08-26 22:44:59.203] [ERROR] [e4060f8419ebb6be48c6ddfb709560d7,5caf9d4f72b5b364] --- [redis-stream-thread-pool-cardgame:select2] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=SelectCardCommandEventConsumer, message=SelectCardCommandEvent[joinCode=F6QA, playerName=삐약, eventId=31c277bf-46d9-4943-b085-78964f97d3fe]",
+  "[2026-08-26 22:45:33.741] [ERROR] [3dd9d23e397e17122f74717183a2d778,b5da4637af8b89dd] --- [redis-stream-thread-pool-cardgame:select1] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=SelectCardCommandEventConsumer, message=SelectCardCommandEvent[joinCode=8XJP, playerName=모카, eventId=23892772-6f08-46d5-a980-153f05a3e736]"
+ ],
+ "logEnvironment": "prod",
+ "expected": "예",
+ "axis": "positive-dense"
+}

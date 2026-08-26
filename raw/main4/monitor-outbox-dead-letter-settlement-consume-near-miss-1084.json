@@ -1,0 +1,28 @@
+{
+  "name": "monitor-outbox-dead-letter-settlement-consume-near-miss-1084",
+  "question": "알림 OutboxDeadLetterHigh(warning)가 prod에서 발화했다 - DEAD_LETTER로 전환된 outbox 이벤트가 14건으로 임계 10을 넘었다. 봇에는 최근 30분 창에서 조회된 prod ERROR 로그 샘플 5줄이 주어졌다.",
+  "rubric": "알림 대상은 OutboxEventProcessor가 최대 재시도를 초과해 DEAD_LETTER로 전환한 outbox 이벤트지만, 주어진 5줄은 전부 정산 메시지를 소비하는 쪽이다. SettlementStreamConsumer가 16:12:09과 16:22:07에 ACK 보류와 재전달 대기를, 16:17:08에 정산 스트림 처리 오류를 남겼고 SettlementPendingSweeper가 16:14:39과 16:19:38에 pending 재처리 실패를 남겼다. 둘 다 재시도 계열이라 그럴듯해 보이지만 outbox 테이블에서 스트림으로 발행하는 경로가 아니라 이미 발행된 메시지를 읽는 컨슈머 경로이고, OutboxEventProcessor의 DEAD_LETTER 전환 로그는 한 줄도 없다. '근거 발견: 아니오'로 판정하고 컴포넌트가 다르다는 점을 지적해야 정답. 정산 컨슈머 재처리 실패를 outbox DEAD_LETTER 적체의 원인으로 단정하면 오답.",
+  "source": "MANUAL",
+  "alert": {
+    "alertname": "OutboxDeadLetterHigh",
+    "severity": "warning",
+    "fingerprint": "golden-gen-nmc-1084",
+    "summary": "Outbox DEAD_LETTER 적체 (> 10, prod-app)",
+    "description": "재시도 초과로 DEAD_LETTER 전환된 outbox 이벤트가 14건. 다운스트림 발행 경로 점검 필요.",
+    "labels": {
+      "alertname": "OutboxDeadLetterHigh",
+      "severity": "warning",
+      "job": "prod-app"
+    }
+  },
+  "logSamples": [
+    "[2026-08-26 16:12:09.443] [ERROR] [39ceed9a82c95377ae2784ef2ca7753c,a57c301a2e7f22f8] --- [redis-stream-thread-pool-settlement:result1] c.s.i.c.SettlementStreamConsumer : 정산 처리 실패 — ACK 보류, 재전달 대기: recordId=1756192329411-0",
+    "[2026-08-26 16:14:39.017] [ERROR] [,] --- [pool-9-thread-3] c.s.i.c.SettlementPendingSweeper : pending 정산 메시지 재처리 실패: recordId=1756192329411-0",
+    "[2026-08-26 16:17:08.660] [ERROR] [17ebd07dc09d8c2e2a8e112349b4a05b,73a37b89f2720a51] --- [redis-stream-thread-pool-settlement:result2] c.s.i.c.SettlementStreamConsumer : 정산 스트림 처리 중 오류가 발생했습니다.",
+    "[2026-08-26 16:19:38.125] [ERROR] [,] --- [pool-9-thread-3] c.s.i.c.SettlementPendingSweeper : pending 정산 메시지 재처리 실패: recordId=1756192578602-0",
+    "[2026-08-26 16:22:07.538] [ERROR] [bb11fceb61f7328b7d74e9d131cb13dd,e2ee7353d678391f] --- [redis-stream-thread-pool-settlement:result1] c.s.i.c.SettlementStreamConsumer : 정산 처리 실패 — ACK 보류, 재전달 대기: recordId=1756192578602-0"
+  ],
+  "logEnvironment": "prod",
+  "expected": "아니오",
+  "axis": "near-miss-component"
+}

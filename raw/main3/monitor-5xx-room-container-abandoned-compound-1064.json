@@ -1,0 +1,34 @@
+{
+ "name": "monitor-5xx-room-container-abandoned-compound-1064",
+ "question": "알림 Http5xxRatioHigh(critical)가 prod에서 발화했다 - 최근 5분 5xx 비율 5% 초과. 봇에는 최근 30분 ERROR 로그 샘플 11줄(room 스트림 컨테이너 복구 포기와 그 뒤의 방 도메인 및 HTTP 요청 실패)이 주어졌다.",
+ "rubric": "주어진 ERROR 로그 11줄은 18:02부터 RedisStreamContainerRecovery가 room 스트림 컨테이너의 상태 확인에 1번, 복구에 2번 실패한 끝에 18:04에 복구를 포기하고 HealthIndicator에 DOWN을 보고했으며, 그 이후 시각에만 EventDispatcher의 PlayerDisconnectedConsumer 처리 실패 2건, RoomEventWaitManager의 방 이벤트 자동 정리 실패 1건, 그리고 /rooms 및 /rooms/{code}/settings 요청 4건이 모두 IllegalStateException(Stream container for room is down)으로 실패했음을 보여준다. '근거 발견: 예'로 판정하고 room 스트림 컨테이너 복구 포기를 근본 원인으로, 방 도메인 이벤트 처리 실패와 HTTP 요청 실패는 그로 인한 파급 증상으로 구분해 가설을 제시하면 정답. '근거 발견: 아니오'로 판정하거나 HTTP 요청 실패나 방 이벤트 정리 실패를 근본 원인으로 지목해 컨테이너 복구 포기를 파급으로 뒤집어 설명하면 오답.",
+ "source": "MANUAL",
+ "alert": {
+  "alertname": "Http5xxRatioHigh",
+  "severity": "critical",
+  "fingerprint": "golden-gen-crca-1064",
+  "summary": "HTTP 5xx 비율 5% 초과 (prod-app)",
+  "description": "최근 5분 5xx 비율이 11.3%. 서버 측 광범위 실패 가능성.",
+  "labels": {
+   "alertname": "Http5xxRatioHigh",
+   "severity": "critical",
+   "job": "prod-app"
+  }
+ },
+ "logSamples": [
+  "[2026-08-26 18:02:14.331] [ERROR] [,] --- [pool-2-thread-1] c.g.h.RedisStreamContainerRecovery : Redis Stream container 상태 확인 중 예외: stream=room",
+  "[2026-08-26 18:02:49.774] [ERROR] [,] --- [pool-2-thread-1] c.g.h.RedisStreamContainerRecovery : Redis Stream container 복구 중 예외 발생: stream=room",
+  "[2026-08-26 18:03:25.208] [ERROR] [,] --- [pool-2-thread-1] c.g.h.RedisStreamContainerRecovery : Redis Stream container 복구 중 예외 발생: stream=room",
+  "[2026-08-26 18:04:00.652] [ERROR] [,] --- [pool-2-thread-1] c.g.h.RedisStreamContainerRecovery : Redis Stream container 복구 포기: stream=room. HealthIndicator에 DOWN 보고",
+  "[2026-08-26 18:04:38.117] [ERROR] [cb6b1b1fa15974bf5c00bb777ebb191a,237656127c4df25f] --- [redis-stream-thread-pool-room1] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=PlayerDisconnectedConsumer, message=PlayerDisconnectedEvent[joinCode=R5TP, playerName=시우, eventId=eeaca657-7f39-4cff-b1e5-dba36b441344]",
+  "[2026-08-26 18:05:12.560] [ERROR] [dfef51c9e33cc8df035a01e32f1f59e1,4f003bb4cd979a64] --- [redis-stream-thread-pool-room2] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=PlayerDisconnectedConsumer, message=PlayerDisconnectedEvent[joinCode=D8KM, playerName=채원, eventId=836b3dac-a6d3-4330-958e-8cb70ef6cb84]",
+  "[2026-08-26 18:05:47.994] [ERROR] [86345bdbdc200aa4c12930eac7a5c0c8,fd14de8693b78bb8] --- [redis-stream-thread-pool-room1] c.r.i.messaging.RoomEventWaitManager : 방 이벤트 자동 정리 (실패): eventId=bfe55d6a-d19c-463b-b37b-654a58c5a319",
+  "[2026-08-26 18:06:23.428] [ERROR] [9c58dda191a8f030da08b895e23d2369,a1b746f2ff6d5d9d] --- [http-nio-8080-exec-14] c.web.exception.RestExceptionHandler : method=PATCH uri=/rooms/R5TP/settings exception=IllegalStateException message=Stream container for room is down",
+  "[2026-08-26 18:07:01.865] [ERROR] [2dfffbb178751abb0958777a7db15167,8dffdeb780db6c50] --- [http-nio-8080-exec-31] c.web.exception.RestExceptionHandler : method=POST uri=/rooms exception=IllegalStateException message=Stream container for room is down",
+  "[2026-08-26 18:07:39.302] [ERROR] [bdbc93d18dd9af5dc7e5ff6b265619cf,4da424010a05ac26] --- [http-nio-8080-exec-9] c.web.exception.RestExceptionHandler : method=PATCH uri=/rooms/D8KM/settings exception=IllegalStateException message=Stream container for room is down",
+  "[2026-08-26 18:08:16.749] [ERROR] [996b4c827a5f28e79f1dc0a9b19513a2,cf6c1d774578526d] --- [http-nio-8080-exec-22] c.web.exception.RestExceptionHandler : method=POST uri=/rooms exception=IllegalStateException message=Stream container for room is down"
+ ],
+ "logEnvironment": "prod",
+ "expected": "예",
+ "axis": "compound-cause"
+}

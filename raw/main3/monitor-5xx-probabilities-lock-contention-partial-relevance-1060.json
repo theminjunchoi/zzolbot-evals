@@ -1,0 +1,31 @@
+{
+ "name": "monitor-5xx-probabilities-lock-contention-partial-relevance-1060",
+ "question": "알림 Http5xxRatioHigh(critical)가 prod에서 발화했다 - 최근 5분 5xx 비율 5% 초과. 봇에는 최근 30분 ERROR 로그 샘플 8줄(확률 조회 요청의 잠금 획득 실패 밀집과 그 밖의 산발 오류가 섞임)이 주어졌다.",
+ "rubric": "주어진 ERROR 로그 8줄 중 관련 로그는 13:41부터 13:43까지 약 3분 창에 몰린 RestExceptionHandler의 확률 조회 요청 실패 6건으로, 서로 다른 요청 스레드에서 두 방(K3QP, B8ZT)의 /rooms/{code}/probabilities 요청이 모두 CannotAcquireLockException(Deadlock found when trying to get lock)으로 끝났다. 무관 로그는 그보다 앞선 SettlementStreamConsumer의 정산 ACK 보류 1건과 speedtouch 게임 스케줄러 예외 1건이다. '근거 발견: 예'로 판정하고 확률 조회 경로의 DB 잠금 경합(데드락)을 5xx 급증의 원인 가설로 제시하면 정답. '근거 발견: 아니오'로 판정하거나 정산 스트림 또는 speedtouch 스케줄러를 원인으로 지목하면 오답.",
+ "source": "MANUAL",
+ "alert": {
+  "alertname": "Http5xxRatioHigh",
+  "severity": "critical",
+  "fingerprint": "golden-gen-cplc-1060",
+  "summary": "HTTP 5xx 비율 5% 초과 (prod-app)",
+  "description": "최근 5분 5xx 비율이 7.4%. 서버 측 광범위 실패 가능성.",
+  "labels": {
+   "alertname": "Http5xxRatioHigh",
+   "severity": "critical",
+   "job": "prod-app"
+  }
+ },
+ "logSamples": [
+  "[2026-08-26 13:20:33.741] [ERROR] [c7de8eac67237ebae100b22b99ab590c,583d1b23817dca62] --- [redis-stream-thread-pool-settlement:result1] c.s.i.c.SettlementStreamConsumer : 정산 처리 실패 — ACK 보류, 재전달 대기: recordId=1756272033512-0",
+  "[2026-08-26 13:29:58.226] [ERROR] [,] --- [speedtouch-task-2] c.g.s.GameTaskSchedulerFactory : [speedtouch] 스케줄 실행 중 예외가 발생했습니다.",
+  "[2026-08-26 13:41:06.483] [ERROR] [a9e6524f0ac3c982b4092c936a8979a3,27ccbf32b3305245] --- [http-nio-8080-exec-8] c.web.exception.RestExceptionHandler : method=GET uri=/rooms/K3QP/probabilities exception=CannotAcquireLockException message=Deadlock found when trying to get lock; try restarting transaction",
+  "[2026-08-26 13:41:39.917] [ERROR] [78d4d9c3d57199ed184f085fd7494fb0,353d31c772cc5b25] --- [http-nio-8080-exec-21] c.web.exception.RestExceptionHandler : method=GET uri=/rooms/K3QP/probabilities exception=CannotAcquireLockException message=Deadlock found when trying to get lock; try restarting transaction",
+  "[2026-08-26 13:42:14.350] [ERROR] [462c9807a664a5cb608bab45053355f0,f7b21291ae94200c] --- [http-nio-8080-exec-13] c.web.exception.RestExceptionHandler : method=GET uri=/rooms/B8ZT/probabilities exception=CannotAcquireLockException message=Deadlock found when trying to get lock; try restarting transaction",
+  "[2026-08-26 13:42:48.792] [ERROR] [febcaeccca9f7add0254a744468222da,407d57ce71ea11bb] --- [http-nio-8080-exec-6] c.web.exception.RestExceptionHandler : method=GET uri=/rooms/B8ZT/probabilities exception=CannotAcquireLockException message=Deadlock found when trying to get lock; try restarting transaction",
+  "[2026-08-26 13:43:23.208] [ERROR] [d8780b13b77e0efbd11b376f004d62be,48bd5b536686bada] --- [http-nio-8080-exec-19] c.web.exception.RestExceptionHandler : method=GET uri=/rooms/K3QP/probabilities exception=CannotAcquireLockException message=Deadlock found when trying to get lock; try restarting transaction",
+  "[2026-08-26 13:43:57.664] [ERROR] [9ddba51691b00d53ad3b6c4bc0ea8353,603944490f06969a] --- [http-nio-8080-exec-11] c.web.exception.RestExceptionHandler : method=GET uri=/rooms/B8ZT/probabilities exception=CannotAcquireLockException message=Deadlock found when trying to get lock; try restarting transaction"
+ ],
+ "logEnvironment": "prod",
+ "expected": "예",
+ "axis": "partial-relevance"
+}

@@ -1,0 +1,33 @@
+{
+  "name": "monitor-stream-backlog-speedtouch-progress-1004",
+  "question": "알림 RedisStreamBacklogHigh(warning)가 prod에서 발화했다 - speedtouch 스트림 길이가 1000을 넘어 적체됐다. 봇에는 최근 30분 ERROR 로그 샘플 10줄(스피드터치 진행도 이벤트 처리 실패와 리스너 오류)이 주어졌다.",
+  "rubric": "주어진 ERROR 로그는 알림 직전 약 5분 사이에 speedtouch 컨슈머 스레드 세 개 모두에서 TouchProgressEvent 처리가 연달아 실패하고 그 사이사이 Redis Stream 리스너 오류와 speedtouch 게임 스케줄 예외까지 반복된 내용으로, 발행되는 진행도 이벤트를 컨슈머가 소비하지 못해 스트림 길이가 늘고 있음을 보여준다. '근거 발견: 예'로 판정하고 speedtouch TouchProgressEvent 처리 실패 반복과 리스너 오류를 적체의 직접 원인으로 제시하면 정답. '근거 발견: 아니오'로 판정하거나, 트래픽 증가나 컨슈머 부족만 추측하고 로그가 보여주는 이벤트 처리 실패를 근거로 삼지 못하거나, 정산이나 DB처럼 로그에 없는 경로를 원인으로 지목하면 오답.",
+  "source": "MANUAL",
+  "alert": {
+    "alertname": "RedisStreamBacklogHigh",
+    "severity": "warning",
+    "fingerprint": "golden-gen-rsb-1004",
+    "summary": "Redis Stream 적체 (length > 1000, prod-app)",
+    "description": "스트림 길이가 2174. 컨슈머 처리 속도가 발행을 못 따라가고 있습니다.",
+    "labels": {
+      "alertname": "RedisStreamBacklogHigh",
+      "severity": "warning",
+      "job": "prod-app"
+    }
+  },
+  "logSamples": [
+    "[2026-08-26 19:21:14.208] [ERROR] [5f185a4589fda8a3e3b38211a4e2e855,21e2ed3aa14a8b99] --- [redis-stream-thread-pool-speedtouch1] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=TouchProgressEventConsumer, message=TouchProgressEvent[eventId=eae9b5d8-e7ac-4baf-a815-d230b86d5f25, timestamp=2026-08-26T10:21:14.208317442Z, joinCode=T9WM, playerName=PLAYER_2, progress=27]",
+    "[2026-08-26 19:21:39.663] [ERROR] [4bdf8c9699209413593e59019e722c6f,da4d369091279b44] --- [redis-stream-thread-pool-speedtouch2] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=TouchProgressEventConsumer, message=TouchProgressEvent[eventId=a9774fbb-bf60-4017-af91-a8926dd77170, timestamp=2026-08-26T10:21:39.663104985Z, joinCode=T9WM, playerName=PLAYER_5, progress=31]",
+    "[2026-08-26 19:22:11.047] [ERROR] [ceece4fbfbc33d9439c7e5431ecdeafb,90b52580a02c572c] --- [redis-stream-thread-pool-speedtouch1] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=TouchProgressEventConsumer, message=TouchProgressEvent[eventId=1c17f9af-f4e3-47f3-b5c3-1e6c6e2b890e, timestamp=2026-08-26T10:22:11.047553218Z, joinCode=T9WM, playerName=PLAYER_1, progress=44]",
+    "[2026-08-26 19:22:48.512] [ERROR] [63586bec09d2edaff2555cfb1760f03d,64d98ac0132c4895] --- [redis-stream-thread-pool-speedtouch2] c.g.r.c.RedisStreamListenerStarter : Redis Stream 처리 중 오류가 발생했습니다.",
+    "[2026-08-26 19:23:20.935] [ERROR] [d1a2e1da6d93977dcb26d07790942cd5,ecdc0c2e28684a9f] --- [redis-stream-thread-pool-speedtouch3] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=TouchProgressEventConsumer, message=TouchProgressEvent[eventId=5965dedd-6416-49fa-95df-7f6f98f0c33d, timestamp=2026-08-26T10:23:20.935702164Z, joinCode=K2QD, playerName=PLAYER_3, progress=12]",
+    "[2026-08-26 19:23:57.418] [ERROR] [d3ba35ff7f58ab73102318485fbd95f5,d5d7ee5416c3c158] --- [redis-stream-thread-pool-speedtouch1] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=TouchProgressEventConsumer, message=TouchProgressEvent[eventId=4166df49-cd8a-454d-81e3-dfbed581ae1b, timestamp=2026-08-26T10:23:57.418269503Z, joinCode=K2QD, playerName=PLAYER_4, progress=19]",
+    "[2026-08-26 19:24:31.870] [ERROR] [,] --- [speedtouch-task-2] c.g.s.GameTaskSchedulerFactory : [speedtouch] 스케줄 실행 중 예외가 발생했습니다.",
+    "[2026-08-26 19:25:04.226] [ERROR] [b3a076d800af20fa5ca7b2afc9da23b7,981dd65ed1eda239] --- [redis-stream-thread-pool-speedtouch2] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=TouchProgressEventConsumer, message=TouchProgressEvent[eventId=c42ebf27-8f85-4876-bba4-e68f621d2518, timestamp=2026-08-26T10:25:04.226881037Z, joinCode=K2QD, playerName=PLAYER_2, progress=26]",
+    "[2026-08-26 19:25:38.691] [ERROR] [ce0e50959a2ec738275bf8989b998034,856720a8027f5694] --- [redis-stream-thread-pool-speedtouch1] c.g.r.c.RedisStreamListenerStarter : Redis Stream 처리 중 오류가 발생했습니다.",
+    "[2026-08-26 19:26:09.145] [ERROR] [12b727ad5eb737748e8f0e7c1bb68e9d,725883a0b63db26d] --- [redis-stream-thread-pool-speedtouch3] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=TouchProgressEventConsumer, message=TouchProgressEvent[eventId=623c957e-2622-4065-8a91-81c2b522ff78, timestamp=2026-08-26T10:26:09.145430876Z, joinCode=K2QD, playerName=PLAYER_5, progress=33]"
+  ],
+  "logEnvironment": "prod",
+  "expected": "예",
+  "axis": "positive-dense"
+}

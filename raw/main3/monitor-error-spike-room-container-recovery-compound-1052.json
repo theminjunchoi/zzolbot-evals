@@ -1,0 +1,33 @@
+{
+ "name": "monitor-error-spike-room-container-recovery-compound-1052",
+ "question": "알림 AppErrorLogSpike(warning)가 prod에서 발화했다 - 최근 5분 ERROR 로그가 임계를 넘어 급증했다. 봇에는 최근 30분 ERROR 로그 샘플 10줄(room 스트림 컨테이너 복구 포기와 그에 뒤따른 방 참가 처리 실패, 방 조회 요청 예외)이 주어졌다.",
+ "rubric": "주어진 ERROR 로그는 RedisStreamContainerRecovery가 stream=room 컨테이너의 상태 확인 예외 1회와 복구 중 예외 2회를 거쳐 복구를 포기하고 HealthIndicator에 DOWN을 보고한 뒤, RoomService의 방 참가 비동기 처리 실패 2회와 RoomEventWaitManager의 방 이벤트 자동 정리 실패 2회, RestExceptionHandler의 uri=/rooms/check-joinCode 요청 예외 2회가 이어진 내용으로, room 스트림 컨테이너의 복구 실패가 근본 원인이고 방 참가 비동기 처리 실패와 요청 예외는 그 파급 증상이다. '근거 발견: 예'로 판정하고 stream=room 컨테이너 복구 포기를 근본 원인으로, 방 참가 처리 실패와 /rooms/check-joinCode 예외를 파급 증상으로 구분해 가설을 제시하면 정답. '근거 발견: 아니오'로 판정하거나 방 참가 로직 또는 이벤트 정리 스케줄러를 근본 원인으로 지목하면 오답.",
+ "source": "MANUAL",
+ "alert": {
+  "alertname": "AppErrorLogSpike",
+  "severity": "warning",
+  "fingerprint": "golden-gen-cc-1052",
+  "summary": "ERROR 로그 급증(최근 5분, prod-app)",
+  "description": "ERROR 로그가 118건(임계 30/5m)입니다. zzol-bot이 근본원인을 분석합니다.",
+  "labels": {
+   "alertname": "AppErrorLogSpike",
+   "severity": "warning",
+   "job": "prod-app"
+  }
+ },
+ "logSamples": [
+  "[2026-08-26 16:58:02.145] [ERROR] [,] --- [pool-1-thread-3] c.g.h.RedisStreamContainerRecovery : Redis Stream container 상태 확인 중 예외: stream=room",
+  "[2026-08-26 16:58:32.190] [ERROR] [,] --- [pool-1-thread-3] c.g.h.RedisStreamContainerRecovery : Redis Stream container 복구 중 예외 발생: stream=room",
+  "[2026-08-26 16:59:02.231] [ERROR] [,] --- [pool-1-thread-3] c.g.h.RedisStreamContainerRecovery : Redis Stream container 복구 중 예외 발생: stream=room",
+  "[2026-08-26 16:59:32.276] [ERROR] [,] --- [pool-1-thread-3] c.g.h.RedisStreamContainerRecovery : Redis Stream container 복구 포기: stream=room. HealthIndicator에 DOWN 보고",
+  "[2026-08-26 17:00:14.803] [ERROR] [a4eb02272acc4206d1c8dfc779974579,d06ef8309267d41f] --- [redis-stream-thread-pool-room:join1] c.r.application.service.RoomService : 방 참가 비동기 처리 실패: eventId=014e00fe-2bda-4979-817e-2e25d02b26e1, joinCode=VB3K, playerName=하루",
+  "[2026-08-26 17:00:49.371] [ERROR] [,] --- [pool-1-thread-5] c.r.i.messaging.RoomEventWaitManager : 방 이벤트 자동 정리 (실패): eventId=014e00fe-2bda-4979-817e-2e25d02b26e1",
+  "[2026-08-26 17:01:27.556] [ERROR] [e266875be73a3106c7aa2f1a4c5828fb,b1bd4df405e7e5fd] --- [redis-stream-thread-pool-room:join2] c.r.application.service.RoomService : 방 참가 비동기 처리 실패: eventId=748bc172-b6bf-4628-b810-e2098ef74dcd, joinCode=VB3K, playerName=수달",
+  "[2026-08-26 17:01:58.612] [ERROR] [,] --- [pool-1-thread-5] c.r.i.messaging.RoomEventWaitManager : 방 이벤트 자동 정리 (실패): eventId=748bc172-b6bf-4628-b810-e2098ef74dcd",
+  "[2026-08-26 17:02:33.905] [ERROR] [a1637bf069c41ee0c7ff1ff8de2ee120,cac27c6bd7c35cf1] --- [http-nio-8080-exec-18] c.web.exception.RestExceptionHandler : method=GET uri=/rooms/check-joinCode exception=RedisSystemException message=Stream container for room is not running",
+  "[2026-08-26 17:03:10.442] [ERROR] [dcfc46a41fca12e89a7a1cf240cbc3e5,f1debe5c43a848a5] --- [http-nio-8080-exec-6] c.web.exception.RestExceptionHandler : method=GET uri=/rooms/check-joinCode exception=RedisSystemException message=Stream container for room is not running"
+ ],
+ "logEnvironment": "prod",
+ "expected": "예",
+ "axis": "compound-cause"
+}

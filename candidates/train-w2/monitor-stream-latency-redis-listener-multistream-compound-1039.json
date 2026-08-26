@@ -1,0 +1,33 @@
+{
+  "name": "monitor-stream-latency-redis-listener-multistream-compound-1039",
+  "question": "알림 RedisStreamE2eLatencyHigh(warning)가 prod에서 발화했다 - 스트림 처리 p95 지연이 3.51s로 임계 500ms를 넘었다. 봇에는 최근 30분 ERROR 로그 샘플 10줄(여러 스트림 리스너 동시 오류와 뒤이은 게임 컨슈머 및 Outbox 오류)이 주어졌다.",
+  "rubric": "주어진 ERROR 로그는 22:08~22:09에 nunchi, cardgame:select, laddergame, speedtouch 등 서로 다른 네 스트림의 리스너가 거의 동시에 처리 오류를 낸 뒤 22:09 이후 눈치게임 press 처리 오류, SelectCardCommandEvent 및 LadderDrawCommandEvent 처리 실패, 두 스트림 키의 Outbox DEAD_LETTER 전환이 이어졌고, 마지막 확률 조회 요청이 RedisCommandTimeoutException으로 실패했음을 보여준다. '근거 발견: 예'로 판정하고 특정 게임이 아니라 여러 스트림에 공통인 Redis 연결 및 명령 타임아웃을 근본 원인으로, 게임별 컨슈머 실패와 Outbox DEAD_LETTER를 그 파급 증상으로 구분해 제시하면 정답. '근거 발견: 아니오'로 판정하거나 특정 게임 로직 결함이나 Outbox 처리기 결함을 근본 원인으로 지목하면 오답.",
+  "source": "MANUAL",
+  "alert": {
+    "alertname": "RedisStreamE2eLatencyHigh",
+    "severity": "warning",
+    "fingerprint": "golden-gen-slrl-1039",
+    "summary": "Redis Stream E2E 지연 p95 > 500ms (prod-app)",
+    "description": "스트림 처리 p95 지연이 3.51s. 컨슈머 처리 적체 또는 다운스트림(App Service) 지연 가능성.",
+    "labels": {
+      "alertname": "RedisStreamE2eLatencyHigh",
+      "severity": "warning",
+      "job": "prod-app"
+    }
+  },
+  "logSamples": [
+    "[2026-08-26 22:08:14.663] [ERROR] [32f3760996c99ebddb7a7775e02886e0,d5a2978994a2b886] --- [redis-stream-thread-pool-nunchi1] c.g.r.c.RedisStreamListenerStarter : Redis Stream 처리 중 오류가 발생했습니다.",
+    "[2026-08-26 22:08:31.207] [ERROR] [a312ad2ed484f2e43cf727b462844455,d3cd53eece12e99e] --- [redis-stream-thread-pool-cardgame:select1] c.g.r.c.RedisStreamListenerStarter : Redis Stream 처리 중 오류가 발생했습니다.",
+    "[2026-08-26 22:08:49.885] [ERROR] [903c8f35d61c77b1a142887601f552e1,ad6abfc84ffb17f2] --- [redis-stream-thread-pool-laddergame1] c.g.r.c.RedisStreamListenerStarter : Redis Stream 처리 중 오류가 발생했습니다.",
+    "[2026-08-26 22:09:12.340] [ERROR] [25ec5f59686a15b90c4309f97994d2ed,173391968ddf81b2] --- [redis-stream-thread-pool-speedtouch1] c.g.r.c.RedisStreamListenerStarter : Redis Stream 처리 중 오류가 발생했습니다.",
+    "[2026-08-26 22:09:38.771] [ERROR] [62fb6ef31c97c1ea5b212267ac27b594,b5036ae062c8ba44] --- [redis-stream-thread-pool-nunchi2] c.n.i.m.c.NunchiCommandEventConsumer : 눈치게임 press 처리 중 오류: joinCode=H2LP, playerName=도윤, eventId=038f5605-3f07-8ca0-e6a3-de160c6881da",
+    "[2026-08-26 22:10:04.196] [ERROR] [93d37740dd33323ee120bdfee1476d3b,04937022524c8bd6] --- [redis-stream-thread-pool-cardgame:select2] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=SelectCardCommandEventConsumer, message=SelectCardCommandEvent[joinCode=H2LP, playerName=도윤, cardIndex=3, eventId=d356f7a3-22dd-95ac-f817-3d13ebd20ca0]",
+    "[2026-08-26 22:10:29.518] [ERROR] [bb09f2b28d675863402446b02f47b6b9,faaf8a5d2a99b796] --- [redis-stream-thread-pool-laddergame2] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=LadderDrawCommandEventConsumer, message=LadderDrawCommandEvent[joinCode=8RTC, playerName=서연, eventId=03e57ce4-6bc0-f87f-6323-5466ba79357e]",
+    "[2026-08-26 22:11:03.942] [ERROR] [,] --- [pool-5-thread-1] c.global.outbox.OutboxEventProcessor : Outbox 이벤트 최대 재시도 초과, DEAD_LETTER 전환: id=20914, streamKey=cardgame:select",
+    "[2026-08-26 22:11:37.365] [ERROR] [,] --- [pool-5-thread-1] c.global.outbox.OutboxEventProcessor : Outbox 이벤트 최대 재시도 초과, DEAD_LETTER 전환: id=20931, streamKey=laddergame",
+    "[2026-08-26 22:12:09.780] [ERROR] [fa33b4724fa764c3b75fa9c400f70639,ae0d945334d6ef28] --- [http-nio-8080-exec-13] c.web.exception.RestExceptionHandler : method=GET uri=/rooms/H2LP/probabilities exception=RedisCommandTimeoutException message=Command timed out after 3 second(s)"
+  ],
+  "logEnvironment": "prod",
+  "expected": "예",
+  "axis": "compound-cause"
+}

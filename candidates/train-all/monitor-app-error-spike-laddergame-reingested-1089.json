@@ -1,0 +1,31 @@
+{
+  "name": "monitor-app-error-spike-laddergame-reingested-1089",
+  "question": "알림 AppErrorLogSpike(warning)가 prod에서 발화했다 - 최근 5분 ERROR 로그가 41건으로 임계 30건을 넘었다. 봇에는 최근 30분 창에서 조회된 prod ERROR 로그 샘플 8줄이 주어졌다.",
+  "rubric": "주어진 8줄 중 7줄은 본문 타임스탬프가 전날인 2026-08-25 06:41부터 23:05까지 약 16시간에 걸쳐 흩어져 있고, 조회 창인 최근 30분에 들어오는 것은 마지막 2026-08-26 14:19의 RoomService 방 참가 비동기 처리 실패 1줄뿐이다. 즉 대부분이 재적재된 과거 로그라 5분 내 41건 급증을 설명하지 못한다. '근거 발견: 아니오'로 판정하고 로그 본문 시각이 조회 창과 어긋난다는 점(재적재 아티팩트, 표본 부족)을 지적해야 정답. 전날 로그를 현재 급증의 근거로 삼아 laddergame 스트림이나 Outbox DEAD_LETTER 전환을 원인으로 단정하면 오답.",
+  "source": "MANUAL",
+  "alert": {
+    "alertname": "AppErrorLogSpike",
+    "severity": "warning",
+    "fingerprint": "golden-gen-stalelad-1089",
+    "summary": "ERROR 로그 급증(최근 5분, prod-app)",
+    "description": "ERROR 로그가 41건(임계 30/5m)입니다. zzol-bot이 근본원인을 분석합니다.",
+    "labels": {
+      "alertname": "AppErrorLogSpike",
+      "severity": "warning",
+      "job": "prod-app"
+    }
+  },
+  "logSamples": [
+    "[2026-08-25 06:41:33.102] [ERROR] [b999d53457b3e933caf8813032a0fde5,105332f7e2a4676a] --- [redis-stream-thread-pool-laddergame1] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=LadderDrawCommandEventConsumer, message=LadderDrawCommandEvent[eventId=7e295455-2d95-411d-885f-ee4ef7d2e832, timestamp=2026-08-24T21:41:33.098472115Z, joinCode=K3RD, playerName=지호]",
+    "[2026-08-25 09:12:07.884] [ERROR] [,] --- [pool-4-thread-2] c.global.outbox.OutboxEventProcessor : Outbox 이벤트 최대 재시도 초과, DEAD_LETTER 전환: id=7318, streamKey=laddergame",
+    "[2026-08-25 11:58:44.219] [ERROR] [,] --- [pool-7-thread-3] c.g.h.RedisStreamContainerRecovery : Redis Stream container 상태 확인 중 예외: stream=speedtouch",
+    "[2026-08-25 15:03:29.671] [ERROR] [,] --- [laddergame-task-1] c.g.s.GameTaskSchedulerFactory : [laddergame] 스케줄 실행 중 예외가 발생했습니다.",
+    "[2026-08-25 18:26:51.340] [ERROR] [,] --- [pool-4-thread-2] o.s.s.s.TaskUtils$LoggingErrorHandler : Unexpected error occurred in scheduled task",
+    "[2026-08-25 21:47:12.508] [ERROR] [c8256614632fd64f28ae037e84ee4fea,2a43093aa770d979] --- [redis-stream-thread-pool-speedtouch2] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=TouchProgressEventConsumer, message=TouchProgressEvent[eventId=1173e4bc-6c17-4333-9bf2-05937082efac, timestamp=2026-08-25T12:47:12.502938104Z, joinCode=B7NQ, playerName=수아]",
+    "[2026-08-25 23:05:38.926] [ERROR] [,] --- [pool-9-thread-1] c.s.i.c.SettlementPendingSweeper : pending 정산 메시지 재처리 실패: recordId=1756134338712-0",
+    "[2026-08-26 14:19:02.774] [ERROR] [96b6972e0e0cecdd514a66b22d9d82e2,4ede783b43a16038] --- [redis-stream-thread-pool-room:join1] c.r.application.service.RoomService : 방 참가 비동기 처리 실패: eventId=9ee8b50e-a19c-43c8-be67-4dd53eabdcc2, joinCode=M4VT, playerName=하린"
+  ],
+  "logEnvironment": "prod",
+  "expected": "아니오",
+  "axis": "stale-reingested"
+}
