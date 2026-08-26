@@ -1,0 +1,32 @@
+{
+ "name": "monitor-stream-backlog-settlement-ack-902",
+ "question": "알림 RedisStreamBacklogHigh(warning)가 prod에서 발화했다 - settlement:result 스트림 길이가 1000을 넘어 적체됐다. 봇에는 최근 30분 ERROR 로그 샘플 10줄(정산 컨슈머의 ACK 보류 실패와 pending 재처리 실패)이 주어졌다.",
+ "rubric": "주어진 ERROR 로그는 알림 시각 직전 약 4분 사이에 SettlementStreamConsumer가 정산 처리에 실패해 ACK를 보류하고 재전달을 기다린 기록이 두 컨슈머 스레드에서 연속 반복되고, 이어서 SettlementPendingSweeper의 pending 메시지 재처리마저 같은 recordId에서 실패한 내용으로, 미ACK 메시지가 계속 쌓여 스트림 길이가 증가하고 있음을 보여준다. '근거 발견: 예'로 판정하고 정산 컨슈머의 처리 실패로 인한 ACK 보류와 pending 재처리 실패 누적을 적체의 직접 원인으로 제시하면 정답. '근거 발견: 아니오'로 판정하거나, 단순히 트래픽 급증이나 컨슈머 수 부족만 언급하고 로그가 보여주는 처리 실패-ACK 보류 누적을 근거로 삼지 못하면 오답.",
+ "source": "MANUAL",
+ "alert": {
+  "alertname": "RedisStreamBacklogHigh",
+  "severity": "warning",
+  "fingerprint": "golden-gen-rsb-902",
+  "summary": "Redis Stream 적체 (length > 1000, prod-app)",
+  "description": "스트림 길이가 3418. 컨슈머 처리 속도가 발행을 못 따라가고 있습니다.",
+  "labels": {
+   "alertname": "RedisStreamBacklogHigh",
+   "severity": "warning",
+   "job": "prod-app"
+  }
+ },
+ "logSamples": [
+  "[2026-08-26 16:22:09.184] [ERROR] [f88127bad3b187679fbee1ac55ad0272,eb1d8ea5008fe499] --- [redis-stream-thread-pool-settlement:result1] c.s.i.c.SettlementStreamConsumer : 정산 처리 실패 — ACK 보류, 재전달 대기: recordId=1787728929184-0",
+  "[2026-08-26 16:22:37.641] [ERROR] [83500eb6103c9426ee78171914766928,d9367a14689b0ab6] --- [redis-stream-thread-pool-settlement:result2] c.s.i.c.SettlementStreamConsumer : 정산 처리 실패 — ACK 보류, 재전달 대기: recordId=1787728957641-0",
+  "[2026-08-26 16:23:04.209] [ERROR] [a47716d79b7771fc392df726cbd4c191,f33ebdc8bb43c5ee] --- [redis-stream-thread-pool-settlement:result1] c.s.i.c.SettlementStreamConsumer : 정산 처리 실패 — ACK 보류, 재전달 대기: recordId=1787728984209-1",
+  "[2026-08-26 16:23:41.877] [ERROR] [59cf59be0f59ed3222eb43f8ad064225,98966e26945070dd] --- [redis-stream-thread-pool-settlement:result2] c.s.i.c.SettlementStreamConsumer : 정산 처리 실패 — ACK 보류, 재전달 대기: recordId=1787729021877-0",
+  "[2026-08-26 16:24:02.318] [ERROR] [39ec57ac42c5f64bc3cb693eb113ea75,018a8c4f8bc8e20b] --- [redis-stream-thread-pool-settlement:result1] c.s.i.c.SettlementStreamConsumer : 정산 스트림 처리 중 오류가 발생했습니다.",
+  "[2026-08-26 16:24:33.755] [ERROR] [a8ad624360d6ffe34c06c89dabb524c5,83b0cf09cf473188] --- [redis-stream-thread-pool-settlement:result1] c.s.i.c.SettlementStreamConsumer : 정산 처리 실패 — ACK 보류, 재전달 대기: recordId=1787729073755-0",
+  "[2026-08-26 16:25:06.492] [ERROR] [51af75c830435f6cf3a053fd28bd109b,96a8302354f3d8a4] --- [redis-stream-thread-pool-settlement:result2] c.s.i.c.SettlementStreamConsumer : 정산 처리 실패 — ACK 보류, 재전달 대기: recordId=1787729106492-2",
+  "[2026-08-26 16:25:44.021] [ERROR] [,] --- [pool-2-thread-4] c.s.i.c.SettlementPendingSweeper : pending 정산 메시지 재처리 실패: recordId=1787728929184-0",
+  "[2026-08-26 16:26:14.503] [ERROR] [,] --- [pool-2-thread-4] c.s.i.c.SettlementPendingSweeper : pending 정산 메시지 재처리 실패: recordId=1787728984209-1"
+ ],
+ "logEnvironment": "prod",
+ "expected": "예",
+ "axis": "positive-dense"
+}

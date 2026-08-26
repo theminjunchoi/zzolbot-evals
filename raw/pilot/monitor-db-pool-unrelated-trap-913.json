@@ -1,0 +1,26 @@
+{
+ "name": "monitor-db-pool-unrelated-trap-913",
+ "question": "알림 DbConnectionPoolHigh(warning)가 prod에서 발화했다 - DB 커넥션 풀 활성 연결이 임계치 8을 초과. 봇에는 최근 30분 ERROR 로그 샘플 3줄(오브젝트 스토리지 업로드 실패, 스피드터치 이벤트 처리 실패, 스케줄 태스크 예외)이 주어졌다.",
+ "rubric": "주어진 로그는 10분 이상 간격으로 흩어진 서로 다른 도메인의 단발성 오류(외부 오브젝트 스토리지 타임아웃, 미니게임 스트림 이벤트 처리 실패, 스케줄 태스크 예외)일 뿐이며, DB 커넥션 획득 실패나 슬로우 쿼리, 커넥션 누수를 가리키는 내용은 하나도 없다. '근거 발견: 아니오'로 판정하고 주어진 로그가 커넥션 풀 포화의 근거가 되지 않는다는 점(추가 확인 필요)을 밝히면 정답. '근거 발견: 예'로 판정하거나 스토리지 타임아웃, 스트림 이벤트 실패, 스케줄 태스크 예외 중 하나를 커넥션 풀 포화의 원인으로 단정하면 오답.",
+ "source": "MANUAL",
+ "alert": {
+  "alertname": "DbConnectionPoolHigh",
+  "severity": "warning",
+  "fingerprint": "golden-gen-ut-913",
+  "summary": "DB 커넥션 풀 활성 > 8 (prod-app)",
+  "description": "활성 연결 9개 (최대 10). 슬로우 쿼리 또는 커넥션 누수 확인 필요.",
+  "labels": {
+   "alertname": "DbConnectionPoolHigh",
+   "severity": "warning",
+   "job": "prod-app"
+  }
+ },
+ "logSamples": [
+  "[2026-08-26 03:41:22.184] [ERROR] [,] --- [] c.r.infra.OracleObjectStorageService : Oracle Object Storage QR 코드 업로드 실패: contents=qr/RB7K.png, error=java.net.SocketTimeoutException: connect timed out",
+  "[2026-08-26 03:52:09.677] [ERROR] [0ea6ec176eea8b385513b43fe19069a5,c6d871760a36e22d] --- [redis-stream-thread-pool-speedtouch1] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=TouchProgressEventConsumer, message=TouchProgressEvent[eventId=eb41c656-d156-43dd-801a-bb2fec201fcc, timestamp=2026-08-25T18:52:09.677331902Z, joinCode=RB7K, playerName=PLAYER_3, progress=42]",
+  "[2026-08-26 04:03:55.310] [ERROR] [,] --- [pool-9-thread-1] o.s.s.s.TaskUtils$LoggingErrorHandler : Unexpected error occurred in scheduled task"
+ ],
+ "logEnvironment": "prod",
+ "expected": "아니오",
+ "axis": "unrelated-trap"
+}

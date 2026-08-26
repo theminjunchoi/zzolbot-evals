@@ -1,0 +1,31 @@
+{
+ "name": "monitor-redis-stream-latency-compound-cause-911",
+ "question": "알림 RedisStreamE2eLatencyHigh(warning)가 prod에서 발화했다 - Redis Stream E2E 지연 p95가 500ms를 초과. 봇에는 최근 30분 ERROR 로그 샘플 8줄(settlement:result 스트림 컨테이너 복구 실패와 그에 따른 정산 컨슈머·스위퍼 처리 실패)이 주어졌다.",
+ "rubric": "주어진 ERROR 로그는 settlement:result 스트림 컨테이너의 상태 확인과 복구가 연달아 실패해 결국 복구가 포기(HealthIndicator DOWN)된 뒤, 같은 스트림의 정산 컨슈머가 ACK를 보류하고 pending 스위퍼 재처리까지 실패하며 처리 적체가 쌓이는 흐름을 보여준다. '근거 발견: 예'로 판정하고 Redis Stream 컨테이너 복구 실패를 근본 원인으로, 정산 컨슈머 처리 실패와 pending 재처리 실패(그로 인한 E2E 지연 상승)를 파급 증상으로 명확히 구분해 가설을 제시하면 정답. '근거 발견: 아니오'로 판정하거나, 정산 로직 자체의 버그나 컨슈머 코드 결함을 근본 원인으로 지목해 파급 증상과 근본 원인을 뒤집으면 오답.",
+ "source": "MANUAL",
+ "alert": {
+  "alertname": "RedisStreamE2eLatencyHigh",
+  "severity": "warning",
+  "fingerprint": "golden-gen-cc-911",
+  "summary": "Redis Stream E2E 지연 p95 > 500ms (prod-app)",
+  "description": "스트림 처리 p95 지연이 1.84s. 컨슈머 처리 적체 또는 다운스트림(App Service) 지연 가능성.",
+  "labels": {
+   "alertname": "RedisStreamE2eLatencyHigh",
+   "severity": "warning",
+   "job": "prod-app"
+  }
+ },
+ "logSamples": [
+  "[2026-08-26 09:12:03.417] [ERROR] [,] --- [pool-3-thread-1] c.g.h.RedisStreamContainerRecovery : Redis Stream container 상태 확인 중 예외: stream=settlement:result",
+  "[2026-08-26 09:12:33.902] [ERROR] [,] --- [pool-3-thread-1] c.g.h.RedisStreamContainerRecovery : Redis Stream container 복구 중 예외 발생: stream=settlement:result",
+  "[2026-08-26 09:13:05.244] [ERROR] [8f77f437f3ddcebdecc1abf7703f9a47,5a31bcc78808489c] --- [redis-stream-thread-pool-settlement:result1] c.s.i.c.SettlementStreamConsumer : 정산 스트림 처리 중 오류가 발생했습니다.",
+  "[2026-08-26 09:13:41.776] [ERROR] [4292aade5eb7c8728e38d0faeaa6de16,0565496a07b80aee] --- [redis-stream-thread-pool-settlement:result1] c.s.i.c.SettlementStreamConsumer : 정산 처리 실패 — ACK 보류, 재전달 대기: recordId=1756193621344-0",
+  "[2026-08-26 09:14:10.058] [ERROR] [58e8da6f19137b5e8ee5681c1cff3e1b,596455877601e6a1] --- [redis-stream-thread-pool-room:join2] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=RoomJoinConsumer, message=RoomJoinEvent[eventId=55397d1c-c905-4d5d-9447-061c44928471, timestamp=2026-08-26T00:14:10.058412738Z, joinCode=K7QD, playerName=PLAYER_4]",
+  "[2026-08-26 09:15:02.631] [ERROR] [,] --- [pool-3-thread-1] c.g.h.RedisStreamContainerRecovery : Redis Stream container 복구 포기: stream=settlement:result. HealthIndicator에 DOWN 보고",
+  "[2026-08-26 09:15:47.319] [ERROR] [,] --- [pool-7-thread-2] c.s.i.c.SettlementPendingSweeper : pending 정산 메시지 재처리 실패: recordId=1756193621344-0",
+  "[2026-08-26 09:16:22.885] [ERROR] [,] --- [pool-7-thread-2] c.s.i.c.SettlementPendingSweeper : pending 정산 메시지 재처리 실패: recordId=1756193648102-1"
+ ],
+ "logEnvironment": "prod",
+ "expected": "예",
+ "axis": "compound-cause"
+}

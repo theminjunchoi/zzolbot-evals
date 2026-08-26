@@ -1,0 +1,27 @@
+{
+ "name": "monitor-outbox-dead-letter-near-miss-919",
+ "question": "알림 OutboxDeadLetterHigh(warning)가 prod에서 발화했다 - 재시도 초과로 DEAD_LETTER 전환된 outbox 이벤트가 14건까지 쌓였다. 봇에는 최근 30분 창에서 조회된 prod ERROR 로그 샘플 4줄이 주어졌다.",
+ "rubric": "알림이 가리키는 컴포넌트는 outbox 레코드를 스트림으로 발행하는 OutboxEventProcessor인데, 주어진 로그 4건은 이미 발행된 정산 메시지를 읽는 소비 측(SettlementStreamConsumer의 ACK 보류, SettlementPendingSweeper의 pending 재처리 실패)의 오류뿐이고 DEAD_LETTER 전환 로그는 한 줄도 없다. 발행 실패와 소비 실패는 서로 다른 컴포넌트라서 소비 측 오류로는 재시도 초과 누적을 설명할 수 없다. '근거 발견: 아니오'로 판정하고 DEAD_LETTER 적체의 원인을 이 로그들로 단정하지 않아야 정답. 정산 소비 측 실패를 outbox 발행 재시도 초과의 원인으로 지목하거나 '근거 발견: 예'로 판정하면 오답.",
+ "source": "MANUAL",
+ "alert": {
+  "alertname": "OutboxDeadLetterHigh",
+  "severity": "warning",
+  "fingerprint": "golden-gen-nearmiss-919",
+  "summary": "Outbox DEAD_LETTER 적체 (> 10, prod-app)",
+  "description": "재시도 초과로 DEAD_LETTER 전환된 outbox 이벤트가 14건. 다운스트림 발행 경로 점검 필요.",
+  "labels": {
+   "alertname": "OutboxDeadLetterHigh",
+   "severity": "warning",
+   "job": "prod-app"
+  }
+ },
+ "logSamples": [
+  "[2026-08-26 09:26:51.077] [ERROR] [,] --- [pool-9-thread-1] c.s.i.c.SettlementPendingSweeper : pending 정산 메시지 재처리 실패: recordId=1756200411882-0",
+  "[2026-08-26 09:31:19.463] [ERROR] [6cf3f51ebbf0a376776f6153f3009000,e913aa13920b3900] --- [redis-stream-thread-pool-settlement:result1] c.s.i.c.SettlementStreamConsumer : 정산 처리 실패 — ACK 보류, 재전달 대기: recordId=1756200679455-0",
+  "[2026-08-26 09:38:02.914] [ERROR] [,] --- [pool-9-thread-1] c.s.i.c.SettlementPendingSweeper : pending 정산 메시지 재처리 실패: recordId=1756200679455-0",
+  "[2026-08-26 09:44:37.208] [ERROR] [e622272e3eb7da3317c5287824bef2ab,9e2ecd6a79fa10ff] --- [redis-stream-thread-pool-settlement:result1] c.s.i.c.SettlementStreamConsumer : 정산 스트림 처리 중 오류가 발생했습니다."
+ ],
+ "logEnvironment": "prod",
+ "expected": "아니오",
+ "axis": "near-miss-component"
+}

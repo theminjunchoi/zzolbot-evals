@@ -1,0 +1,28 @@
+{
+ "name": "monitor-db-connection-pool-near-miss-920",
+ "question": "알림 DbConnectionPoolHigh(warning)가 prod에서 발화했다 - DB 커넥션 풀 활성 연결이 9개(최대 10)까지 차올라 슬로우 쿼리나 커넥션 누수가 의심된다. 봇에는 최근 30분 창에서 조회된 prod ERROR 로그 샘플 5줄이 주어졌다.",
+ "rubric": "주어진 로그 5건은 방 참가 스트림(room:join)의 이벤트 처리 실패와 Redis Stream 리스너, 컨테이너 복구 실패 등 전부 Redis 연결 계층의 오류이고, 쿼리 타임아웃이나 커넥션 획득 실패처럼 DB 커넥션 풀을 가리키는 로그는 한 줄도 없다. Redis와 DB 커넥션 풀은 서로 다른 커넥션 자원이라서 Redis 측 실패는 활성 DB 연결이 차오르는 현상을 설명하지 못한다. '근거 발견: 아니오'로 판정하고 커넥션 풀 포화의 원인을 이 로그들로 단정하지 않아야 정답. Redis Stream 오류를 DB 커넥션 풀 포화의 원인으로 지목하거나 '근거 발견: 예'로 판정하면 오답.",
+ "source": "MANUAL",
+ "alert": {
+  "alertname": "DbConnectionPoolHigh",
+  "severity": "warning",
+  "fingerprint": "golden-gen-nearmiss-920",
+  "summary": "DB 커넥션 풀 활성 > 8 (prod-app)",
+  "description": "활성 연결 9개 (최대 10). 슬로우 쿼리 또는 커넥션 누수 확인 필요.",
+  "labels": {
+   "alertname": "DbConnectionPoolHigh",
+   "severity": "warning",
+   "job": "prod-app"
+  }
+ },
+ "logSamples": [
+  "[2026-08-26 17:12:29.331] [ERROR] [c602fc6fd2256740ebb86450e02d04f7,d00599a2b73af471] --- [redis-stream-thread-pool-room:join1] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=RoomJoinConsumer, message=RoomJoinEvent[eventId=7b3d92c1-8f04-4a6e-9c52-3ea18d70b6f5, timestamp=2026-08-26T08:12:29.324517630Z, joinCode=M2VD, playerName=GUEST_4]",
+  "[2026-08-26 17:15:47.802] [ERROR] [da89e787b1635c45bd1fabd4c649d478,7fa82c38745f7b7d] --- [redis-stream-thread-pool-room:join1] c.r.application.service.RoomService : 방 참가 비동기 처리 실패: eventId=7b3d92c1-8f04-4a6e-9c52-3ea18d70b6f5, joinCode=M2VD, playerName=GUEST_4",
+  "[2026-08-26 17:21:03.645] [ERROR] [,] --- [redis-stream-thread-pool-concurrent2] c.g.r.c.RedisStreamListenerStarter : Redis Stream 처리 중 오류가 발생했습니다.",
+  "[2026-08-26 17:26:58.170] [ERROR] [,] --- [pool-7-thread-3] c.g.h.RedisStreamContainerRecovery : Redis Stream container 복구 중 예외 발생: stream=room:join",
+  "[2026-08-26 17:31:40.926] [ERROR] [,] --- [pool-7-thread-3] c.g.h.RedisStreamContainerRecovery : Redis Stream container 복구 포기: stream=room:join. HealthIndicator에 DOWN 보고"
+ ],
+ "logEnvironment": "prod",
+ "expected": "아니오",
+ "axis": "near-miss-component"
+}

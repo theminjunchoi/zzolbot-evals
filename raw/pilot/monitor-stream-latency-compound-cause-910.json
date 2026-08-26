@@ -1,0 +1,33 @@
+{
+ "name": "monitor-stream-latency-compound-cause-910",
+ "question": "알림 RedisStreamE2eLatencyHigh(warning)가 prod에서 발화했다 - Redis Stream E2E 지연 p95가 500ms를 초과. 봇에는 최근 30분 ERROR 로그 샘플 10줄(room:join 컨슈머의 다운스트림 응답 타임아웃과 그에 뒤따른 Outbox, 요청 실패)이 주어졌다.",
+ "rubric": "주어진 ERROR 로그는 room:join과 room, minigame 스트림 컨슈머에서 EventDispatcher가 다운스트림 App Service 호출의 Read timed out으로 연속 실패한 뒤, 같은 스트림의 리스너 오류와 Outbox 이벤트의 DEAD_LETTER 전환, 스케줄 태스크 오류, 방 생성 요청의 타임아웃이 이어져 발생함을 보여주며, 근본 원인은 다운스트림 App Service 응답 타임아웃이고 스트림 처리 오류와 Outbox DEAD_LETTER 전환과 요청 실패는 그 파급 증상이다. '근거 발견: 예'로 판정하고 다운스트림 App Service 호출 타임아웃(Read timed out)에 따른 컨슈머 처리 지연을 근본 원인으로, RedisStreamListenerStarter 오류와 Outbox DEAD_LETTER 전환과 HTTP 타임아웃을 파급 증상으로 구분해 제시하면 정답. '근거 발견: 아니오'로 판정하거나, Redis 자체 장애나 Outbox 재시도 한도, HTTP 타임아웃 자체를 근본 원인으로 지목해 근본과 파급을 구분하지 못하면 오답.",
+ "source": "MANUAL",
+ "alert": {
+  "alertname": "RedisStreamE2eLatencyHigh",
+  "severity": "warning",
+  "fingerprint": "golden-gen-cc-910",
+  "summary": "Redis Stream E2E 지연 p95 > 500ms (prod-app)",
+  "description": "스트림 처리 p95 지연이 4.1s. 컨슈머 처리 적체 또는 다운스트림(App Service) 지연 가능성.",
+  "labels": {
+   "alertname": "RedisStreamE2eLatencyHigh",
+   "severity": "warning",
+   "job": "prod-app"
+  }
+ },
+ "logSamples": [
+  "[2026-08-26 13:21:07.512] [ERROR] [74e9f87fd1a61617029bdb3b553064f9,c769020ad2fd8ade] --- [redis-stream-thread-pool-room:join1] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=RoomJoinConsumer(RoomJoinEvent), message=App Service 호출 Read timed out",
+  "[2026-08-26 13:21:49.238] [ERROR] [fd1e72f9c90926048b15312583766933,081bbe1d8cf78bde] --- [redis-stream-thread-pool-room:join2] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=RoomJoinConsumer(RoomJoinEvent), message=App Service 호출 Read timed out",
+  "[2026-08-26 13:22:26.884] [ERROR] [1d57188570a43667753076cde922bea1,1070539e334f6d0b] --- [redis-stream-thread-pool-room1] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=PlayerDisconnectedConsumer(PlayerDisconnectedEvent), message=App Service 호출 Read timed out",
+  "[2026-08-26 13:23:04.371] [ERROR] [e664cee378b5bd1c3bf2d3c207ed95d9,e31c83fe7812fe44] --- [redis-stream-thread-pool-room:join1] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=RoomJoinConsumer(RoomJoinEvent), message=App Service 호출 Read timed out",
+  "[2026-08-26 13:23:41.926] [ERROR] [a141b9637e71d481095e4a16b77fe4e6,bff96f6bc2261e8c] --- [redis-stream-thread-pool-room:join1] c.g.r.c.RedisStreamListenerStarter : Redis Stream 처리 중 오류가 발생했습니다.",
+  "[2026-08-26 13:24:18.605] [ERROR] [75f0ef5a55e0b970869db0709b854af6,8a96e7c304172a13] --- [redis-stream-thread-pool-minigame1] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=MiniGameStartConsumer, message=App Service 호출 Read timed out",
+  "[2026-08-26 13:25:02.147] [ERROR] [,] --- [pool-1-thread-4] c.global.outbox.OutboxEventProcessor : Outbox 이벤트 최대 재시도 초과, DEAD_LETTER 전환: id=10473, streamKey=room:join",
+  "[2026-08-26 13:25:47.733] [ERROR] [,] --- [pool-1-thread-4] c.global.outbox.OutboxEventProcessor : Outbox 이벤트 최대 재시도 초과, DEAD_LETTER 전환: id=10478, streamKey=minigame",
+  "[2026-08-26 13:26:29.480] [ERROR] [,] --- [pool-6-thread-1] o.s.s.s.TaskUtils$LoggingErrorHandler : Unexpected error occurred in scheduled task",
+  "[2026-08-26 13:27:11.056] [ERROR] [7362ff6a7702dd6df27ec2843c0b998a,c370422a5c621cd7] --- [http-nio-8080-exec-04] c.web.exception.RestExceptionHandler : method=POST uri=/rooms exception=ResourceAccessException message=Read timed out on App Service call"
+ ],
+ "logEnvironment": "prod",
+ "expected": "예",
+ "axis": "compound-cause"
+}

@@ -1,0 +1,32 @@
+{
+ "name": "monitor-stream-backlog-nunchi-consumer-903",
+ "question": "알림 RedisStreamBacklogHigh(warning)가 prod에서 발화했다 - nunchi 스트림 길이가 1000을 넘어 적체됐다. 봇에는 최근 30분 ERROR 로그 샘플 9줄(눈치게임 press 이벤트 처리 실패 반복)이 주어졌다.",
+ "rubric": "주어진 ERROR 로그는 알림 시각 직전 약 3분 사이에 nunchi 스트림을 소비하는 세 컨슈머 스레드 전부에서 눈치게임 press 이벤트 처리가 연속 실패하고 스트림 리스너 자체의 처리 오류까지 반복된 내용으로, 컨슈머 측 처리 실패가 발행 속도를 따라가지 못해 적체가 쌓이고 있음을 보여준다. '근거 발견: 예'로 판정하고 nunchi press 이벤트 컨슈머의 반복 실패를 적체의 직접 원인으로 지목하면 정답. '근거 발견: 아니오'로 판정하거나, 원인을 정산 스트림이나 outbox처럼 로그에 등장하지 않는 다른 경로로 돌리면 오답.",
+ "source": "MANUAL",
+ "alert": {
+  "alertname": "RedisStreamBacklogHigh",
+  "severity": "warning",
+  "fingerprint": "golden-gen-rsb-903",
+  "summary": "Redis Stream 적체 (length > 1000, prod-app)",
+  "description": "스트림 길이가 2764. 컨슈머 처리 속도가 발행을 못 따라가고 있습니다.",
+  "labels": {
+   "alertname": "RedisStreamBacklogHigh",
+   "severity": "warning",
+   "job": "prod-app"
+  }
+ },
+ "logSamples": [
+  "[2026-08-26 20:11:33.207] [ERROR] [1b82f13e2da4fbdb009d376605b6dbcb,f91532fd48ba9f83] --- [redis-stream-thread-pool-nunchi1] c.n.i.m.c.NunchiCommandEventConsumer : 눈치게임 press 처리 중 오류: joinCode=T4WQ, playerName=감자도리, eventId=b885617a-504c-40ad-8199-9c377cbe8060",
+  "[2026-08-26 20:11:48.664] [ERROR] [192c32c12540ac07d57193155b329842,5307fadba34aad07] --- [redis-stream-thread-pool-nunchi2] c.n.i.m.c.NunchiCommandEventConsumer : 눈치게임 press 처리 중 오류: joinCode=T4WQ, playerName=밤톨이, eventId=24e242be-25a0-40f3-a840-3b829a16df3c",
+  "[2026-08-26 20:12:05.912] [ERROR] [9088604bd4a42e083374fac7fd64be9f,a59af27229cb9e68] --- [redis-stream-thread-pool-nunchi1] c.n.i.m.c.NunchiCommandEventConsumer : 눈치게임 press 처리 중 오류: joinCode=T4WQ, playerName=구름빵, eventId=901fe949-1fcc-4bd5-b290-9bdbc99570f0",
+  "[2026-08-26 20:12:31.480] [ERROR] [18ab499a756075020fd979f6a296cb74,3a261fe77d2d0e44] --- [redis-stream-thread-pool-nunchi3] c.n.i.m.c.NunchiCommandEventConsumer : 눈치게임 press 처리 중 오류: joinCode=9BKD, playerName=달토끼, eventId=d7869ac3-5e53-45e8-be9d-928401c2f740",
+  "[2026-08-26 20:12:52.133] [ERROR] [faf5984105746dea0982d3c9146ca026,1a0e61ba9017df9f] --- [redis-stream-thread-pool-nunchi2] c.g.r.c.RedisStreamListenerStarter : Redis Stream 처리 중 오류가 발생했습니다.",
+  "[2026-08-26 20:13:14.775] [ERROR] [737c13083bd8df410edc4213cc8fae52,c7ae050dbe165726] --- [redis-stream-thread-pool-nunchi1] c.n.i.m.c.NunchiCommandEventConsumer : 눈치게임 press 처리 중 오류: joinCode=9BKD, playerName=햇살이, eventId=15c0f2fd-e01b-4b50-97f1-7677162c25a2",
+  "[2026-08-26 20:13:39.028] [ERROR] [fb883c329c31dd1797e62c7b2559dc43,78f32808a65cde27] --- [redis-stream-thread-pool-nunchi3] c.n.i.m.c.NunchiCommandEventConsumer : 눈치게임 press 처리 중 오류: joinCode=9BKD, playerName=물장구, eventId=cb88e319-c437-421e-9fbd-249a570e8205",
+  "[2026-08-26 20:14:02.591] [ERROR] [a3d4d5386951c05a293286790b7011df,834f5a6c0ffa67e8] --- [redis-stream-thread-pool-nunchi2] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=MiniGameStartConsumer, message=NunchiPressCommand handling timed out",
+  "[2026-08-26 20:14:27.316] [ERROR] [c6c65845b582e89814a6252ebd3a13d2,b1e6d3bccc11b396] --- [redis-stream-thread-pool-nunchi1] c.g.r.c.RedisStreamListenerStarter : Redis Stream 처리 중 오류가 발생했습니다."
+ ],
+ "logEnvironment": "prod",
+ "expected": "예",
+ "axis": "positive-dense"
+}

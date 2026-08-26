@@ -30,6 +30,18 @@ _IDENTIFIER_STOPWORDS = frozenset({
 })
 
 
+def expects_evidence(scenario: Scenario) -> bool:
+    """이 시나리오가 기대하는 근거 판정.
+
+    명시된 expected 필드를 우선한다. rubric 문자열로 추측하면 오답 조건 절에 있는 문구를
+    정답으로 잘못 읽는다("아니오로 판정하면 정답. 예로 판정하면 오답"). 실제로 그렇게 틀렸다.
+    """
+    if scenario.expected:
+        return scenario.expected.strip() == "예"
+    head = scenario.rubric.split("정답", 1)[0]
+    return "근거 발견: 예" in head
+
+
 class TargetRule(ABC):
     name: str
 
@@ -43,7 +55,7 @@ class VerdictMatchesExpectation(TargetRule):
     name = "verdict"
 
     def violations(self, scenario: Scenario, target: Analysis) -> list[str]:
-        expected_yes = "'근거 발견: 예'" in scenario.rubric or "근거 발견: 예로" in scenario.rubric
+        expected_yes = expects_evidence(scenario)
         if target.evidence_found != expected_yes:
             want = "예" if expected_yes else "아니오"
             got = "예" if target.evidence_found else "아니오"

@@ -47,4 +47,5 @@ class ScenarioLoader:
             alert=alert,
             log_samples=tuple(raw["logSamples"]),
             log_environment=raw["logEnvironment"],
+            expected=str(raw.get("expected") or ""),
         )

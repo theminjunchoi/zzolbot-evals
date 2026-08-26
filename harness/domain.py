@@ -26,6 +26,8 @@ class Scenario:
     alert: Alert
     log_samples: tuple[str, ...]
     log_environment: str
+    # 합성 후보가 명시한 기대 판정("예"/"아니오"). 승격된 골든셋 파일에는 없어 빈 값이 된다.
+    expected: str = ""
 
 
 @dataclass(frozen=True)

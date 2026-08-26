@@ -1,0 +1,32 @@
+{
+ "name": "monitor-outbox-dead-letter-settlement-901",
+ "question": "알림 OutboxDeadLetterHigh(warning)가 prod에서 발화했다 - 재시도 초과로 DEAD_LETTER로 전환된 outbox 이벤트가 10건을 넘어 적체됐다. 봇에는 최근 30분 ERROR 로그 샘플 9줄(outbox 이벤트 최대 재시도 초과 후 DEAD_LETTER 전환이 반복된 기록)이 주어졌다.",
+ "rubric": "주어진 ERROR 로그는 알림 시각 직전 약 3분 사이에 OutboxEventProcessor가 서로 다른 outbox 이벤트 id를 최대 재시도 초과로 DEAD_LETTER 전환한 기록이 30초 주기 스케줄마다 반복된 내용이며, 전환된 이벤트의 streamKey가 대부분 settlement:result에 몰려 있어 특정 스트림으로의 발행 경로가 지속 실패하고 있음을 보여준다. '근거 발견: 예'로 판정하고 outbox 이벤트의 재시도 소진 후 DEAD_LETTER 전환 반복을 직접 근거로 인용하면서 settlement:result 스트림 발행 경로(Redis 발행 실패 등)를 원인 가설로 제시하면 정답. '근거 발견: 아니오'로 판정하거나, DEAD_LETTER 건수만 되풀이하고 어느 streamKey의 발행 경로가 문제인지 짚지 못하거나, HTTP 요청 실패나 게임 로직처럼 로그에 없는 원인을 지목하면 오답.",
+ "source": "MANUAL",
+ "alert": {
+  "alertname": "OutboxDeadLetterHigh",
+  "severity": "warning",
+  "fingerprint": "golden-gen-odl-901",
+  "summary": "Outbox DEAD_LETTER 적체 (> 10, prod-app)",
+  "description": "재시도 초과로 DEAD_LETTER 전환된 outbox 이벤트가 24건. 다운스트림 발행 경로 점검 필요.",
+  "labels": {
+   "alertname": "OutboxDeadLetterHigh",
+   "severity": "warning",
+   "job": "prod-app"
+  }
+ },
+ "logSamples": [
+  "[2026-08-26 09:43:12.418] [ERROR] [,] --- [pool-3-thread-1] c.global.outbox.OutboxEventProcessor : Outbox 이벤트 최대 재시도 초과, DEAD_LETTER 전환: id=41207, streamKey=settlement:result",
+  "[2026-08-26 09:43:12.905] [ERROR] [,] --- [pool-3-thread-1] c.global.outbox.OutboxEventProcessor : Outbox 이벤트 최대 재시도 초과, DEAD_LETTER 전환: id=41208, streamKey=settlement:result",
+  "[2026-08-26 09:43:43.271] [ERROR] [,] --- [pool-3-thread-1] c.global.outbox.OutboxEventProcessor : Outbox 이벤트 최대 재시도 초과, DEAD_LETTER 전환: id=41211, streamKey=settlement:result",
+  "[2026-08-26 09:44:13.664] [ERROR] [,] --- [pool-3-thread-1] c.global.outbox.OutboxEventProcessor : Outbox 이벤트 최대 재시도 초과, DEAD_LETTER 전환: id=41214, streamKey=settlement:result",
+  "[2026-08-26 09:44:44.032] [ERROR] [,] --- [pool-3-thread-1] c.global.outbox.OutboxEventProcessor : Outbox 이벤트 최대 재시도 초과, DEAD_LETTER 전환: id=41219, streamKey=room:join",
+  "[2026-08-26 09:45:14.487] [ERROR] [,] --- [pool-3-thread-1] c.global.outbox.OutboxEventProcessor : Outbox 이벤트 최대 재시도 초과, DEAD_LETTER 전환: id=41223, streamKey=settlement:result",
+  "[2026-08-26 09:45:44.916] [ERROR] [,] --- [pool-3-thread-1] c.global.outbox.OutboxEventProcessor : Outbox 이벤트 최대 재시도 초과, DEAD_LETTER 전환: id=41226, streamKey=settlement:result",
+  "[2026-08-26 09:46:15.338] [ERROR] [,] --- [pool-3-thread-1] c.global.outbox.OutboxEventProcessor : Outbox 이벤트 최대 재시도 초과, DEAD_LETTER 전환: id=41229, streamKey=settlement:result",
+  "[2026-08-26 09:46:45.702] [ERROR] [,] --- [pool-3-thread-1] c.global.outbox.OutboxEventProcessor : Outbox 이벤트 최대 재시도 초과, DEAD_LETTER 전환: id=41232, streamKey=room:join"
+ ],
+ "logEnvironment": "prod",
+ "expected": "예",
+ "axis": "positive-dense"
+}

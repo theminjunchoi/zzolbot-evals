@@ -1,0 +1,31 @@
+{
+ "name": "monitor-5xx-partial-relevance-906",
+ "question": "알림 Http5xxRatioHigh(critical)가 prod에서 발화했다 - 최근 5분 5xx 비율 5% 초과. 봇에는 최근 30분 ERROR 로그 샘플 8줄(산발적인 QR, 게임 스케줄, 정산 스윕 오류와 알림 직전 5분에 밀집한 HTTP 요청 실패)이 주어졌다.",
+ "rubric": "주어진 ERROR 로그에서 알림 직전 약 3분 구간에 밀집한 다섯 줄은 /rooms, /rooms/check-joinCode, /rooms/check-guestName, /rooms/PXMH/settings 등 서로 다른 엔드포인트가 모두 동일한 RedisCommandTimeoutException(Command timed out after 1 second(s))으로 실패한 내용이라 5xx 급증의 직접 근거이고, 그보다 20분 이상 앞서 한 줄씩 흩어져 있는 QR 코드 생성 실패, nunchi 게임 스케줄 예외, pending 정산 메시지 재처리 실패는 알림 구간과 시간적으로도 대상 기능으로도 무관한 배경 잡음이다. '근거 발견: 예'로 판정하고 밀집한 RestExceptionHandler 로그를 근거로 Redis 커맨드 타임아웃(Redis 응답 지연)을 5xx의 근본 원인 가설로 제시하면 정답. '근거 발견: 아니오'로 판정하거나, QR 코드 생성 실패, 게임 스케줄 예외, 정산 스윕 실패 같은 산발 로그를 근본 원인으로 지목하면 오답.",
+ "source": "MANUAL",
+ "alert": {
+  "alertname": "Http5xxRatioHigh",
+  "severity": "critical",
+  "fingerprint": "golden-gen-pr-906",
+  "summary": "HTTP 5xx 비율 5% 초과 (prod-app)",
+  "description": "최근 5분 5xx 비율이 11.4%. 서버 측 광범위 실패 가능성.",
+  "labels": {
+   "alertname": "Http5xxRatioHigh",
+   "severity": "critical",
+   "job": "prod-app"
+  }
+ },
+ "logSamples": [
+  "[2026-08-26 09:11:52.418] [ERROR] [,] --- [] c.r.application.service.QrCodeService : QR 코드 생성 실패: joinCode=K7QM, error=Public URL 생성 응답 없음",
+  "[2026-08-26 09:19:07.663] [ERROR] [,] --- [nunchi-task-1] c.g.s.GameTaskSchedulerFactory : [nunchi] 스케줄 실행 중 예외가 발생했습니다.",
+  "[2026-08-26 09:27:41.905] [ERROR] [,] --- [pool-3-thread-1] c.s.i.c.SettlementPendingSweeper : pending 정산 메시지 재처리 실패: recordId=1787734061480-0",
+  "[2026-08-26 09:36:12.204] [ERROR] [d7378bfc9ac8f0020480fd5a7b21d57d,5cc1455914ca0cb0] --- [http-nio-8080-exec-17] c.web.exception.RestExceptionHandler : method=POST uri=/rooms exception=RedisCommandTimeoutException message=Command timed out after 1 second(s)",
+  "[2026-08-26 09:36:48.771] [ERROR] [4565a329460d3fb8a8f733e55f34d7c2,346e285f406b5e67] --- [http-nio-8080-exec-23] c.web.exception.RestExceptionHandler : method=GET uri=/rooms/check-joinCode exception=RedisCommandTimeoutException message=Command timed out after 1 second(s)",
+  "[2026-08-26 09:37:29.336] [ERROR] [9747cbc22ae18ab14e342bdfcd07194e,7a2c75f95ccd6101] --- [http-nio-8080-exec-08] c.web.exception.RestExceptionHandler : method=GET uri=/rooms/check-guestName exception=RedisCommandTimeoutException message=Command timed out after 1 second(s)",
+  "[2026-08-26 09:38:15.052] [ERROR] [907fc430f8e3342ee74e899ce7920637,7b40097feecf862f] --- [http-nio-8080-exec-31] c.web.exception.RestExceptionHandler : method=PATCH uri=/rooms/PXMH/settings exception=RedisCommandTimeoutException message=Command timed out after 1 second(s)",
+  "[2026-08-26 09:38:55.619] [ERROR] [077db1ad87900ac488de90c99b8f6be8,257fbb729da95399] --- [http-nio-8080-exec-12] c.web.exception.RestExceptionHandler : method=POST uri=/rooms exception=RedisCommandTimeoutException message=Command timed out after 1 second(s)"
+ ],
+ "logEnvironment": "prod",
+ "expected": "예",
+ "axis": "partial-relevance"
+}

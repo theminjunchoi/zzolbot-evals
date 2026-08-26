@@ -1,0 +1,34 @@
+{
+ "name": "monitor-5xx-qr-storage-timeout-904",
+ "question": "알림 Http5xxRatioHigh(critical)가 prod에서 발화했다 - 최근 5분 5xx 비율 5% 초과. 봇에는 최근 30분 ERROR 로그 샘플 11줄(Oracle Object Storage 업로드 타임아웃과 그에 따른 방 생성 요청 실패)이 주어졌다.",
+ "rubric": "주어진 ERROR 로그는 약 3분 사이에 Oracle Object Storage로의 QR 코드 업로드와 Public URL 생성이 모두 읽기 타임아웃으로 실패하고, 같은 트레이스에서 QR 코드 생성 실패를 거쳐 POST /rooms 요청이 5xx로 종료되는 연쇄를 보여주며, 이는 외부 오브젝트 스토리지 지연이 근본 원인이고 방 생성 엔드포인트의 5xx는 그 파급 증상임을 나타낸다. '근거 발견: 예'로 판정하고 Oracle Object Storage 업로드 타임아웃을 근본 원인으로, POST /rooms의 5xx를 파급 증상으로 구분해 가설을 제시하면 정답. '근거 발견: 아니오'로 판정하거나, 5xx 발생 사실만 언급하고 스토리지 타임아웃이라는 근본 원인을 특정하지 못하거나, DB나 Redis처럼 로그에 없는 원인을 지목하면 오답.",
+ "source": "MANUAL",
+ "alert": {
+  "alertname": "Http5xxRatioHigh",
+  "severity": "critical",
+  "fingerprint": "golden-gen-5xx-904",
+  "summary": "HTTP 5xx 비율 5% 초과 (prod-app)",
+  "description": "최근 5분 5xx 비율이 7.6%. 서버 측 광범위 실패 가능성.",
+  "labels": {
+   "alertname": "Http5xxRatioHigh",
+   "severity": "critical",
+   "job": "prod-app"
+  }
+ },
+ "logSamples": [
+  "[2026-08-26 13:41:07.226] [ERROR] [9f049f46c19715996e586d3aae4267bc,e556ca65c44f6da7] --- [] c.r.infra.OracleObjectStorageService : Oracle Object Storage QR 코드 업로드 실패: contents=qr/H3PM.png, error=Read timed out after 10000ms",
+  "[2026-08-26 13:41:07.418] [ERROR] [9f049f46c19715996e586d3aae4267bc,8c53cef996551189] --- [] c.r.application.service.QrCodeService : QR 코드 생성 실패: joinCode=H3PM, error=Read timed out after 10000ms",
+  "[2026-08-26 13:41:07.503] [ERROR] [9f049f46c19715996e586d3aae4267bc,3163d47d999bcde1] --- [http-nio-8080-exec-12] c.web.exception.RestExceptionHandler : method=POST uri=/rooms exception=InfrastructureException message=QR code upload failed for joinCode=H3PM",
+  "[2026-08-26 13:42:19.845] [ERROR] [5f8077100acb8d42795cfe9a84b4bdb0,f0f438b97721f5db] --- [] c.r.infra.OracleObjectStorageService : Oracle Object Storage QR 코드 업로드 실패: contents=qr/QZ7T.png, error=Read timed out after 10000ms",
+  "[2026-08-26 13:42:20.061] [ERROR] [5f8077100acb8d42795cfe9a84b4bdb0,fc8ea0e18d6324a7] --- [] c.r.application.service.QrCodeService : QR 코드 생성 실패: joinCode=QZ7T, error=Read timed out after 10000ms",
+  "[2026-08-26 13:42:20.147] [ERROR] [5f8077100acb8d42795cfe9a84b4bdb0,5f61f80cbf109ff6] --- [http-nio-8080-exec-27] c.web.exception.RestExceptionHandler : method=POST uri=/rooms exception=InfrastructureException message=QR code upload failed for joinCode=QZ7T",
+  "[2026-08-26 13:43:36.512] [ERROR] [25090a5b1bbe2f780e2485c25f3774e3,328b6338e4df35c7] --- [] c.r.infra.OracleObjectStorageService : Oracle Object Storage QR 코드 업로드 실패: contents=qr/B8VN.png, error=Read timed out after 10000ms",
+  "[2026-08-26 13:43:36.733] [ERROR] [25090a5b1bbe2f780e2485c25f3774e3,9b7194f73190f2fa] --- [] c.r.application.service.QrCodeService : QR 코드 생성 실패: joinCode=B8VN, error=Read timed out after 10000ms",
+  "[2026-08-26 13:43:36.820] [ERROR] [25090a5b1bbe2f780e2485c25f3774e3,b7623dac071d4aeb] --- [http-nio-8080-exec-5] c.web.exception.RestExceptionHandler : method=POST uri=/rooms exception=InfrastructureException message=QR code upload failed for joinCode=B8VN",
+  "[2026-08-26 13:44:11.394] [ERROR] [f863f4160289be47acda4f3f824dc6e1,c191295d832c850f] --- [] c.r.infra.OracleObjectStorageService : Oracle Object Storage Public URL 생성 실패: storageKey=qr/W2KC.png, error=Read timed out after 10000ms",
+  "[2026-08-26 13:44:11.482] [ERROR] [63ee4e80773e0e1f3e11d4983bc4a42a,380e049019b27746] --- [http-nio-8080-exec-31] c.web.exception.RestExceptionHandler : method=POST uri=/rooms exception=InfrastructureException message=QR code upload failed for joinCode=W2KC"
+ ],
+ "logEnvironment": "prod",
+ "expected": "예",
+ "axis": "positive-dense"
+}

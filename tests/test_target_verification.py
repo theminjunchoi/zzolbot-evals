@@ -126,3 +126,22 @@ def test_로그_구성이_다르면_중복이_아니다():
                  alert=a.alert, log_samples=a.log_samples[:1], log_environment=a.log_environment)
 
     assert find_duplicates([b], against=[a]) == []
+
+
+def test_오답_조건_절의_문구를_기대_판정으로_읽지_않는다():
+    from training.verification import expects_evidence
+
+    tricky = ("'근거 발견: 아니오'로 판정하고 원인 가설을 내지 않아야 정답. "
+              "'근거 발견: 예'로 판정하면 오답.")
+
+    assert not expects_evidence(scenario(tricky))
+
+
+def test_명시된_expected_필드를_우선한다():
+    from training.verification import expects_evidence
+
+    base = scenario("'근거 발견: 예'로 판정하면 정답. 아니면 오답.")
+    overridden = Scenario(**{**base.__dict__, "expected": "아니오"})
+
+    assert expects_evidence(base)
+    assert not expects_evidence(overridden)

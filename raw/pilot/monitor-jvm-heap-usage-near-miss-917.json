@@ -1,0 +1,27 @@
+{
+ "name": "monitor-jvm-heap-usage-near-miss-917",
+ "question": "알림 JvmHeapUsageHigh(critical)가 prod에서 발화했다 - JVM 힙 사용률이 91%까지 올라 GC 오버헤드 및 OOM 위험이 있다. 봇에는 최근 30분 창에서 조회된 prod ERROR 로그 샘플 4줄이 주어졌다.",
+ "rubric": "주어진 로그 4건은 정산 스트림 컨슈머의 메시지 처리 실패와 Redis Stream 컨테이너 상태 확인, 복구 예외로 모두 Redis Stream 인프라 컴포넌트의 오류이며, 힙 점유 주체나 메모리 누수 지점, GC 동작을 보여주는 로그는 없다. JVM 힙 사용률은 프로세스 메모리 지표라서 특정 스트림 컨슈머의 처리 실패로는 설명되지 않는 다른 컴포넌트다. '근거 발견: 아니오'로 판정하고 힙 상승의 원인을 로그에서 단정하지 않아야 정답. 정산 스트림이나 Redis Stream 컨테이너 오류를 힙 사용률 급등의 원인으로 지목하거나 '근거 발견: 예'로 판정하면 오답.",
+ "source": "MANUAL",
+ "alert": {
+  "alertname": "JvmHeapUsageHigh",
+  "severity": "critical",
+  "fingerprint": "golden-gen-nearmiss-917",
+  "summary": "JVM 힙 사용률 > 85% (prod-app)",
+  "description": "힙 사용률이 91%. GC 오버헤드 증가 및 OOM 위험.",
+  "labels": {
+   "alertname": "JvmHeapUsageHigh",
+   "severity": "critical",
+   "job": "prod-app"
+  }
+ },
+ "logSamples": [
+  "[2026-08-26 03:41:12.204] [ERROR] [,] --- [pool-4-thread-2] c.g.h.RedisStreamContainerRecovery : Redis Stream container 상태 확인 중 예외: stream=settlement:result",
+  "[2026-08-26 03:44:36.881] [ERROR] [9ca1c5c7a4dfa44d481dc431f13ed2b4,30bc73b0619617df] --- [redis-stream-thread-pool-settlement:result1] c.s.i.c.SettlementStreamConsumer : 정산 처리 실패 — ACK 보류, 재전달 대기: recordId=1756179876871-0",
+  "[2026-08-26 03:49:58.115] [ERROR] [,] --- [pool-4-thread-2] c.g.h.RedisStreamContainerRecovery : Redis Stream container 복구 중 예외 발생: stream=settlement:result",
+  "[2026-08-26 03:53:27.640] [ERROR] [6db99e96129712af2c67f24e2e0568f1,af0af767d00dfc93] --- [redis-stream-thread-pool-settlement:result1] c.s.i.c.SettlementStreamConsumer : 정산 스트림 처리 중 오류가 발생했습니다."
+ ],
+ "logEnvironment": "prod",
+ "expected": "아니오",
+ "axis": "near-miss-component"
+}

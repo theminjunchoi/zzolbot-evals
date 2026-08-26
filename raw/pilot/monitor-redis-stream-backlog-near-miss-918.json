@@ -1,0 +1,27 @@
+{
+ "name": "monitor-redis-stream-backlog-near-miss-918",
+ "question": "알림 RedisStreamBacklogHigh(warning)가 prod에서 발화했다 - 정산 스트림(settlement:result) 길이가 1483까지 늘어 컨슈머가 발행 속도를 따라가지 못하고 있다. 봇에는 최근 30분 창에서 조회된 prod ERROR 로그 샘플 4줄이 주어졌다.",
+ "rubric": "적체가 난 스트림은 settlement:result인데 주어진 로그 4건은 전부 카드게임 선택 스트림(cardgame:select)과 눈치게임 스트림(nunchi) 컨슈머의 개별 메시지 처리 실패이고, 두 스트림은 정산과 별도의 컨슈머 그룹, 별도의 스레드 풀에서 동작하므로 정산 컨슈머의 지연을 설명하지 못한다. SettlementStreamConsumer나 SettlementPendingSweeper의 지연, 실패를 보여주는 로그는 한 줄도 없다. '근거 발견: 아니오'로 판정하고 정산 적체의 원인을 이 로그들로 단정하지 않아야 정답. 카드게임이나 눈치게임 스트림 오류를 정산 스트림 적체의 원인으로 지목하거나 '근거 발견: 예'로 판정하면 오답.",
+ "source": "MANUAL",
+ "alert": {
+  "alertname": "RedisStreamBacklogHigh",
+  "severity": "warning",
+  "fingerprint": "golden-gen-nearmiss-918",
+  "summary": "Redis Stream 적체 (length > 1000, prod-app)",
+  "description": "스트림 길이가 1483. 컨슈머 처리 속도가 발행을 못 따라가고 있습니다.",
+  "labels": {
+   "alertname": "RedisStreamBacklogHigh",
+   "severity": "warning",
+   "job": "prod-app"
+  }
+ },
+ "logSamples": [
+  "[2026-08-26 21:02:18.556] [ERROR] [9586140bce57a0acf58419bfce478446,fe4e3fccdf174d9e] --- [redis-stream-thread-pool-cardgame:select2] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=SelectCardCommandEventConsumer, message=SelectCardCommandEvent[eventId=9c1f4a30-6b2e-4d18-95c7-0a3f8d2e71b4, timestamp=2026-08-26T12:02:18.551204773Z, joinCode=T4WQ, playerName=PLAYER_2, cardIndex=4]",
+  "[2026-08-26 21:07:44.192] [ERROR] [451c2f32fa173403c8c7c0eda98ec878,7d2ec55959c3ef5c] --- [redis-stream-thread-pool-nunchi1] c.n.i.m.c.NunchiCommandEventConsumer : 눈치게임 press 처리 중 오류: joinCode=B9XR, playerName=PLAYER_5, eventId=1d7ac802-53fe-4f6b-b0d9-6c48e2a91f37",
+  "[2026-08-26 21:13:05.870] [ERROR] [,] --- [pool-6-thread-1] c.g.h.RedisStreamContainerRecovery : Redis Stream container 상태 확인 중 예외: stream=cardgame:select",
+  "[2026-08-26 21:19:33.428] [ERROR] [dbfea546a494c676340069516d7d0fd1,fcb141da8ebdc691] --- [redis-stream-thread-pool-cardgame:select2] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=SelectCardCommandEventConsumer, message=SelectCardCommandEvent[eventId=4e8b60d5-1c7a-42f9-8e35-b7d0416ca2ef, timestamp=2026-08-26T12:19:33.421886402Z, joinCode=T4WQ, playerName=PLAYER_6, cardIndex=1]"
+ ],
+ "logEnvironment": "prod",
+ "expected": "아니오",
+ "axis": "near-miss-component"
+}

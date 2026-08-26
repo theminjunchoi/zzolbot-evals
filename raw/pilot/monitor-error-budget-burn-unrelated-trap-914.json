@@ -1,0 +1,26 @@
+{
+ "name": "monitor-error-budget-burn-unrelated-trap-914",
+ "question": "알림 ErrorBudgetBurnSlow(warning)가 prod에서 발화했다 - 6시간과 30분 양쪽 창에서 5xx 비율이 3%를 초과해 에러버짓이 느리게 소진 중. 봇에는 최근 30분 ERROR 로그 샘플 3줄(QR 코드 생성 실패, 블록쌓기 이벤트 처리 실패, 레이싱게임 스케줄 예외)이 주어졌다.",
+ "rubric": "주어진 로그는 10분 이상 간격으로 흩어진 서로 다른 기능의 단발성 오류이고 모두 HTTP 요청 처리 경로 밖(외부 QR 생성, 스트림 이벤트 소비, 게임 스케줄러)에서 발생해, 6시간에 걸쳐 지속된 5xx 비율 상승을 설명하지 못한다. '근거 발견: 아니오'로 판정하고 이 표본만으로는 지속적인 5xx 발생 원인을 특정할 수 없음을 밝히면 정답. '근거 발견: 예'로 판정하거나 QR 생성 실패나 게임 스케줄러 예외를 5xx 비율 상승의 원인으로 단정하면 오답.",
+ "source": "MANUAL",
+ "alert": {
+  "alertname": "ErrorBudgetBurnSlow",
+  "severity": "warning",
+  "fingerprint": "golden-gen-ut-914",
+  "summary": "에러버짓 느린 소진 (SLO 99.5%, burn-rate 6×)",
+  "description": "prod-app 5xx 비율이 6h·30m 양 창에서 3%를 초과. 누적 시 에러버짓 위협.",
+  "labels": {
+   "alertname": "ErrorBudgetBurnSlow",
+   "severity": "warning",
+   "job": "prod-app"
+  }
+ },
+ "logSamples": [
+  "[2026-08-26 16:58:41.223] [ERROR] [,] --- [] c.r.application.service.QrCodeService : QR 코드 생성 실패: joinCode=T3BW, error=java.net.SocketTimeoutException: Read timed out",
+  "[2026-08-26 17:09:17.845] [ERROR] [41bdff11b186259c4365dd0e85846b94,e2388a48c3359b30] --- [redis-stream-thread-pool-blockstacking1] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=StopCommandEventConsumer, message=StopCommandEvent[eventId=81361b2c-fc0a-4aec-bfec-03cffd4b9553, timestamp=2026-08-26T08:09:17.845507219Z, joinCode=T3BW, playerName=PLAYER_2]",
+  "[2026-08-26 17:21:36.402] [ERROR] [,] --- [racinggame-task-2] c.g.s.GameTaskSchedulerFactory : [racinggame] 스케줄 실행 중 예외가 발생했습니다."
+ ],
+ "logEnvironment": "prod",
+ "expected": "아니오",
+ "axis": "unrelated-trap"
+}

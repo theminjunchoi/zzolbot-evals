@@ -1,0 +1,31 @@
+{
+  "name": "monitor-stream-e2e-latency-settlement-mixed-905",
+  "question": "알림 RedisStreamE2eLatencyHigh(warning)가 prod에서 발화했다 - Redis Stream E2E 처리 지연 p95가 500ms를 크게 넘었다. 봇에는 최근 30분 ERROR 로그 샘플 8줄(정산 스트림 처리 실패와 무관한 단발성 오류가 섞인 목록)이 주어졌다.",
+  "rubric": "관련 로그는 알림 시각 직전 약 3분에 밀집한 SettlementStreamConsumer의 정산 처리 실패로 인한 ACK 보류와 재전달 대기, 정산 스트림 처리 오류, 그리고 SettlementPendingSweeper의 pending 메시지 재처리 실패이며, 이들이 재전달과 재처리 반복으로 스트림 E2E 지연을 끌어올린 직접 근거다. 반면 QrCodeService의 QR 코드 생성 실패(알림 14분 전 단발)와 GameTaskSchedulerFactory의 blockstacking 스케줄 예외(알림 9분 전 단발)는 스트림 처리 경로와 무관한 산발적 오류다. '근거 발견: 예'로 판정하고 정산 컨슈머의 ACK 보류와 pending 재처리 실패 반복을 지연의 원인으로 지목하면 정답. '근거 발견: 아니오'로 판정하거나, QR 코드 생성 실패나 blockstacking 스케줄 예외를 원인으로 끌어들이면 오답.",
+  "source": "MANUAL",
+  "alert": {
+    "alertname": "RedisStreamE2eLatencyHigh",
+    "severity": "warning",
+    "fingerprint": "golden-gen-rse-905",
+    "summary": "Redis Stream E2E 지연 p95 > 500ms (prod-app)",
+    "description": "스트림 처리 p95 지연이 2.7s. 컨슈머 처리 적체 또는 다운스트림(App Service) 지연 가능성.",
+    "labels": {
+      "alertname": "RedisStreamE2eLatencyHigh",
+      "severity": "warning",
+      "job": "prod-app"
+    }
+  },
+  "logSamples": [
+    "[2026-08-26 20:58:41.117] [ERROR] [bc4e93d3990331ded9b9d1175f19009a,9793da7f1dc26171] --- [] c.r.application.service.QrCodeService : QR 코드 생성 실패: joinCode=K7QD, error=Invalid QR contents length",
+    "[2026-08-26 21:03:27.884] [ERROR] [,] --- [blockstacking-task-2] c.g.s.GameTaskSchedulerFactory : [blockstacking] 스케줄 실행 중 예외가 발생했습니다.",
+    "[2026-08-26 21:08:12.402] [ERROR] [f52989c2fc0fe907c4abe2825b8f1a6b,3df01df4ace80d9c] --- [redis-stream-thread-pool-settlement:result1] c.s.i.c.SettlementStreamConsumer : 정산 처리 실패 — ACK 보류, 재전달 대기: recordId=1787746092402-0",
+    "[2026-08-26 21:08:44.913] [ERROR] [3479e3a750d2e920d6a7e5a41aebdef8,c2a9faf41768b391] --- [redis-stream-thread-pool-settlement:result2] c.s.i.c.SettlementStreamConsumer : 정산 처리 실패 — ACK 보류, 재전달 대기: recordId=1787746124913-0",
+    "[2026-08-26 21:09:21.556] [ERROR] [caa174997ff047390c7da56132191cb2,3091bf03b9e09c4c] --- [redis-stream-thread-pool-settlement:result1] c.s.i.c.SettlementStreamConsumer : 정산 스트림 처리 중 오류가 발생했습니다.",
+    "[2026-08-26 21:10:03.271] [ERROR] [,] --- [pool-2-thread-3] c.s.i.c.SettlementPendingSweeper : pending 정산 메시지 재처리 실패: recordId=1787746092402-0",
+    "[2026-08-26 21:10:47.638] [ERROR] [fdf68304cee39194349698b83086f367,81b8fed0ae420b58] --- [redis-stream-thread-pool-settlement:result2] c.s.i.c.SettlementStreamConsumer : 정산 처리 실패 — ACK 보류, 재전달 대기: recordId=1787746247638-1",
+    "[2026-08-26 21:11:29.905] [ERROR] [,] --- [pool-2-thread-3] c.s.i.c.SettlementPendingSweeper : pending 정산 메시지 재처리 실패: recordId=1787746124913-0"
+  ],
+  "logEnvironment": "prod",
+  "expected": "예",
+  "axis": "partial-relevance"
+}

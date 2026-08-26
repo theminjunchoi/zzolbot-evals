@@ -1,0 +1,31 @@
+{
+ "name": "monitor-stream-latency-partial-relevance-908",
+ "question": "알림 RedisStreamE2eLatencyHigh(warning)가 prod에서 발화했다 - Redis Stream E2E 지연 p95가 500ms를 초과. 봇에는 최근 30분 ERROR 로그 샘플 8줄(nunchi 스트림 컨슈머에 밀집한 처리 실패와 시간적으로 떨어진 산발 오류)이 주어졌다.",
+ "rubric": "주어진 ERROR 로그에서 알림 직전 약 3분 구간에 밀집한 다섯 줄은 redis-stream-thread-pool-nunchi 스레드에서 눈치게임 press 처리와 EventDispatcher 이벤트 처리가 연속 실패하고 같은 joinCode의 동일 eventId 메시지가 반복 재처리되는 내용이라 nunchi 스트림 컨슈머 적체로 인한 E2E 지연의 직접 근거이고, 20분 이상 앞서 각각 한 줄씩 나타난 QR Public URL 생성 실패, laddergame 스케줄 예외, /rooms/check-guestName 요청 실패는 스트림 지연과 무관한 산발 오류다. '근거 발견: 예'로 판정하고 nunchi 스트림 컨슈머의 반복 실패와 재처리로 인한 컨슈머 적체를 지연의 근본 원인 가설로 제시하면 정답. '근거 발견: 아니오'로 판정하거나, QR 실패, laddergame 스케줄 예외, HTTP 요청 실패를 지연의 원인으로 지목하면 오답.",
+ "source": "MANUAL",
+ "alert": {
+  "alertname": "RedisStreamE2eLatencyHigh",
+  "severity": "warning",
+  "fingerprint": "golden-gen-pr-908",
+  "summary": "Redis Stream E2E 지연 p95 > 500ms (prod-app)",
+  "description": "스트림 처리 p95 지연이 2.7s. 컨슈머 처리 적체 또는 다운스트림(App Service) 지연 가능성.",
+  "labels": {
+   "alertname": "RedisStreamE2eLatencyHigh",
+   "severity": "warning",
+   "job": "prod-app"
+  }
+ },
+ "logSamples": [
+  "[2026-08-26 20:41:26.334] [ERROR] [,] --- [] c.r.infra.OracleObjectStorageService : Oracle Object Storage Public URL 생성 실패: storageKey=qr/QW48.png, error=Read timed out",
+  "[2026-08-26 20:49:11.708] [ERROR] [,] --- [laddergame-task-2] c.g.s.GameTaskSchedulerFactory : [laddergame] 스케줄 실행 중 예외가 발생했습니다.",
+  "[2026-08-26 20:56:03.921] [ERROR] [0e3f6708087350fd120061a9e9d7b3d4,0b85f1af1c30e16a] --- [http-nio-8080-exec-19] c.web.exception.RestExceptionHandler : method=GET uri=/rooms/check-guestName exception=IllegalArgumentException message=guestName must not be blank",
+  "[2026-08-26 21:12:44.115] [ERROR] [6894b62af0f3c41c0907bca4db9a2f36,d32127708e99aba0] --- [redis-stream-thread-pool-nunchi1] c.n.i.m.c.NunchiCommandEventConsumer : 눈치게임 press 처리 중 오류: joinCode=8HRV, playerName=토니, eventId=6f2a91c4-53be-4d0a-9b17-2c8e5d41a077",
+  "[2026-08-26 21:13:18.562] [ERROR] [1765621d30b848b884457c55f397266e,5140257b4df26168] --- [redis-stream-thread-pool-nunchi1] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=TapCommandEventConsumer, message=눈치게임 press 처리 지연으로 컨슈머 타임아웃",
+  "[2026-08-26 21:13:57.030] [ERROR] [2bf6ac5a20483c99c72b97b021c6773e,296086504de4e498] --- [redis-stream-thread-pool-nunchi2] c.n.i.m.c.NunchiCommandEventConsumer : 눈치게임 press 처리 중 오류: joinCode=8HRV, playerName=재현, eventId=b71d0e53-84cc-4f19-a0d6-1e93f77b25c4",
+  "[2026-08-26 21:14:35.489] [ERROR] [c6dbdfa055e713fbd0dee6d8f21ed07a,8cfc311c15493b02] --- [redis-stream-thread-pool-nunchi2] c.n.i.m.c.NunchiCommandEventConsumer : 눈치게임 press 처리 중 오류: joinCode=8HRV, playerName=토니, eventId=6f2a91c4-53be-4d0a-9b17-2c8e5d41a077",
+  "[2026-08-26 21:15:09.877] [ERROR] [82e18ee605788de4a4606ddc8d244bb2,aee6baa1a66a6592] --- [redis-stream-thread-pool-nunchi1] c.g.r.c.RedisStreamListenerStarter : Redis Stream 처리 중 오류가 발생했습니다."
+ ],
+ "logEnvironment": "prod",
+ "expected": "예",
+ "axis": "partial-relevance"
+}

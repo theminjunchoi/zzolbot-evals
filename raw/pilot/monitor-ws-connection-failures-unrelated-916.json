@@ -1,0 +1,26 @@
+{
+ "name": "monitor-ws-connection-failures-unrelated-916",
+ "question": "알림 WsConnectionFailuresHigh(warning)가 prod에서 발화했다 - 최근 5분 WebSocket(STOMP) 연결 실패가 24건으로 임계 10을 넘었다. 봇에는 최근 30분 창에서 조회된 prod ERROR 로그 샘플 3줄이 주어졌다.",
+ "rubric": "주어진 로그 3건은 QR 코드 생성 실패, 오브젝트 스토리지 URL 생성 실패, 게스트 이름 검증 REST 예외로 모두 WebSocket 연결 경로와 무관한 HTTP 및 비동기 도메인의 산발적 오류이고, STOMP 핸드셰이크나 연결 단계 실패를 보여주는 로그는 한 줄도 없다. '근거 발견: 아니오'로 판정하고 WS 연결 실패의 원인을 이 로그들로 단정하지 않아야 정답. QR, 스토리지, 요청 검증 오류를 WebSocket 연결 실패의 원인으로 지목하거나 '근거 발견: 예'로 판정하면 오답.",
+ "source": "MANUAL",
+ "alert": {
+  "alertname": "WsConnectionFailuresHigh",
+  "severity": "warning",
+  "fingerprint": "golden-gen-unrelated-916",
+  "summary": "WebSocket 연결 실패 급증 (prod-app)",
+  "description": "최근 5분 WS 연결 실패가 24건 (임계 10). STOMP 연결 단계 실패 누적.",
+  "labels": {
+   "alertname": "WsConnectionFailuresHigh",
+   "severity": "warning",
+   "job": "prod-app"
+  }
+ },
+ "logSamples": [
+  "[2026-08-26 14:06:41.318] [ERROR] [,] --- [] c.r.application.service.QrCodeService : QR 코드 생성 실패: joinCode=K7QD, error=java.net.SocketTimeoutException: Read timed out",
+  "[2026-08-26 14:18:52.907] [ERROR] [77285528f064edcc321e6d3e9b322f65,1a1440ddc886dd6f] --- [http-nio-8080-exec-7] c.web.exception.RestExceptionHandler : method=POST uri=/rooms/check-guestName exception=MethodArgumentNotValidException message=guestName: 게스트 이름은 8자 이하여야 합니다",
+  "[2026-08-26 14:27:10.442] [ERROR] [,] --- [] c.r.infra.OracleObjectStorageService : Oracle Object Storage Public URL 생성 실패: storageKey=qr/2026/08/26/K7QD.png, error=java.io.IOException: Unexpected end of file from server"
+ ],
+ "logEnvironment": "prod",
+ "expected": "아니오",
+ "axis": "unrelated-trap"
+}
