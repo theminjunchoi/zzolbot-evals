@@ -117,8 +117,58 @@ class BenignParaphrase(AnswerMutation):
         return FlatAnswer(f"확인 결과, {flat.summary}", flat.evidence_found, flat.cause, flat.actions_block)
 
 
-DEFAULT_MUTATIONS: tuple[AnswerMutation, ...] = (
+class VagueCause(AnswerMutation):
+    """원인을 구체 컴포넌트 없이 뭉뚱그린다. 판정은 맞지만 rubric이 요구하는 원인 특정에
+    미달하는 경계 사례다. judge가 이걸 통과시키면 채점이 느슨한 것이다."""
+
+    name = "vague-cause"
+    expected_verdict = "FAIL"
+    CLAIM = "시스템 내부의 일시적인 문제로 인해 발생한 것으로 보입니다."
+
+    def apply(self, flat: FlatAnswer) -> FlatAnswer | None:
+        if not flat.evidence_found:
+            return None
+        return FlatAnswer(flat.summary, True, self.CLAIM, flat.actions_block)
+
+
+class HedgedVerdict(AnswerMutation):
+    """판정 라벨은 유지하되 요약에서 확신을 흐린다. 계약 문자열은 그대로이므로 rubric의
+    판정 조건은 충족한다. judge가 표현의 머뭇거림만으로 떨어뜨리면 과민한 것이다."""
+
+    name = "hedged-summary"
+    expected_verdict = "PASS"
+
+    def apply(self, flat: FlatAnswer) -> FlatAnswer:
+        summary = f"{flat.summary} 다만 추가 확인이 필요할 수 있습니다."
+        return FlatAnswer(summary, flat.evidence_found, flat.cause, flat.actions_block)
+
+
+class TruncatedActions(AnswerMutation):
+    """제안 조치를 비운다. rubric은 판정과 원인만 요구하므로 통과해야 한다.
+    judge가 rubric에 없는 요소를 요구하는지 재는 대조군이다."""
+
+    name = "no-actions"
+    expected_verdict = "PASS"
+
+    def apply(self, flat: FlatAnswer) -> FlatAnswer:
+        return FlatAnswer(flat.summary, flat.evidence_found, flat.cause, "제안 조치: (없음)")
+
+
+# 명백한 오답을 다루는 1차 프로브. judge의 하한을 잰다.
+GROSS_MUTATIONS: tuple[AnswerMutation, ...] = (
     Unmutated(), VerdictFlip(), FabricatedCause(), ComponentSwap(), BenignParaphrase())
+
+# 경계 영역 프로브. 실측에서 관찰된 판정 변동(같은 답변에 acc 3→5→3)이 일어나는 구간을 겨냥한다.
+SUBTLE_MUTATIONS: tuple[AnswerMutation, ...] = (
+    VagueCause(), HedgedVerdict(), TruncatedActions())
+
+DEFAULT_MUTATIONS: tuple[AnswerMutation, ...] = GROSS_MUTATIONS + SUBTLE_MUTATIONS
+
+MUTATION_SETS: dict[str, tuple[AnswerMutation, ...]] = {
+    "gross": GROSS_MUTATIONS,
+    "subtle": SUBTLE_MUTATIONS,
+    "all": DEFAULT_MUTATIONS,
+}
 
 
 def build_probes(scenario_name: str, answer: str,

@@ -79,3 +79,34 @@ def test_리포트는_놓친_오답과_과잉_탈락을_구분한다():
     assert "전체 일치율: 1/3" in md
     assert "놓친 오답(FAIL이어야 하는데 PASS): 1건" in md
     assert "과잉 탈락(PASS여야 하는데 FAIL): 1건" in md
+
+
+def test_모호한_원인은_근거_있음_답변에만_적용된다():
+    from analysis.mutations import VagueCause
+
+    assert VagueCause().apply(FlatAnswer.parse(UNGROUNDED)) is None
+
+    vague = VagueCause().apply(FlatAnswer.parse(GROUNDED)).render()
+    assert "근거 발견: 예" in vague
+    assert "커넥션 누수" not in vague
+
+
+def test_확신을_흐려도_판정과_원인은_보존된다():
+    from analysis.mutations import HedgedVerdict
+
+    hedged = HedgedVerdict().apply(FlatAnswer.parse(GROUNDED)).render()
+
+    assert "근거 발견: 예" in hedged
+    assert "원인 가설: 커넥션 누수" in hedged
+    assert "추가 확인이 필요할 수 있습니다" in hedged
+
+
+def test_경계_프로브는_명백한_오답_프로브와_분리되어_있다():
+    from analysis.mutations import GROSS_MUTATIONS, SUBTLE_MUTATIONS
+
+    gross = {m.name for m in GROSS_MUTATIONS}
+    subtle = {m.name for m in SUBTLE_MUTATIONS}
+
+    assert gross & subtle == set()
+    assert "verdict-flip" in gross
+    assert "vague-cause" in subtle
