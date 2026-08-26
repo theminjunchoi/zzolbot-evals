@@ -60,6 +60,10 @@ class AnswerMutation(ABC):
     def apply(self, flat: FlatAnswer) -> FlatAnswer | None:
         """적용할 수 없는 답변이면 None을 돌려준다."""
 
+    def applies_to(self, rubric: str) -> bool:
+        """채점 기준에 따라 참조 라벨이 성립하지 않는 변형은 여기서 걸러낸다."""
+        return True
+
 
 class Unmutated(AnswerMutation):
     """대조군. 원본 그대로이므로 judge가 PASS해야 한다."""
@@ -144,14 +148,22 @@ class HedgedVerdict(AnswerMutation):
 
 
 class TruncatedActions(AnswerMutation):
-    """제안 조치를 비운다. rubric은 판정과 원인만 요구하므로 통과해야 한다.
-    judge가 rubric에 없는 요소를 요구하는지 재는 대조군이다."""
+    """제안 조치를 비운다. 판정과 원인만 요구하는 채점 기준이라면 통과해야 하므로,
+    judge가 기준에 없는 요소를 요구하는지 재는 대조군이 된다.
+
+    다만 채점 기준이 특정 사실의 "언급"이나 "명시"를 요구하는 경우, 그 서술이 제안 조치에만
+    담겨 있을 수 있다. 그때 조치를 비우면 답변이 실제로 기준을 어기게 되어 PASS 기대가
+    성립하지 않는다. 실측에서 이 경우를 과잉 탈락으로 잘못 집계한 적이 있어 걸러낸다."""
 
     name = "no-actions"
     expected_verdict = "PASS"
+    _MENTION_REQUIRED = ("언급", "명시")
 
     def apply(self, flat: FlatAnswer) -> FlatAnswer:
         return FlatAnswer(flat.summary, flat.evidence_found, flat.cause, "제안 조치: (없음)")
+
+    def applies_to(self, rubric: str) -> bool:
+        return not any(word in rubric for word in self._MENTION_REQUIRED)
 
 
 # 명백한 오답을 다루는 1차 프로브. judge의 하한을 잰다.
@@ -172,12 +184,15 @@ MUTATION_SETS: dict[str, tuple[AnswerMutation, ...]] = {
 
 
 def build_probes(scenario_name: str, answer: str,
-                 mutations: tuple[AnswerMutation, ...] = DEFAULT_MUTATIONS) -> list[Probe]:
+                 mutations: tuple[AnswerMutation, ...] = DEFAULT_MUTATIONS,
+                 rubric: str = "") -> list[Probe]:
     flat = FlatAnswer.parse(answer)
     if flat is None:
         return []
     probes = []
     for mutation in mutations:
+        if not mutation.applies_to(rubric):
+            continue
         mutated = mutation.apply(flat)
         if mutated is None:
             continue

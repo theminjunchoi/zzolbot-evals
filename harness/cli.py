@@ -13,7 +13,7 @@ import sys
 from pathlib import Path
 
 from harness.analyzer import PROMPT_VARIANTS, GeminiAnalyzer
-from harness.judge import GeminiJudge
+from harness.judge import JUDGE_VARIANTS, GeminiJudge
 from harness.llm import GeminiJsonClient
 from harness.loading import ScenarioLoader
 from harness.reporting import JsonlSink, ReportBuilder
@@ -34,6 +34,8 @@ def main() -> int:
                         help="평가할 분할. 개선 실험은 dev, 최종 보고 숫자는 test에서 낸다")
     parser.add_argument("--splits-file", type=Path, default=Path("golden-set/splits.json"))
     parser.add_argument("--model", default=DEFAULT_MODEL)
+    parser.add_argument("--judge-variant", default="production", choices=sorted(JUDGE_VARIANTS),
+                        help="judge 프롬프트 변형. 바꾸면 과거 측정과 비교가 끊긴다")
     parser.add_argument("--prompt-variant", default="production", choices=sorted(PROMPT_VARIANTS),
                         help="분석기 프롬프트 변형. production은 팀 레포와 동일한 운영 프롬프트다")
     parser.add_argument("--min-interval", type=float, default=6.5,
@@ -66,7 +68,7 @@ def main() -> int:
 
     runner = EvalRunner(
         analyzer=GeminiAnalyzer(client, PROMPT_VARIANTS[args.prompt_variant]),
-        judge=GeminiJudge(client), on_result=on_result)
+        judge=GeminiJudge(client, JUDGE_VARIANTS[args.judge_variant]), on_result=on_result)
     results = runner.run(scenarios, repeats=args.repeats)
 
     builder = ReportBuilder()

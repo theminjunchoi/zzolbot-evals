@@ -15,7 +15,7 @@ from pathlib import Path
 
 from analysis.calibration import CalibrationReport, CalibrationRunner
 from analysis.mutations import MUTATION_SETS, build_probes
-from harness.judge import GeminiJudge
+from harness.judge import JUDGE_VARIANTS, GeminiJudge
 from harness.llm import GeminiJsonClient
 from harness.loading import ScenarioLoader
 
@@ -56,6 +56,8 @@ def main() -> int:
     parser.add_argument("--out-dir", type=Path, default=Path("reports"))
     parser.add_argument("--model", default="gemini-2.5-flash", help="judge 모델. 실측과 같아야 한다")
     parser.add_argument("--min-interval", type=float, default=1.5)
+    parser.add_argument("--judge-variant", default="production", choices=sorted(JUDGE_VARIANTS),
+                        help="측정할 judge 프롬프트 변형")
     parser.add_argument("--mutations", default="all", choices=sorted(MUTATION_SETS),
                         help="gross=명백한 오답(하한 측정), subtle=경계 영역(정밀도 측정)")
     args = parser.parse_args()
@@ -71,7 +73,8 @@ def main() -> int:
 
     probes = []
     for name in names:
-        probes.extend(build_probes(name, answers[name], MUTATION_SETS[args.mutations]))
+        probes.extend(build_probes(name, answers[name], MUTATION_SETS[args.mutations],
+                                   rubric=scenarios[name].rubric))
     if not probes:
         print("프로브를 만들 수 없습니다. 먼저 평가를 실행해 결과를 쌓으세요.", file=sys.stderr)
         return 1
@@ -83,7 +86,7 @@ def main() -> int:
         print(f"[{mark}] {result.probe.scenario_name} [{result.probe.mutation}] "
               f"기대={result.probe.expected_verdict} judge={result.judge_verdict}")
 
-    results = CalibrationRunner(GeminiJudge(client), on_result=on_result).run(scenarios, probes)
+    results = CalibrationRunner(GeminiJudge(client, JUDGE_VARIANTS[args.judge_variant]), on_result=on_result).run(scenarios, probes)
 
     args.out_dir.mkdir(parents=True, exist_ok=True)
     raw_path = args.out_dir / f"{args.label}.jsonl"

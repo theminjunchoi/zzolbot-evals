@@ -110,3 +110,16 @@ def test_경계_프로브는_명백한_오답_프로브와_분리되어_있다()
     assert gross & subtle == set()
     assert "verdict-flip" in gross
     assert "vague-cause" in subtle
+
+
+def test_언급을_요구하는_기준에는_조치_비우기를_적용하지_않는다():
+    from analysis.mutations import TruncatedActions
+
+    demanding = "'근거 발견: 아니오'로 판정하고 표본 부족을 언급해야 정답. 아니면 오답."
+    plain = "'근거 발견: 예'로 판정하고 커넥션 풀 고갈을 원인으로 제시하면 정답. 아니면 오답."
+
+    assert not TruncatedActions().applies_to(demanding)
+    assert TruncatedActions().applies_to(plain)
+
+    names = {p.mutation for p in build_probes("s", GROUNDED, rubric=demanding)}
+    assert "no-actions" not in names
