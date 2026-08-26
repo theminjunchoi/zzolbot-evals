@@ -1,0 +1,26 @@
+{
+ "name": "monitor-jvm-heap-usage-unrelated-2007",
+ "question": "알림 JvmHeapUsageHigh(critical)가 prod에서 발화했다 - prod-app JVM 힙 사용률이 88%로 85% 임계를 넘었다. 봇에는 최근 30분 창에서 조회된 prod ERROR 로그 샘플 3줄이 주어졌다.",
+ "rubric": "주어진 3줄은 정산 스트림 처리 오류 1건, Outbox 이벤트 DEAD_LETTER 전환 1건, PlayerDisconnectedEvent 처리 실패 1건으로 12분 안팎 간격의 산발적 오류이고, 메모리 부족이나 GC 관련 오류는 한 줄도 없다. '근거 발견: 아니오'로 판정해야 정답. 이 3건을 힙 사용률 상승의 근거로 삼거나 OOM이 이미 일어났다고 단정하면 오답.",
+ "source": "MANUAL",
+ "alert": {
+  "alertname": "JvmHeapUsageHigh",
+  "severity": "critical",
+  "fingerprint": "golden-gen-heap-2007",
+  "summary": "JVM 힙 사용률 > 85% (prod-app)",
+  "description": "힙 사용률이 88%. GC 오버헤드 증가 및 OOM 위험.",
+  "labels": {
+   "alertname": "JvmHeapUsageHigh",
+   "severity": "critical",
+   "job": "prod-app"
+  }
+ },
+ "logSamples": [
+  "[2026-08-26 15:20:41.902] [ERROR] [e1320f413e8140b05645ca587ea1159e,dd642fd1ca423032] --- [redis-stream-thread-pool-settlement:result1] c.s.i.c.SettlementStreamConsumer : 정산 스트림 처리 중 오류가 발생했습니다.",
+  "[2026-08-26 15:33:17.264] [ERROR] [,] --- [pool-5-thread-2] c.global.outbox.OutboxEventProcessor : Outbox 이벤트 최대 재시도 초과, DEAD_LETTER 전환: id=10473, streamKey=room:join",
+  "[2026-08-26 15:44:02.815] [ERROR] [5ed3b472ccbb261d520a6f36533216b8,b9433322f038c428] --- [redis-stream-thread-pool-room1] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=PlayerDisconnectedConsumer, message=PlayerDisconnectedEvent[eventId=016c0825-4763-4972-9fd5-9f11f796d452, timestamp=2026-08-26T06:44:02.811902344Z, joinCode=H8VC, playerName=USER5]"
+ ],
+ "logEnvironment": "prod",
+ "expected": "아니오",
+ "axis": "unrelated-trap"
+}

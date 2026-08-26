@@ -1,0 +1,32 @@
+{
+  "name": "monitor-error-spike-stale-reingest-qr-storage-2042",
+  "question": "알림 AppErrorLogSpike(warning)가 prod에서 발화했다 - ERROR 로그 급증(최근 5분, prod-app). 봇에는 최근 30분 창에서 조회된 ERROR 로그 샘플 9줄이 주어졌다.",
+  "rubric": "샘플 9줄 중 8줄은 본문 타임스탬프가 전날인 2026-08-25 01:14부터 05:41 사이에 흩어져 있고, 2026-08-26 시각을 가진 줄은 마지막 22:47:36 한 줄뿐이다. 최근 30분 창 조회 결과라기에는 시각이 맞지 않는 재적재 아티팩트이므로 지금 5분 창 63건 급증의 근거가 되지 못한다. '근거 발견: 아니오'로 판정하고 로그 타임스탬프가 조회 창과 어긋난다는 점을 지적해야 정답. 전날 새벽의 QR 코드 생성 실패와 Oracle Object Storage 실패를 지금 급증의 원인으로 지목하면 오답.",
+  "source": "MANUAL",
+  "alert": {
+    "alertname": "AppErrorLogSpike",
+    "severity": "warning",
+    "fingerprint": "golden-gen-stale-2042",
+    "summary": "ERROR 로그 급증(최근 5분, prod-app)",
+    "description": "ERROR 로그가 63건(임계 30/5m)입니다. zzol-bot이 근본원인을 분석합니다.",
+    "labels": {
+      "alertname": "AppErrorLogSpike",
+      "severity": "warning",
+      "job": "prod-app"
+    }
+  },
+  "logSamples": [
+    "[2026-08-25 01:14:29.336] [ERROR] [,] --- [] c.r.application.service.QrCodeService : QR 코드 생성 실패: joinCode=M4TZ, error=java.net.SocketTimeoutException: Read timed out",
+    "[2026-08-25 01:52:06.741] [ERROR] [,] --- [] c.r.infra.OracleObjectStorageService : Oracle Object Storage QR 코드 업로드 실패: contents=qr-M4TZ.png, error=java.net.SocketTimeoutException: Read timed out",
+    "[2026-08-25 02:30:48.115] [ERROR] [39e2e360c5b4081a754f660fe408ec47,3073dd3e9a532bed] --- [http-nio-8080-exec-9] c.web.exception.RestExceptionHandler : method=POST uri=/rooms exception=java.util.concurrent.CompletionException message=QR 코드 발급에 실패했습니다",
+    "[2026-08-25 03:07:19.482] [ERROR] [,] --- [] c.r.infra.OracleObjectStorageService : Oracle Object Storage Public URL 생성 실패: storageKey=qr/M4TZ.png, error=java.net.ConnectException: Connection refused",
+    "[2026-08-25 03:48:55.907] [ERROR] [,] --- [] c.r.application.service.QrCodeService : QR 코드 생성 실패: joinCode=W9PN, error=java.net.ConnectException: Connection refused",
+    "[2026-08-25 04:22:31.268] [ERROR] [6725f8d310d1392139775df7622fef71,debe82fbb93e39f5] --- [http-nio-8080-exec-4] c.web.exception.RestExceptionHandler : method=GET uri=/rooms/W9PN/settings exception=java.lang.IllegalStateException message=QR 코드가 아직 준비되지 않았습니다",
+    "[2026-08-25 04:59:13.594] [ERROR] [,] --- [] c.r.infra.OracleObjectStorageService : Oracle Object Storage QR 코드 업로드 실패: contents=qr-W9PN.png, error=java.net.SocketTimeoutException: Read timed out",
+    "[2026-08-25 05:41:02.850] [ERROR] [,] --- [] c.r.application.service.QrCodeService : QR 코드 생성 실패: joinCode=W9PN, error=java.io.IOException: unexpected end of stream",
+    "[2026-08-26 22:47:36.219] [ERROR] [,] --- [] c.r.application.service.QrCodeService : QR 코드 생성 실패: joinCode=Z2HL, error=java.net.SocketTimeoutException: Read timed out"
+  ],
+  "logEnvironment": "prod",
+  "expected": "아니오",
+  "axis": "stale-reingested"
+}

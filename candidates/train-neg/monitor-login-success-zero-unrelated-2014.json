@@ -1,0 +1,25 @@
+{
+  "name": "monitor-login-success-zero-unrelated-2014",
+  "question": "알림 LoginSuccessDroppedToZero(critical)가 prod에서 발화했다 - naver 로그인 시도는 있는데 성공이 0이다. 봇에는 최근 30분 창에서 조회된 prod ERROR 로그 샘플 2줄이 주어졌다.",
+  "rubric": "주어진 2줄은 LadderDrawCommandEvent 처리 실패 1건과 Outbox 이벤트 DEAD_LETTER 전환 1건뿐이고 20분 넘게 떨어져 있으며, 로그인 시도나 OAuth 콜백 처리에서 남은 로그는 없다. '근거 발견: 아니오'로 판정하고 provider 설정 문제를 주어진 로그로는 확인할 수 없다고 밝혀야 정답. 두 오류를 naver 로그인 성공 0의 원인으로 지목하면 오답.",
+  "source": "MANUAL",
+  "alert": {
+    "alertname": "LoginSuccessDroppedToZero",
+    "severity": "critical",
+    "fingerprint": "golden-gen-login-2014",
+    "summary": "naver 로그인 성공 0 (prod-app) — 시도는 계속됨",
+    "description": "최근 로그인 시도는 있으나 성공이 없다. redirect_uri(스킴/호스트)·provider 콘솔 등록·시크릿을 점검. 여러 provider 동시 발생 시 프록시/baseUrl 의심.",
+    "labels": {
+      "alertname": "LoginSuccessDroppedToZero",
+      "severity": "critical",
+      "job": "prod-app"
+    }
+  },
+  "logSamples": [
+    "[2026-08-26 16:44:03.129] [ERROR] [1b8b3905222c121708a7e95c44533215,3d3def1565c045cb] --- [redis-stream-thread-pool-laddergame1] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=LadderDrawCommandEventConsumer, message=LadderDrawCommandEvent[eventId=5d24f7ae-982b-43ef-b556-01af13674306, timestamp=2026-08-26T07:44:03.125673401Z, joinCode=V9KM, playerName=PLAYER_1]",
+    "[2026-08-26 17:06:58.443] [ERROR] [,] --- [pool-1-thread-2] c.global.outbox.OutboxEventProcessor : Outbox 이벤트 최대 재시도 초과, DEAD_LETTER 전환: id=6902, streamKey=minigame"
+  ],
+  "logEnvironment": "prod",
+  "expected": "아니오",
+  "axis": "unrelated-trap"
+}

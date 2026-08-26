@@ -1,0 +1,25 @@
+{
+  "name": "monitor-5xx-sparse-probabilities-room-create-2032",
+  "question": "알림 Http5xxRatioHigh(critical)가 prod에서 발화했다 - HTTP 5xx 비율 5% 초과 (prod-app). 봇에는 최근 30분 창에서 조회된 ERROR 로그 샘플 2줄이 주어졌다.",
+  "rubric": "주어진 2줄은 09:07 GET /rooms/9FQD/probabilities의 IllegalStateException 1건과 09:31 POST /rooms의 DataIntegrityViolationException 1건으로, 23분 넘게 떨어진 서로 다른 엔드포인트의 단발 예외다. 5분 창 5xx 비율 8.4%를 설명할 밀도가 아니고 두 예외를 잇는 공통 요소도 로그에 없다. '근거 발견: 아니오'로 판정하고 표본이 부족하다는 점을 밝혀야 정답. 두 예외 중 하나를 5xx 급등의 원인으로 단정하거나 둘을 하나의 장애로 묶으면 오답.",
+  "source": "MANUAL",
+  "alert": {
+    "alertname": "Http5xxRatioHigh",
+    "severity": "critical",
+    "fingerprint": "golden-gen-sparse-2032",
+    "summary": "HTTP 5xx 비율 5% 초과 (prod-app)",
+    "description": "최근 5분 5xx 비율이 8.4%. 서버 측 광범위 실패 가능성.",
+    "labels": {
+      "alertname": "Http5xxRatioHigh",
+      "severity": "critical",
+      "job": "prod-app"
+    }
+  },
+  "logSamples": [
+    "[2026-08-26 09:07:33.415] [ERROR] [f980eefc6156dde4296f1561a85ca0f0,6f0e54ca2e75ca9c] --- [http-nio-8080-exec-7] c.web.exception.RestExceptionHandler : method=GET uri=/rooms/9FQD/probabilities exception=java.lang.IllegalStateException message=확률 설정이 초기화되지 않았습니다",
+    "[2026-08-26 09:31:02.968] [ERROR] [5cedfbac7c27bf9188a61f8cb0825e9e,3a4c8c1740856def] --- [http-nio-8080-exec-3] c.web.exception.RestExceptionHandler : method=POST uri=/rooms exception=org.springframework.dao.DataIntegrityViolationException message=could not execute statement"
+  ],
+  "logEnvironment": "prod",
+  "expected": "아니오",
+  "axis": "sparse-evidence"
+}

@@ -1,0 +1,25 @@
+{
+  "name": "monitor-ws-connection-failures-unrelated-2011",
+  "question": "알림 WsConnectionFailuresHigh(warning)가 prod에서 발화했다 - 최근 5분 WS 연결 실패가 31건으로 임계 10을 크게 넘었다. 봇에는 최근 30분 창에서 조회된 prod ERROR 로그 샘플 2줄이 주어졌다.",
+  "rubric": "주어진 2줄은 스케줄 태스크의 처리되지 않은 예외 1건과 TouchProgressEvent 처리 실패 1건으로 20분 넘게 떨어져 있고, WebSocket 연결 단계에서 남은 로그는 없다. '근거 발견: 아니오'로 판정하고 표본이 알림과 무관함을 밝혀야 정답. 두 오류 중 하나를 WS 연결 실패 급증과 인과로 묶으면 오답.",
+  "source": "MANUAL",
+  "alert": {
+    "alertname": "WsConnectionFailuresHigh",
+    "severity": "warning",
+    "fingerprint": "golden-gen-wsfail-2011",
+    "summary": "WebSocket 연결 실패 급증 (prod-app)",
+    "description": "최근 5분 WS 연결 실패가 31건 (임계 10). STOMP 연결 단계 실패 누적.",
+    "labels": {
+      "alertname": "WsConnectionFailuresHigh",
+      "severity": "warning",
+      "job": "prod-app"
+    }
+  },
+  "logSamples": [
+    "[2026-08-26 20:41:12.058] [ERROR] [,] --- [pool-10-thread-2] o.s.s.s.TaskUtils$LoggingErrorHandler : Unexpected error occurred in scheduled task",
+    "[2026-08-26 21:03:27.694] [ERROR] [974b28b7c7bcbcb42e96ab4e071c9354,b43c2c2b51f8d3ac] --- [redis-stream-thread-pool-speedtouch1] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=TouchProgressEventConsumer, message=TouchProgressEvent[eventId=bc2c4331-b670-49d0-84b2-5edba8895efb, timestamp=2026-08-26T12:03:27.690551238Z, joinCode=Q2WN, playerName=PLAYER_5]"
+  ],
+  "logEnvironment": "prod",
+  "expected": "아니오",
+  "axis": "unrelated-trap"
+}

@@ -1,0 +1,27 @@
+{
+  "name": "monitor-jvm-heap-high-scheduler-exception-near-miss-2025",
+  "question": "알림 JvmHeapUsageHigh(critical)가 prod에서 발화했다 - JVM 힙 사용률이 88%로 임계 85%를 넘었다. 봇에는 최근 30분 창에서 조회된 prod ERROR 로그 샘플 4줄이 주어졌다.",
+  "rubric": "주어진 ERROR 4건은 racinggame과 speedtouch 게임 스케줄 실행 예외 2건, 스프링 스케줄 작업의 미처리 예외 2건이다. 이 로그들은 스케줄 실행이 예외로 끝났다는 사실만 남길 뿐 예외의 종류도 지연 시간도 담고 있지 않아, 그 원인이 GC 스톨인지 도메인 오류인지 구분해주지 않는다. 힙 사용률이나 GC 시간, OutOfMemoryError를 담은 로그는 없다. '근거 발견: 아니오'로 판정하고 메모리를 직접 보여주는 근거가 없다고 말해야 정답. 스케줄 예외를 GC 스톨이나 힙 압박의 증거로 해석해 원인을 단정하면 오답.",
+  "source": "MANUAL",
+  "alert": {
+    "alertname": "JvmHeapUsageHigh",
+    "severity": "critical",
+    "fingerprint": "golden-gen-heap-2025",
+    "summary": "JVM 힙 사용률 > 85% (prod-app)",
+    "description": "힙 사용률이 88%. GC 오버헤드 증가 및 OOM 위험.",
+    "labels": {
+      "alertname": "JvmHeapUsageHigh",
+      "severity": "critical",
+      "job": "prod-app"
+    }
+  },
+  "logSamples": [
+    "[2026-08-26 12:03:55.740] [ERROR] [,] --- [racinggame-task-1] c.g.s.GameTaskSchedulerFactory : [racinggame] 스케줄 실행 중 예외가 발생했습니다.",
+    "[2026-08-26 12:11:27.318] [ERROR] [,] --- [pool-12-thread-4] o.s.s.s.TaskUtils$LoggingErrorHandler : Unexpected error occurred in scheduled task",
+    "[2026-08-26 12:19:40.092] [ERROR] [,] --- [speedtouch-task-3] c.g.s.GameTaskSchedulerFactory : [speedtouch] 스케줄 실행 중 예외가 발생했습니다.",
+    "[2026-08-26 12:27:09.663] [ERROR] [,] --- [pool-12-thread-1] o.s.s.s.TaskUtils$LoggingErrorHandler : Unexpected error occurred in scheduled task"
+  ],
+  "logEnvironment": "prod",
+  "expected": "아니오",
+  "axis": "near-miss-component"
+}

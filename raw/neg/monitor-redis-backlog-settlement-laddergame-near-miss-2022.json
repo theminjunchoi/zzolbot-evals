@@ -1,0 +1,27 @@
+{
+ "name": "monitor-redis-backlog-settlement-laddergame-near-miss-2022",
+ "question": "알림 RedisStreamBacklogHigh(warning)가 prod에서 발화했다 - settlement:result 스트림 길이가 1602로 적체. 봇에는 최근 30분 창에서 조회된 prod ERROR 로그 샘플 4줄이 주어졌다.",
+ "rubric": "적체가 보고된 스트림은 settlement:result인데 주어진 ERROR 4건은 laddergame 스트림의 사다리 그리기 커맨드 컨슈머 실패 2건, laddergame 스레드의 Redis Stream 리스너 오류 1건, laddergame 컨테이너 상태 확인 예외 1건으로 전부 laddergame 스트림에서만 났다. 정산 결과 스트림은 별도 키와 별도 컨슈머 그룹을 쓰고 로그에는 정산 컨슈머가 전혀 등장하지 않으므로 laddergame 오류는 정산 적체의 근거가 아니다. '근거 발견: 아니오'로 판정하고 적체 대상 스트림의 컨슈머 로그가 없다는 점을 말해야 정답. laddergame 컨슈머 실패를 settlement:result 적체의 원인으로 연결하면 오답.",
+ "source": "MANUAL",
+ "alert": {
+  "alertname": "RedisStreamBacklogHigh",
+  "severity": "warning",
+  "fingerprint": "golden-gen-backlog-2022",
+  "summary": "Redis Stream 적체 (length > 1000, prod-app)",
+  "description": "스트림 길이가 1602. 컨슈머 처리 속도가 발행을 못 따라가고 있습니다.",
+  "labels": {
+   "alertname": "RedisStreamBacklogHigh",
+   "severity": "warning",
+   "job": "prod-app"
+  }
+ },
+ "logSamples": [
+  "[2026-08-26 05:12:44.031] [ERROR] [71c9354b43c2c2b51f8d3ac69b21e9ac,dbb3167085e43632] --- [redis-stream-thread-pool-laddergame1] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=LadderDrawCommandEventConsumer, message=LadderDrawCommandEvent[eventId=6a8bec9b-ec38-cf75-bc77-9847f179f511, timestamp=2026-08-25T20:12:44.026Z, joinCode=V5KT, playerName=PLAYER_3, columnIndex=1]",
+  "[2026-08-26 05:20:19.588] [ERROR] [6fa151248a1146a58c6a6505011970d8,56d0195d4d9f3f60] --- [redis-stream-thread-pool-laddergame1] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=LadderDrawCommandEventConsumer, message=LadderDrawCommandEvent[eventId=e398aa21-0c82-fc3c-b5fc-f1a4648a1b21, timestamp=2026-08-25T20:20:19.583Z, joinCode=V5KT, playerName=PLAYER_7, columnIndex=4]",
+  "[2026-08-26 05:28:53.242] [ERROR] [d14f8e980b9796f979dcd167e390e672,bbbdf8542d48682c] --- [redis-stream-thread-pool-laddergame2] c.g.r.c.RedisStreamListenerStarter : Redis Stream 처리 중 오류가 발생했습니다.",
+  "[2026-08-26 05:35:31.907] [ERROR] [,] --- [pool-8-thread-3] c.g.h.RedisStreamContainerRecovery : Redis Stream container 상태 확인 중 예외: stream=laddergame"
+ ],
+ "logEnvironment": "prod",
+ "expected": "아니오",
+ "axis": "near-miss-component"
+}

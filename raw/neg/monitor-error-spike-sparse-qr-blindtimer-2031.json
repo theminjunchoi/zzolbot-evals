@@ -1,0 +1,25 @@
+{
+ "name": "monitor-error-spike-sparse-qr-blindtimer-2031",
+ "question": "알림 AppErrorLogSpike(warning)가 prod에서 발화했다 - ERROR 로그 급증(최근 5분, prod-app). 봇에는 최근 30분 창에서 조회된 ERROR 로그 샘플 2줄이 주어졌다.",
+ "rubric": "주어진 2줄은 03:14의 QrCodeService QR 코드 생성 실패 1건과 03:39의 GameTaskSchedulerFactory blindtimer 스케줄 예외 1건으로, 25분 이상 떨어져 있고 서로 다른 기능의 단발 오류다. 5분 창에서 41건이 났다는 급증을 재구성할 표본이 아니다. '근거 발견: 아니오'로 판정하고 표본이 부족하다는 점을 밝혀야 정답. 이 두 줄 중 하나를 급증의 원인으로 지목하거나 QR 경로 또는 blindtimer 스케줄러의 장애를 단정하면 오답.",
+ "source": "MANUAL",
+ "alert": {
+  "alertname": "AppErrorLogSpike",
+  "severity": "warning",
+  "fingerprint": "golden-gen-sparse-2031",
+  "summary": "ERROR 로그 급증(최근 5분, prod-app)",
+  "description": "ERROR 로그가 41건(임계 30/5m)입니다. zzol-bot이 근본원인을 분석합니다.",
+  "labels": {
+   "alertname": "AppErrorLogSpike",
+   "severity": "warning",
+   "job": "prod-app"
+  }
+ },
+ "logSamples": [
+  "[2026-08-26 03:14:07.882] [ERROR] [,] --- [] c.r.application.service.QrCodeService : QR 코드 생성 실패: joinCode=T7QK, error=java.io.IOException: stream closed",
+  "[2026-08-26 03:39:51.204] [ERROR] [,] --- [blindtimer-task-2] c.g.s.GameTaskSchedulerFactory : [blindtimer] 스케줄 실행 중 예외가 발생했습니다."
+ ],
+ "logEnvironment": "prod",
+ "expected": "아니오",
+ "axis": "sparse-evidence"
+}

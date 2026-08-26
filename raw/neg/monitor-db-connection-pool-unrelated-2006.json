@@ -1,0 +1,27 @@
+{
+ "name": "monitor-db-connection-pool-unrelated-2006",
+ "question": "알림 DbConnectionPoolHigh(warning)가 prod에서 발화했다 - HikariCP 활성 연결이 9개로 최대 10에 근접했다. 봇에는 최근 30분 창에서 조회된 prod ERROR 로그 샘플 4줄이 주어졌다.",
+ "rubric": "주어진 4줄은 StopCommandEvent 처리 실패 1건, Oracle Object Storage QR 코드 업로드 실패 1건, 스케줄 태스크의 처리되지 않은 예외 1건, 방 이벤트 자동 정리 실패 1건으로 24분에 걸쳐 흩어진 서로 다른 기능의 오류이며, DB 커넥션 획득 지연이나 커넥션 풀 고갈을 보여 주는 로그는 없다. '근거 발견: 아니오'로 판정해야 정답. 이 오류들을 커넥션 누수나 슬로우 쿼리의 증거로 해석하면 오답.",
+ "source": "MANUAL",
+ "alert": {
+  "alertname": "DbConnectionPoolHigh",
+  "severity": "warning",
+  "fingerprint": "golden-gen-dbpool-2006",
+  "summary": "DB 커넥션 풀 활성 > 8 (prod-app)",
+  "description": "활성 연결 9개 (최대 10). 슬로우 쿼리 또는 커넥션 누수 확인 필요.",
+  "labels": {
+   "alertname": "DbConnectionPoolHigh",
+   "severity": "warning",
+   "job": "prod-app"
+  }
+ },
+ "logSamples": [
+  "[2026-08-26 11:31:04.217] [ERROR] [677e69b4314a70f03be6014565f72752,fea7217252fbf6c2] --- [redis-stream-thread-pool-blockstacking1] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=StopCommandEventConsumer, message=StopCommandEvent[eventId=6a395861-9af8-4cde-82c4-20bf5810c3fa, timestamp=2026-08-26T02:31:04.213417225Z, joinCode=M4XZ, playerName=PLAYER_2]",
+  "[2026-08-26 11:38:22.680] [ERROR] [,] --- [] c.r.infra.OracleObjectStorageService : Oracle Object Storage QR 코드 업로드 실패: contents=qr-M4XZ.png, error=java.net.SocketTimeoutException: connect timed out",
+  "[2026-08-26 11:47:56.031] [ERROR] [,] --- [pool-12-thread-1] o.s.s.s.TaskUtils$LoggingErrorHandler : Unexpected error occurred in scheduled task",
+  "[2026-08-26 11:55:13.498] [ERROR] [,] --- [pool-6-thread-4] c.r.i.messaging.RoomEventWaitManager : 방 이벤트 자동 정리 (실패): eventId=e400e0c3-f152-4b0e-84bf-11fca61d03d7"
+ ],
+ "logEnvironment": "prod",
+ "expected": "아니오",
+ "axis": "unrelated-trap"
+}

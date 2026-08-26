@@ -1,0 +1,27 @@
+{
+  "name": "monitor-jvm-heap-usage-unrelated-2003",
+  "question": "알림 JvmHeapUsageHigh(critical)가 prod에서 발화했다 - prod-app JVM 힙 사용률이 91%로 85% 임계를 넘었다. 봇에는 최근 30분 창에서 조회된 prod ERROR 로그 샘플 4줄이 주어졌다.",
+  "rubric": "주어진 4줄은 게스트 이름 중복 요청 예외 1건, Oracle Object Storage Public URL 생성 실패 1건, racinggame 스케줄 실행 예외 1건, 방 참가 비동기 처리 실패 1건으로 도메인이 모두 다른 단발성 오류이고, 메모리 부족이나 GC 관련 오류는 한 줄도 없다. '근거 발견: 아니오'로 판정하고 원인 가설을 단정하지 않아야 정답. 이 4건 중 하나를 힙 사용률 상승의 원인이나 결과로 단정하면 오답.",
+  "source": "MANUAL",
+  "alert": {
+    "alertname": "JvmHeapUsageHigh",
+    "severity": "critical",
+    "fingerprint": "golden-gen-heap-2003",
+    "summary": "JVM 힙 사용률 > 85% (prod-app)",
+    "description": "힙 사용률이 91%. GC 오버헤드 증가 및 OOM 위험.",
+    "labels": {
+      "alertname": "JvmHeapUsageHigh",
+      "severity": "critical",
+      "job": "prod-app"
+    }
+  },
+  "logSamples": [
+    "[2026-08-26 13:02:11.339] [ERROR] [1e7e94e0b3b083bcda025f7735986e93,eb0d45770d84f7e6] --- [http-nio-8080-exec-9] c.web.exception.RestExceptionHandler : method=POST uri=/rooms/check-guestName exception=java.lang.IllegalArgumentException message=중복된 게스트 이름입니다.",
+    "[2026-08-26 13:09:47.602] [ERROR] [,] --- [] c.r.infra.OracleObjectStorageService : Oracle Object Storage Public URL 생성 실패: storageKey=qr/T3QM.png, error=java.net.UnknownHostException: objectstorage.ap-chuncheon-1.oraclecloud.com",
+    "[2026-08-26 13:18:05.771] [ERROR] [,] --- [racinggame-task-1] c.g.s.GameTaskSchedulerFactory : [racinggame] 스케줄 실행 중 예외가 발생했습니다.",
+    "[2026-08-26 13:26:52.118] [ERROR] [de252ad7275ac03d1e32f60291254452,486fc5152634139a] --- [redis-stream-thread-pool-room:join1] c.r.application.service.RoomService : 방 참가 비동기 처리 실패: eventId=af621168-3043-4f3a-b6b2-897441d53bc6, joinCode=T3QM, playerName=GUEST_3"
+  ],
+  "logEnvironment": "prod",
+  "expected": "아니오",
+  "axis": "unrelated-trap"
+}

@@ -1,0 +1,27 @@
+{
+  "name": "monitor-outbox-dead-letter-consumer-side-near-miss-2020",
+  "question": "알림 OutboxDeadLetterHigh(warning)가 prod에서 발화했다 - 재시도 초과로 DEAD_LETTER 전환된 outbox 이벤트가 14건. 봇에는 최근 30분 창에서 조회된 prod ERROR 로그 샘플 4줄이 주어졌다.",
+  "rubric": "주어진 ERROR 4건은 minigame 스트림의 미니게임 시작 컨슈머 실패, racinggame 스트림의 탭 커맨드 컨슈머 실패, nunchi 스트림의 눈치게임 press 처리 오류, room 스트림의 리스너 오류로 전부 이미 스트림에 실린 이벤트를 읽는 컨슈머 쪽에서 났다. 알림이 세는 것은 발행 측 outbox 레코드의 DEAD_LETTER 전환 건수이고 그 전환을 남기는 OutboxEventProcessor의 로그는 한 줄도 없으므로, 컨슈머 실패는 outbox 레코드 상태를 설명하지 못한다. '근거 발견: 아니오'로 판정하고 발행 경로 로그가 없다는 점을 말해야 정답. 컨슈머 실패를 DEAD_LETTER 적체의 원인으로 지목하면 오답.",
+  "source": "MANUAL",
+  "alert": {
+    "alertname": "OutboxDeadLetterHigh",
+    "severity": "warning",
+    "fingerprint": "golden-gen-outboxdl-2020",
+    "summary": "Outbox DEAD_LETTER 적체 (> 10, prod-app)",
+    "description": "재시도 초과로 DEAD_LETTER 전환된 outbox 이벤트가 14건. 다운스트림 발행 경로 점검 필요.",
+    "labels": {
+      "alertname": "OutboxDeadLetterHigh",
+      "severity": "warning",
+      "job": "prod-app"
+    }
+  },
+  "logSamples": [
+    "[2026-08-26 15:44:19.372] [ERROR] [d6100a1abb916faa22f24423025daa23,77bdf6a90011d8e8] --- [redis-stream-thread-pool-minigame1] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=MiniGameStartConsumer, message=MiniGameStartEvent[eventId=4feb666c-f455-450f-25a8-bbd65abef99c, timestamp=2026-08-26T06:44:19.366Z, joinCode=H8QN, gameType=racinggame]",
+    "[2026-08-26 15:51:06.945] [ERROR] [6a3e25d5e0e762d7e684a6f112828f30,f00f3a9c05aff7ab] --- [redis-stream-thread-pool-racinggame1] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=TapCommandEventConsumer, message=TapCommandEvent[eventId=8185b2c4-f2f4-d078-20ec-db92e7c7b3a3, timestamp=2026-08-26T06:51:06.940Z, joinCode=H8QN, playerName=PLAYER_4, tapCount=27]",
+    "[2026-08-26 15:58:33.610] [ERROR] [edc5609e3e5e804b150f54b9d9551d2f,3e76df313086becb] --- [redis-stream-thread-pool-nunchi2] c.n.i.m.c.NunchiCommandEventConsumer : 눈치게임 press 처리 중 오류: joinCode=H8QN, playerName=PLAYER_6, eventId=e5c42957-4339-2856-cedf-b13bbc2c4331",
+    "[2026-08-26 16:05:47.281] [ERROR] [b6709d024b25edba8895efb974b28b7c,7bcbcb42e96ab4e0] --- [redis-stream-thread-pool-room1] c.g.r.c.RedisStreamListenerStarter : Redis Stream 처리 중 오류가 발생했습니다."
+  ],
+  "logEnvironment": "prod",
+  "expected": "아니오",
+  "axis": "near-miss-component"
+}

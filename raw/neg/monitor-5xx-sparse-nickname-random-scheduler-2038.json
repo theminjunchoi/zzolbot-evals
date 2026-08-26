@@ -1,0 +1,25 @@
+{
+ "name": "monitor-5xx-sparse-nickname-random-scheduler-2038",
+ "question": "알림 Http5xxRatioHigh(critical)가 prod에서 발화했다 - HTTP 5xx 비율 5% 초과 (prod-app). 봇에는 최근 30분 창에서 조회된 ERROR 로그 샘플 2줄이 주어졌다.",
+ "rubric": "주어진 2줄 중 02:41 줄은 pool-3-thread-1 스케줄 스레드에서 난 TaskUtils 예외라 HTTP 요청 경로가 아니고, HTTP 요청 라인은 03:05 GET /rooms/nickname/random의 ResourceAccessException 1건뿐이다. 두 줄은 24분 떨어져 있다. 5분 창 5xx 비율 6.3%를 뒷받침하려면 요청 실패가 밀집해야 하는데 그런 표본이 없다. '근거 발견: 아니오'로 판정하고 표본이 부족하다는 점을 밝혀야 정답. 스케줄 예외를 HTTP 5xx의 원인으로 연결하거나 단일 요청 실패로 광범위 실패를 단정하면 오답.",
+ "source": "MANUAL",
+ "alert": {
+  "alertname": "Http5xxRatioHigh",
+  "severity": "critical",
+  "fingerprint": "golden-gen-sparse-2038",
+  "summary": "HTTP 5xx 비율 5% 초과 (prod-app)",
+  "description": "최근 5분 5xx 비율이 6.3%. 서버 측 광범위 실패 가능성.",
+  "labels": {
+   "alertname": "Http5xxRatioHigh",
+   "severity": "critical",
+   "job": "prod-app"
+  }
+ },
+ "logSamples": [
+  "[2026-08-26 02:41:12.376] [ERROR] [,] --- [pool-3-thread-1] o.s.s.s.TaskUtils$LoggingErrorHandler : Unexpected error occurred in scheduled task",
+  "[2026-08-26 03:05:29.941] [ERROR] [b2c819f7ae5f9fc0f85a2a92dc3b294d,4428c0db05a445f8] --- [http-nio-8080-exec-5] c.web.exception.RestExceptionHandler : method=GET uri=/rooms/nickname/random exception=org.springframework.web.client.ResourceAccessException message=I/O error on GET request"
+ ],
+ "logEnvironment": "prod",
+ "expected": "아니오",
+ "axis": "sparse-evidence"
+}

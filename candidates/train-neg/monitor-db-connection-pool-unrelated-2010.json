@@ -1,0 +1,26 @@
+{
+  "name": "monitor-db-connection-pool-unrelated-2010",
+  "question": "알림 DbConnectionPoolHigh(warning)가 prod에서 발화했다 - HikariCP 활성 연결이 최대치 10에 도달했다. 봇에는 최근 30분 창에서 조회된 prod ERROR 로그 샘플 3줄이 주어졌다.",
+  "rubric": "주어진 3줄은 RoomJoinEvent 처리 실패 1건, Redis Stream 처리 오류 1건, laddergame 스케줄 실행 예외 1건으로 17분에 걸친 산발적 오류이고, DB 커넥션 획득 실패나 쿼리 타임아웃을 보여 주는 로그는 없다. '근거 발견: 아니오'로 판정해야 정답. Redis 계열 오류를 DB 커넥션 풀 포화의 원인으로 바꿔 설명하면 오답.",
+  "source": "MANUAL",
+  "alert": {
+    "alertname": "DbConnectionPoolHigh",
+    "severity": "warning",
+    "fingerprint": "golden-gen-dbpool-2010",
+    "summary": "DB 커넥션 풀 활성 > 8 (prod-app)",
+    "description": "활성 연결 10개 (최대 10). 슬로우 쿼리 또는 커넥션 누수 확인 필요.",
+    "labels": {
+      "alertname": "DbConnectionPoolHigh",
+      "severity": "warning",
+      "job": "prod-app"
+    }
+  },
+  "logSamples": [
+    "[2026-08-26 08:07:31.145] [ERROR] [f2f4d07820ecdb92e7c7b3a3edc5609e,3e5e804b150f54b9] --- [redis-stream-thread-pool-room:join1] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=RoomJoinConsumer, message=RoomJoinEvent[eventId=2828f30f-00f3-4a9c-85af-f7ab8185b2c4, timestamp=2026-08-25T23:07:31.140882617Z, joinCode=Z3PL, playerName=GUEST_7]",
+    "[2026-08-26 08:16:09.483] [ERROR] [d9551d2f3e76df313086becbe5c42957,43392856cedfb13b] --- [redis-stream-thread-pool-laddergame1] c.g.r.c.RedisStreamListenerStarter : Redis Stream 처리 중 오류가 발생했습니다.",
+    "[2026-08-26 08:24:44.912] [ERROR] [,] --- [laddergame-task-1] c.g.s.GameTaskSchedulerFactory : [laddergame] 스케줄 실행 중 예외가 발생했습니다."
+  ],
+  "logEnvironment": "prod",
+  "expected": "아니오",
+  "axis": "unrelated-trap"
+}

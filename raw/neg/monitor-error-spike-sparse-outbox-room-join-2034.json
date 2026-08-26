@@ -1,0 +1,25 @@
+{
+ "name": "monitor-error-spike-sparse-outbox-room-join-2034",
+ "question": "알림 AppErrorLogSpike(warning)가 prod에서 발화했다 - ERROR 로그 급증(최근 5분, prod-app). 봇에는 최근 30분 창에서 조회된 ERROR 로그 샘플 2줄이 주어졌다.",
+ "rubric": "주어진 2줄은 21:03 OutboxEventProcessor의 laddergame 스트림 DEAD_LETTER 전환 1건과 21:28 EventDispatcher의 RoomJoinConsumer 처리 실패 1건으로, 24분 이상 떨어진 서로 다른 경로의 단발 오류다. 5분 창 37건 급증과는 밀도도 시간대도 맞지 않는다. '근거 발견: 아니오'로 판정하고 표본이 부족하다는 점을 밝혀야 정답. 두 줄을 하나의 인과 사슬로 엮거나 outbox 적체를 급증의 원인으로 단정하면 오답.",
+ "source": "MANUAL",
+ "alert": {
+  "alertname": "AppErrorLogSpike",
+  "severity": "warning",
+  "fingerprint": "golden-gen-sparse-2034",
+  "summary": "ERROR 로그 급증(최근 5분, prod-app)",
+  "description": "ERROR 로그가 37건(임계 30/5m)입니다. zzol-bot이 근본원인을 분석합니다.",
+  "labels": {
+   "alertname": "AppErrorLogSpike",
+   "severity": "warning",
+   "job": "prod-app"
+  }
+ },
+ "logSamples": [
+  "[2026-08-26 21:03:44.129] [ERROR] [,] --- [pool-6-thread-2] c.global.outbox.OutboxEventProcessor : Outbox 이벤트 최대 재시도 초과, DEAD_LETTER 전환: id=5192, streamKey=laddergame",
+  "[2026-08-26 21:28:16.773] [ERROR] [393563a59599ee6a045c527868a71b85,61917946568cfa6a] --- [redis-stream-thread-pool-room:join1] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=RoomJoinConsumer, message=RoomJoinEvent[eventId=3a2ae2c9-6876-4ffa-8a57-ff855d6bcdae, timestamp=2026-08-26T12:28:16.761204338Z, joinCode=K3WD, playerName=PLAYER_5]"
+ ],
+ "logEnvironment": "prod",
+ "expected": "아니오",
+ "axis": "sparse-evidence"
+}

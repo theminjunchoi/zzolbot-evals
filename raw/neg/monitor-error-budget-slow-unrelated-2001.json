@@ -1,0 +1,26 @@
+{
+ "name": "monitor-error-budget-slow-unrelated-2001",
+ "question": "알림 ErrorBudgetBurnSlow(warning)가 prod에서 발화했다 - prod-app 5xx 비율이 6h와 30m 양 창에서 3%를 넘어 에러버짓이 느리게 소진되고 있다. 봇에는 최근 30분 창에서 조회된 prod ERROR 로그 샘플 3줄이 주어졌다.",
+ "rubric": "주어진 3줄은 QR 코드 생성 실패 1건, blindtimer 게임 스케줄 실행 예외 1건, 방 이벤트 자동 정리 실패 1건으로 서로 다른 기능에서 10분 안팎 간격으로 한 번씩 난 산발적 오류이고, 어느 것도 HTTP 요청 처리 경로에서 남은 로그가 아니라 5xx 응답 비율의 지속 상승을 설명하지 못한다. '근거 발견: 아니오'로 판정하고 원인 가설을 단정하지 않아야 정답. 이 3건 중 하나를 에러버짓 소진의 원인으로 지목하거나 5xx 응답이 실제로 발생했다고 단정하면 오답.",
+ "source": "MANUAL",
+ "alert": {
+  "alertname": "ErrorBudgetBurnSlow",
+  "severity": "warning",
+  "fingerprint": "golden-gen-ebslow-2001",
+  "summary": "에러버짓 느린 소진 (SLO 99.5%, burn-rate 6×)",
+  "description": "prod-app 5xx 비율이 6h·30m 양 창에서 3%를 초과. 누적 시 에러버짓 위협.",
+  "labels": {
+   "alertname": "ErrorBudgetBurnSlow",
+   "severity": "warning",
+   "job": "prod-app"
+  }
+ },
+ "logSamples": [
+  "[2026-08-26 04:12:33.481] [ERROR] [,] --- [] c.r.application.service.QrCodeService : QR 코드 생성 실패: joinCode=K7WD, error=java.net.SocketTimeoutException: Read timed out",
+  "[2026-08-26 04:21:07.905] [ERROR] [,] --- [blindtimer-task-2] c.g.s.GameTaskSchedulerFactory : [blindtimer] 스케줄 실행 중 예외가 발생했습니다.",
+  "[2026-08-26 04:33:59.214] [ERROR] [,] --- [pool-7-thread-3] c.r.i.messaging.RoomEventWaitManager : 방 이벤트 자동 정리 (실패): eventId=f1294643-c253-4163-841c-f73ef3817839"
+ ],
+ "logEnvironment": "prod",
+ "expected": "아니오",
+ "axis": "unrelated-trap"
+}

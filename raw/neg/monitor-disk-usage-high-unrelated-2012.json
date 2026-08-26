@@ -1,0 +1,27 @@
+{
+ "name": "monitor-disk-usage-high-unrelated-2012",
+ "question": "알림 DiskUsageHigh(warning)가 prod에서 발화했다 - 노드 디스크 사용률이 89%로 85% 임계를 넘었다. 봇에는 최근 30분 창에서 조회된 prod ERROR 로그 샘플 4줄이 주어졌다.",
+ "rubric": "주어진 4줄은 Oracle Object Storage Public URL 생성 실패 1건, 방 참가 비동기 처리 실패 1건, 눈치게임 press 처리 오류 1건, 방 설정 변경 요청 예외 1건으로 모두 애플리케이션 기능 오류이고, 디스크 쓰기 실패나 용량 부족을 보여 주는 로그는 없다. 게다가 이 알림의 대상은 애플리케이션이 아니라 노드(job=node)의 디스크 사용률이다. '근거 발견: 아니오'로 판정해야 정답. 앱 오류를 디스크 포화의 원인이나 결과로 단정하면 오답.",
+ "source": "MANUAL",
+ "alert": {
+  "alertname": "DiskUsageHigh",
+  "severity": "warning",
+  "fingerprint": "golden-gen-disk-2012",
+  "summary": "디스크 사용률 > 85%",
+  "description": "디스크 사용률이 89%. 로그 정리 또는 디스크 확장 필요.",
+  "labels": {
+   "alertname": "DiskUsageHigh",
+   "severity": "warning",
+   "job": "node"
+  }
+ },
+ "logSamples": [
+  "[2026-08-26 03:12:48.331] [ERROR] [,] --- [] c.r.infra.OracleObjectStorageService : Oracle Object Storage Public URL 생성 실패: storageKey=qr/J7BD.png, error=com.oracle.bmc.model.BmcException: (503, ServiceUnavailable)",
+  "[2026-08-26 03:21:15.907] [ERROR] [9bec38cf75bc779847f179f5116fa151,248a1146a58c6a65] --- [redis-stream-thread-pool-room:join1] c.r.application.service.RoomService : 방 참가 비동기 처리 실패: eventId=69b21e9a-cdbb-4316-9085-e436326a8bec, joinCode=J7BD, playerName=GUEST_2",
+  "[2026-08-26 03:29:52.164] [ERROR] [a210c82fc3cb5fcf1a4648a1b21d14f8,e980b9796f979dcd] --- [redis-stream-thread-pool-nunchi1] c.n.i.m.c.NunchiCommandEventConsumer : 눈치게임 press 처리 중 오류: joinCode=J7BD, playerName=USER3, eventId=05011970-d856-4d01-a5d4-d9f3f60e398a",
+  "[2026-08-26 03:38:07.520] [ERROR] [167e390e672bbbdf8542d48682cc1b2b,bef1bcecaa6962dc] --- [http-nio-8080-exec-6] c.web.exception.RestExceptionHandler : method=PATCH uri=/rooms/J7BD/settings exception=java.lang.IllegalArgumentException message=방장만 설정을 변경할 수 있습니다."
+ ],
+ "logEnvironment": "prod",
+ "expected": "아니오",
+ "axis": "unrelated-trap"
+}

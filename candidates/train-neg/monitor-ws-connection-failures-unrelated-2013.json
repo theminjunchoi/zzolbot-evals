@@ -1,0 +1,26 @@
+{
+  "name": "monitor-ws-connection-failures-unrelated-2013",
+  "question": "알림 WsConnectionFailuresHigh(warning)가 prod에서 발화했다 - 최근 5분 WS 연결 실패가 14건으로 임계 10을 넘었다. 봇에는 최근 30분 창에서 조회된 prod ERROR 로그 샘플 3줄이 주어졌다.",
+  "rubric": "주어진 3줄은 정산 처리 실패로 인한 ACK 보류 1건, settlement:result 스트림 컨테이너 상태 확인 예외 1건, blockstacking 스케줄 실행 예외 1건으로 25분에 걸친 서버 내부 오류이며, WebSocket 연결 실패를 보여 주는 로그는 없다. '근거 발견: 아니오'로 판정해야 정답. 정산 스트림 문제를 WS 연결 실패 급증의 원인으로 연결하면 오답.",
+  "source": "MANUAL",
+  "alert": {
+    "alertname": "WsConnectionFailuresHigh",
+    "severity": "warning",
+    "fingerprint": "golden-gen-wsfail-2013",
+    "summary": "WebSocket 연결 실패 급증 (prod-app)",
+    "description": "최근 5분 WS 연결 실패가 14건 (임계 10). STOMP 연결 단계 실패 누적.",
+    "labels": {
+      "alertname": "WsConnectionFailuresHigh",
+      "severity": "warning",
+      "job": "prod-app"
+    }
+  },
+  "logSamples": [
+    "[2026-08-26 12:05:26.712] [ERROR] [6f0a4379d686c1e49564e1caf7e8b2ec,ffedced3a4d631ae] --- [redis-stream-thread-pool-settlement:result1] c.s.i.c.SettlementStreamConsumer : 정산 처리 실패 — ACK 보류, 재전달 대기: recordId=1756213526708-0",
+    "[2026-08-26 12:17:44.259] [ERROR] [,] --- [pool-13-thread-1] c.g.h.RedisStreamContainerRecovery : Redis Stream container 상태 확인 중 예외: stream=settlement:result",
+    "[2026-08-26 12:30:19.836] [ERROR] [,] --- [blockstacking-task-2] c.g.s.GameTaskSchedulerFactory : [blockstacking] 스케줄 실행 중 예외가 발생했습니다."
+  ],
+  "logEnvironment": "prod",
+  "expected": "아니오",
+  "axis": "unrelated-trap"
+}

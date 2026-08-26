@@ -1,0 +1,27 @@
+{
+ "name": "monitor-error-budget-slow-unrelated-2015",
+ "question": "알림 ErrorBudgetBurnSlow(warning)가 prod에서 발화했다 - prod-app 5xx 비율이 두 창 모두에서 3%를 넘겨 월간 에러버짓이 느리게 깎이고 있다. 봇에는 최근 30분 창에서 조회된 prod ERROR 로그 샘플 4줄이 주어졌다.",
+ "rubric": "주어진 4줄은 MiniGameStartEvent 처리 실패 1건, 스케줄 태스크의 처리되지 않은 예외 1건, 방 이벤트 자동 정리 실패 1건, 눈치게임 press 처리 오류 1건으로 25분에 걸쳐 흩어진 서로 다른 기능의 단발성 오류이고, 네 줄 모두 비동기 처리 경로의 로그라 HTTP 응답 코드를 알 수 없다. '근거 발견: 아니오'로 판정해야 정답. 이 오류들을 에러버짓 소진의 원인으로 지목하거나 이들 때문에 5xx 응답이 나갔다고 단정하면 오답.",
+ "source": "MANUAL",
+ "alert": {
+  "alertname": "ErrorBudgetBurnSlow",
+  "severity": "warning",
+  "fingerprint": "golden-gen-ebslow-2015",
+  "summary": "에러버짓 느린 소진 (SLO 99.5%, burn-rate 6×)",
+  "description": "prod-app 5xx 비율이 6h·30m 양 창에서 3%를 초과. 누적 시 에러버짓 위협.",
+  "labels": {
+   "alertname": "ErrorBudgetBurnSlow",
+   "severity": "warning",
+   "job": "prod-app"
+  }
+ },
+ "logSamples": [
+  "[2026-08-26 23:04:37.288] [ERROR] [4454c153b15113519ce9c00be7139446,7619bef4d9ca91c3] --- [redis-stream-thread-pool-minigame1] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=MiniGameStartConsumer, message=MiniGameStartEvent[eventId=1f824ccf-7625-4190-8179-b9d658f57b8f, timestamp=2026-08-26T14:04:37.284119706Z, joinCode=C6HT, playerName=PLAYER_4]",
+  "[2026-08-26 23:12:50.615] [ERROR] [,] --- [pool-15-thread-2] o.s.s.s.TaskUtils$LoggingErrorHandler : Unexpected error occurred in scheduled task",
+  "[2026-08-26 23:21:09.074] [ERROR] [6fc1a17aff84846d76b7afb6afd44f41,874849cf11ca0e05] --- [redis-stream-thread-pool-room1] c.r.i.messaging.RoomEventWaitManager : 방 이벤트 자동 정리 (실패): eventId=0976828d-4c6a-4adf-a5b6-d86231a96a76",
+  "[2026-08-26 23:29:44.331] [ERROR] [620904efb149e730ccb26f7057df25c3,c93acb272cb40764] --- [redis-stream-thread-pool-nunchi1] c.n.i.m.c.NunchiCommandEventConsumer : 눈치게임 press 처리 중 오류: joinCode=C6HT, playerName=USER6, eventId=e5e239a4-03b6-4c3f-a68a-3feb5a29dfae"
+ ],
+ "logEnvironment": "prod",
+ "expected": "아니오",
+ "axis": "unrelated-trap"
+}

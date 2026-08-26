@@ -1,0 +1,27 @@
+{
+  "name": "monitor-db-pool-high-settlement-ack-near-miss-2019",
+  "question": "알림 DbConnectionPoolHigh(warning)가 prod에서 발화했다 - DB 커넥션 풀 활성 연결이 최대치인 10개까지 찼다. 봇에는 최근 30분 창에서 조회된 prod ERROR 로그 샘플 4줄이 주어졌다.",
+  "rubric": "주어진 ERROR 4건은 정산 스트림 컨슈머의 ACK 보류 후 재전달 대기 2건, 정산 스트림 처리 오류 1건, pending 정산 메시지 재처리 실패 1건으로 모두 settlement:result 스트림의 메시지 재전달 경로에서 났다. 이 로그들은 어떤 SQL이 오래 걸렸는지도, 커넥션이 반납되지 않았는지도 말해주지 않으므로 활성 JDBC 연결이 최대치까지 찼다는 알림의 근거가 되지 않는다. '근거 발견: 아니오'로 판정하고 커넥션 풀 자체를 보여주는 로그가 없다는 점을 말해야 정답. 정산 재처리 실패를 커넥션 풀 고갈의 원인으로 단정하거나, 반대로 풀 고갈이 정산 실패를 일으켰다고 확정하면 오답.",
+  "source": "MANUAL",
+  "alert": {
+    "alertname": "DbConnectionPoolHigh",
+    "severity": "warning",
+    "fingerprint": "golden-gen-dbpool-2019",
+    "summary": "DB 커넥션 풀 활성 > 8 (prod-app)",
+    "description": "활성 연결 10개 (최대 10). 슬로우 쿼리 또는 커넥션 누수 확인 필요.",
+    "labels": {
+      "alertname": "DbConnectionPoolHigh",
+      "severity": "warning",
+      "job": "prod-app"
+    }
+  },
+  "logSamples": [
+    "[2026-08-26 21:12:03.884] [ERROR] [f413e8140b05645ca587ea1159edd642,fd1ca423032016c0] --- [redis-stream-thread-pool-settlement:result1] c.s.i.c.SettlementStreamConsumer : 정산 처리 실패 — ACK 보류, 재전달 대기: recordId=1756192323871-0",
+    "[2026-08-26 21:19:41.226] [ERROR] [82547639726fd59f11f796d4525ed3b4,72ccbb261d520a6f] --- [redis-stream-thread-pool-settlement:result1] c.s.i.c.SettlementStreamConsumer : 정산 스트림 처리 중 오류가 발생했습니다.",
+    "[2026-08-26 21:26:55.470] [ERROR] [,] --- [pool-6-thread-2] c.s.i.c.SettlementPendingSweeper : pending 정산 메시지 재처리 실패: recordId=1756192323871-0",
+    "[2026-08-26 21:33:12.058] [ERROR] [36533216b8b9433322f038c428c309a3,c47d4493d542a2df] --- [redis-stream-thread-pool-settlement:result2] c.s.i.c.SettlementStreamConsumer : 정산 처리 실패 — ACK 보류, 재전달 대기: recordId=1756193592041-1"
+  ],
+  "logEnvironment": "prod",
+  "expected": "아니오",
+  "axis": "near-miss-component"
+}

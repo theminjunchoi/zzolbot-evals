@@ -1,0 +1,27 @@
+{
+  "name": "monitor-redis-backlog-cardgame-blindtimer-container-near-miss-2028",
+  "question": "알림 RedisStreamBacklogHigh(warning)가 prod에서 발화했다 - cardgame:select 스트림 길이가 1123으로 적체. 봇에는 최근 30분 창에서 조회된 prod ERROR 로그 샘플 4줄이 주어졌다.",
+  "rubric": "적체가 보고된 스트림은 cardgame:select인데 주어진 ERROR 4건은 blindtimer 스트림 컨테이너의 상태 확인 예외 1건, 복구 예외 1건, 복구 포기 후 HealthIndicator DOWN 보고 1건, 스프링 스케줄 작업의 미처리 예외 1건이다. 컨테이너 복구가 포기된 스트림은 blindtimer뿐이고 cardgame:select 컨슈머나 컨테이너는 로그에 한 번도 등장하지 않으므로, 카드 선택 스트림이 밀린 이유는 이 로그로 설명되지 않는다. '근거 발견: 아니오'로 판정하고 적체 대상 스트림의 컨슈머와 컨테이너 로그가 없다는 점을 말해야 정답. blindtimer 컨테이너 다운을 cardgame:select 적체의 원인으로 연결하면 오답.",
+  "source": "MANUAL",
+  "alert": {
+    "alertname": "RedisStreamBacklogHigh",
+    "severity": "warning",
+    "fingerprint": "golden-gen-backlog-2028",
+    "summary": "Redis Stream 적체 (length > 1000, prod-app)",
+    "description": "스트림 길이가 1123. 컨슈머 처리 속도가 발행을 못 따라가고 있습니다.",
+    "labels": {
+      "alertname": "RedisStreamBacklogHigh",
+      "severity": "warning",
+      "job": "prod-app"
+    }
+  },
+  "logSamples": [
+    "[2026-08-26 13:05:21.448] [ERROR] [,] --- [pool-2-thread-3] c.g.h.RedisStreamContainerRecovery : Redis Stream container 상태 확인 중 예외: stream=blindtimer",
+    "[2026-08-26 13:13:39.902] [ERROR] [,] --- [pool-2-thread-3] c.g.h.RedisStreamContainerRecovery : Redis Stream container 복구 중 예외 발생: stream=blindtimer",
+    "[2026-08-26 13:21:14.276] [ERROR] [,] --- [pool-2-thread-3] c.g.h.RedisStreamContainerRecovery : Redis Stream container 복구 포기: stream=blindtimer. HealthIndicator에 DOWN 보고",
+    "[2026-08-26 13:28:50.631] [ERROR] [,] --- [pool-2-thread-1] o.s.s.s.TaskUtils$LoggingErrorHandler : Unexpected error occurred in scheduled task"
+  ],
+  "logEnvironment": "prod",
+  "expected": "아니오",
+  "axis": "near-miss-component"
+}

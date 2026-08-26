@@ -1,0 +1,27 @@
+{
+ "name": "monitor-db-pool-high-redis-container-near-miss-2018",
+ "question": "알림 DbConnectionPoolHigh(warning)가 prod에서 발화했다 - DB 커넥션 풀 활성 연결이 9개로 임계 8을 넘었다. 봇에는 최근 30분 창에서 조회된 prod ERROR 로그 샘플 4줄이 주어졌다.",
+ "rubric": "주어진 ERROR 4건은 room 스트림 컨테이너 상태 확인 예외 1건과 복구 예외 1건, Redis Stream 리스너 오류 1건, room:join 컨슈머의 방 참가 이벤트 처리 실패 1건으로 전부 Redis Stream 연결과 컨슈머 계층에서 났다. 알림이 가리키는 것은 JDBC 커넥션 풀(최대 10)의 활성 연결이며, Redis 커넥션과 JDBC 커넥션 풀은 서로 다른 풀이라 Redis 쪽 오류는 활성 DB 연결이 늘어난 이유를 설명하지 못한다. '근거 발견: 아니오'로 판정하고 커넥션 획득 지연이나 슬로우 쿼리를 보여주는 로그가 없다는 점을 말해야 정답. Redis 오류를 DB 커넥션 누수나 슬로우 쿼리의 원인으로 연결하면 오답.",
+ "source": "MANUAL",
+ "alert": {
+  "alertname": "DbConnectionPoolHigh",
+  "severity": "warning",
+  "fingerprint": "golden-gen-dbpool-2018",
+  "summary": "DB 커넥션 풀 활성 > 8 (prod-app)",
+  "description": "활성 연결 9개 (최대 10). 슬로우 쿼리 또는 커넥션 누수 확인 필요.",
+  "labels": {
+   "alertname": "DbConnectionPoolHigh",
+   "severity": "warning",
+   "job": "prod-app"
+  }
+ },
+ "logSamples": [
+  "[2026-08-26 03:41:29.007] [ERROR] [,] --- [pool-3-thread-1] c.g.h.RedisStreamContainerRecovery : Redis Stream container 상태 확인 중 예외: stream=room",
+  "[2026-08-26 03:48:16.552] [ERROR] [,] --- [pool-3-thread-1] c.g.h.RedisStreamContainerRecovery : Redis Stream container 복구 중 예외 발생: stream=room",
+  "[2026-08-26 03:55:44.238] [ERROR] [5d30188f656636a3958619af8cde12c4,20bf5810c3fa677e] --- [redis-stream-thread-pool-room1] c.g.r.c.RedisStreamListenerStarter : Redis Stream 처리 중 오류가 발생했습니다.",
+  "[2026-08-26 04:02:57.109] [ERROR] [69b4314a70f03be6014565f72752fea7,217252fbf6c2e400] --- [redis-stream-thread-pool-room:join1] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=RoomJoinConsumer, message=RoomJoinEvent[eventId=e0c3f152-b0e3-4bf1-1fca-61d03d7e1320, timestamp=2026-08-25T19:02:57.104Z, joinCode=K3PV, playerName=GUEST_7]"
+ ],
+ "logEnvironment": "prod",
+ "expected": "아니오",
+ "axis": "near-miss-component"
+}

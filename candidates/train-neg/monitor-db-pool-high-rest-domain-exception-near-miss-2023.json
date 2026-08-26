@@ -1,0 +1,27 @@
+{
+  "name": "monitor-db-pool-high-rest-domain-exception-near-miss-2023",
+  "question": "알림 DbConnectionPoolHigh(warning)가 prod에서 발화했다 - DB 커넥션 풀 활성 연결이 9개로 임계 8을 넘었다. 봇에는 최근 30분 창에서 조회된 prod ERROR 로그 샘플 4줄이 주어졌다.",
+  "rubric": "주어진 ERROR 4건 중 3건은 RestExceptionHandler가 기록한 요청 처리 예외(참여 코드 중복, 요청 값 검증 실패, 게임 상태 위반)이고 1건은 QR 코드 생성 중 난 I/O 오류다. 셋 다 요청이 오래 걸려 커넥션을 붙잡았음을 보여주지 않고, 커넥션 획득 타임아웃이나 반납되지 않은 커넥션을 가리키는 로그는 한 줄도 없다. '근거 발견: 아니오'로 판정하고 커넥션 풀 상태를 보여주는 로그가 없다고 말해야 정답. 도메인 예외를 슬로우 쿼리나 커넥션 누수의 증거로 삼거나, 이 예외들 때문에 활성 연결이 늘었다고 단정하면 오답.",
+  "source": "MANUAL",
+  "alert": {
+    "alertname": "DbConnectionPoolHigh",
+    "severity": "warning",
+    "fingerprint": "golden-gen-dbpool-2023",
+    "summary": "DB 커넥션 풀 활성 > 8 (prod-app)",
+    "description": "활성 연결 9개 (최대 10). 슬로우 쿼리 또는 커넥션 누수 확인 필요.",
+    "labels": {
+      "alertname": "DbConnectionPoolHigh",
+      "severity": "warning",
+      "job": "prod-app"
+    }
+  },
+  "logSamples": [
+    "[2026-08-26 11:07:52.663] [ERROR] [c1b2bbef1bcecaa6962dc6f0a4379d68,6c1e49564e1caf7e] --- [http-nio-8080-exec-4] c.web.exception.RestExceptionHandler : method=POST uri=/rooms exception=DuplicateJoinCodeException message=이미 사용 중인 참여 코드입니다.",
+    "[2026-08-26 11:15:31.208] [ERROR] [8b2ecffedced3a4d631ae5d24f7ae982,b3efc55601af1367] --- [http-nio-8080-exec-7] c.web.exception.RestExceptionHandler : method=GET uri=/rooms/check-guestName exception=IllegalArgumentException message=guestName은 비어 있을 수 없습니다.",
+    "[2026-08-26 11:23:46.884] [ERROR] [43061b8b3905222c121708a7e95c4453,32153d3def1565c0] --- [http-nio-8080-exec-2] c.web.exception.RestExceptionHandler : method=PATCH uri=/rooms/Q4TZ/settings exception=IllegalStateException message=게임이 이미 시작되어 설정을 변경할 수 없습니다.",
+    "[2026-08-26 11:31:19.520] [ERROR] [,] --- [] c.r.application.service.QrCodeService : QR 코드 생성 실패: joinCode=Q4TZ, error=java.io.IOException: broken pipe"
+  ],
+  "logEnvironment": "prod",
+  "expected": "아니오",
+  "axis": "near-miss-component"
+}

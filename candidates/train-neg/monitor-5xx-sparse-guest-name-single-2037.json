@@ -1,0 +1,24 @@
+{
+  "name": "monitor-5xx-sparse-guest-name-single-2037",
+  "question": "알림 Http5xxRatioHigh(critical)가 prod에서 발화했다 - HTTP 5xx 비율 5% 초과 (prod-app). 봇에는 최근 30분 창에서 조회된 ERROR 로그 샘플 1줄이 주어졌다.",
+  "rubric": "주어진 로그는 17:21 POST /rooms/check-guestName에서 RestExceptionHandler가 IllegalArgumentException 1건을 남긴 것이 전부이고, 그 줄에는 응답 상태 코드가 남아 있지 않다. 한 줄로는 최근 5분 5xx 비율 12.6%가 어떤 요청들로 구성됐는지 알 수 없다. '근거 발견: 아니오'로 판정하고 표본이 부족하다는 점을 밝혀야 정답. 이 단일 예외를 5xx 급등의 원인으로 단정하거나 로그에 없는 응답 코드를 추정해 결론을 내면 오답.",
+  "source": "MANUAL",
+  "alert": {
+    "alertname": "Http5xxRatioHigh",
+    "severity": "critical",
+    "fingerprint": "golden-gen-sparse-2037",
+    "summary": "HTTP 5xx 비율 5% 초과 (prod-app)",
+    "description": "최근 5분 5xx 비율이 12.6%. 서버 측 광범위 실패 가능성.",
+    "labels": {
+      "alertname": "Http5xxRatioHigh",
+      "severity": "critical",
+      "job": "prod-app"
+    }
+  },
+  "logSamples": [
+    "[2026-08-26 17:21:09.883] [ERROR] [9078f17a5795efdcf6a49f961c45b918,2023ec3489c95120] --- [http-nio-8080-exec-11] c.web.exception.RestExceptionHandler : method=POST uri=/rooms/check-guestName exception=java.lang.IllegalArgumentException message=게스트 이름은 8자를 넘을 수 없습니다"
+  ],
+  "logEnvironment": "prod",
+  "expected": "아니오",
+  "axis": "sparse-evidence"
+}

@@ -1,0 +1,27 @@
+{
+ "name": "monitor-redis-backlog-nunchi-settlement-near-miss-2026",
+ "question": "알림 RedisStreamBacklogHigh(warning)가 prod에서 발화했다 - nunchi 스트림 길이가 1988로 적체. 봇에는 최근 30분 창에서 조회된 prod ERROR 로그 샘플 4줄이 주어졌다.",
+ "rubric": "적체가 보고된 스트림은 nunchi인데 주어진 ERROR 4건은 정산 스트림 컨슈머의 ACK 보류 후 재전달 대기 2건과 pending 정산 메시지 재처리 실패 2건으로 전부 settlement:result 스트림의 정산 경로에서 났다. 눈치게임 press를 처리하는 nunchi 컨슈머는 로그에 한 번도 등장하지 않으므로 정산 쪽 재전달 적체는 nunchi 적체의 근거가 되지 않는다. '근거 발견: 아니오'로 판정하고 적체 대상 스트림의 컨슈머 로그가 없다는 점을 말해야 정답. 정산 ACK 보류를 nunchi 스트림 적체의 원인으로 연결하거나 두 적체를 같은 사건으로 묶으면 오답.",
+ "source": "MANUAL",
+ "alert": {
+  "alertname": "RedisStreamBacklogHigh",
+  "severity": "warning",
+  "fingerprint": "golden-gen-backlog-2026",
+  "summary": "Redis Stream 적체 (length > 1000, prod-app)",
+  "description": "스트림 길이가 1988. 컨슈머 처리 속도가 발행을 못 따라가고 있습니다.",
+  "labels": {
+   "alertname": "RedisStreamBacklogHigh",
+   "severity": "warning",
+   "job": "prod-app"
+  }
+ },
+ "logSamples": [
+  "[2026-08-26 08:14:52.377] [ERROR] [2eb4a58f20962e3dd0fca69d6c14db50,a7ef9377598eb73a] --- [redis-stream-thread-pool-settlement:result1] c.s.i.c.SettlementStreamConsumer : 정산 처리 실패 — ACK 보류, 재전달 대기: recordId=1756199692361-0",
+  "[2026-08-26 08:22:31.940] [ERROR] [84aa40d8323409bea0d3daef577090f4,506f91fb5313bf82] --- [redis-stream-thread-pool-settlement:result2] c.s.i.c.SettlementStreamConsumer : 정산 처리 실패 — ACK 보류, 재전달 대기: recordId=1756200151928-2",
+  "[2026-08-26 08:30:06.512] [ERROR] [,] --- [pool-14-thread-1] c.s.i.c.SettlementPendingSweeper : pending 정산 메시지 재처리 실패: recordId=1756199692361-0",
+  "[2026-08-26 08:37:44.185] [ERROR] [,] --- [pool-14-thread-1] c.s.i.c.SettlementPendingSweeper : pending 정산 메시지 재처리 실패: recordId=1756200151928-2"
+ ],
+ "logEnvironment": "prod",
+ "expected": "아니오",
+ "axis": "near-miss-component"
+}

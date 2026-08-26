@@ -1,0 +1,33 @@
+{
+ "name": "monitor-error-spike-stale-reingest-http-outbox-2044",
+ "question": "알림 AppErrorLogSpike(warning)가 prod에서 발화했다 - ERROR 로그 급증(최근 5분, prod-app). 봇에는 최근 30분 창에서 조회된 ERROR 로그 샘플 10줄이 주어졌다.",
+ "rubric": "샘플 10줄 중 9줄은 본문 타임스탬프가 전날인 2026-08-25 10:05부터 17:44 사이에 흩어져 있고, 2026-08-26 시각을 가진 줄은 마지막 12:09:21 한 줄뿐이다. 최근 30분 창으로 조회한 결과인데 하루 전 로그가 되돌아온 재적재 아티팩트라, 지금 5분 창 48건 급증의 구성을 이 표본으로 알 수 없다. '근거 발견: 아니오'로 판정하고 로그 타임스탬프가 조회 창과 어긋난다는 점을 지적해야 정답. 전날의 laddergame outbox DEAD_LETTER 전환과 HTTP 예외를 지금 급증의 원인으로 지목하면 오답.",
+ "source": "MANUAL",
+ "alert": {
+  "alertname": "AppErrorLogSpike",
+  "severity": "warning",
+  "fingerprint": "golden-gen-stale-2044",
+  "summary": "ERROR 로그 급증(최근 5분, prod-app)",
+  "description": "ERROR 로그가 48건(임계 30/5m)입니다. zzol-bot이 근본원인을 분석합니다.",
+  "labels": {
+   "alertname": "AppErrorLogSpike",
+   "severity": "warning",
+   "job": "prod-app"
+  }
+ },
+ "logSamples": [
+  "[2026-08-25 10:05:33.412] [ERROR] [ac822180c0979c31e739c5e2e3cd9fc4,6e249719af323d01] --- [http-nio-8080-exec-2] c.web.exception.RestExceptionHandler : method=POST uri=/rooms/check-joinCode exception=org.springframework.dao.QueryTimeoutException message=Redis command timed out",
+  "[2026-08-25 10:41:18.077] [ERROR] [,] --- [pool-10-thread-1] c.global.outbox.OutboxEventProcessor : Outbox 이벤트 최대 재시도 초과, DEAD_LETTER 전환: id=7714, streamKey=laddergame",
+  "[2026-08-25 11:23:50.936] [ERROR] [6ac963de07255a1191aaefe67e815237,3a061b3d98ca49b2] --- [redis-stream-thread-pool-laddergame1] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=LadderDrawCommandEventConsumer, message=LadderDrawCommandEvent[eventId=efcce24e-3fb4-490b-91ae-f26e99ac3c84, timestamp=2026-08-25T02:23:50.924773301Z, joinCode=H6KP, playerName=PLAYER_2]",
+  "[2026-08-25 12:47:04.520] [ERROR] [4ebc44d2ded71de2afe044675b8f22a3,e0ac84bb01aad896] --- [http-nio-8080-exec-6] c.web.exception.RestExceptionHandler : method=GET uri=/rooms/H6KP/probabilities exception=org.springframework.dao.QueryTimeoutException message=Redis command timed out",
+  "[2026-08-25 13:58:41.283] [ERROR] [,] --- [pool-10-thread-2] c.global.outbox.OutboxEventProcessor : Outbox 이벤트 최대 재시도 초과, DEAD_LETTER 전환: id=7802, streamKey=laddergame",
+  "[2026-08-25 14:36:27.659] [ERROR] [,] --- [laddergame-task-1] c.g.s.GameTaskSchedulerFactory : [laddergame] 스케줄 실행 중 예외가 발생했습니다.",
+  "[2026-08-25 15:19:12.744] [ERROR] [c3d078d0eb1acb14c3592e4777a93aed,c11f9bc40c25eb60] --- [redis-stream-thread-pool-laddergame2] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=LadderDrawCommandEventConsumer, message=LadderDrawCommandEvent[eventId=6d76df5a-08a9-4871-8fc1-18056bfed344, timestamp=2026-08-25T06:19:12.732095446Z, joinCode=H6KP, playerName=PLAYER_5]",
+  "[2026-08-25 16:02:55.198] [ERROR] [ba2391ea004c3dfed64363b46212f566,5e15da3a9696695b] --- [http-nio-8080-exec-8] c.web.exception.RestExceptionHandler : method=PATCH uri=/rooms/H6KP/settings exception=java.lang.IllegalStateException message=게임이 이미 시작되어 설정을 변경할 수 없습니다",
+  "[2026-08-25 17:44:39.806] [ERROR] [,] --- [pool-10-thread-1] c.global.outbox.OutboxEventProcessor : Outbox 이벤트 최대 재시도 초과, DEAD_LETTER 전환: id=7935, streamKey=laddergame",
+  "[2026-08-26 12:09:21.475] [ERROR] [,] --- [pool-14-thread-2] c.global.outbox.OutboxEventProcessor : Outbox 이벤트 최대 재시도 초과, DEAD_LETTER 전환: id=8067, streamKey=laddergame"
+ ],
+ "logEnvironment": "prod",
+ "expected": "아니오",
+ "axis": "stale-reingested"
+}

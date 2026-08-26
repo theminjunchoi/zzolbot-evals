@@ -1,0 +1,27 @@
+{
+ "name": "monitor-redis-backlog-minigame-room-join-near-miss-2024",
+ "question": "알림 RedisStreamBacklogHigh(warning)가 prod에서 발화했다 - minigame 스트림 길이가 1355로 적체. 봇에는 최근 30분 창에서 조회된 prod ERROR 로그 샘플 4줄이 주어졌다.",
+ "rubric": "적체가 보고된 스트림은 minigame인데 주어진 ERROR 4건은 방 참가 비동기 처리 실패 2건, 방 이벤트 자동 정리 실패 1건, room:join 컨슈머의 방 참가 이벤트 처리 실패 1건으로 전부 방 참가 도메인에서 났다. 미니게임 시작 이벤트를 읽는 minigame 컨슈머는 로그에 한 번도 등장하지 않으므로 방 참가 쪽 실패는 minigame 적체의 근거가 되지 않는다. '근거 발견: 아니오'로 판정하고 적체 대상 스트림의 컨슈머 로그가 없다는 점을 말해야 정답. 방 참가 실패를 minigame 스트림 적체의 원인으로 연결하면 오답.",
+ "source": "MANUAL",
+ "alert": {
+  "alertname": "RedisStreamBacklogHigh",
+  "severity": "warning",
+  "fingerprint": "golden-gen-backlog-2024",
+  "summary": "Redis Stream 적체 (length > 1000, prod-app)",
+  "description": "스트림 길이가 1355. 컨슈머 처리 속도가 발행을 못 따라가고 있습니다.",
+  "labels": {
+   "alertname": "RedisStreamBacklogHigh",
+   "severity": "warning",
+   "job": "prod-app"
+  }
+ },
+ "logSamples": [
+  "[2026-08-26 22:41:08.664] [ERROR] [45cb1f824ccf76251900179b9d658f57,b8f4454c153b1511] --- [redis-stream-thread-pool-room:join1] c.r.application.service.RoomService : 방 참가 비동기 처리 실패: eventId=3519ce9c-00be-7139-4467-619bef4d9ca9, joinCode=D2WQ, playerName=GUEST_3",
+  "[2026-08-26 22:48:35.219] [ERROR] [,] --- [pool-10-thread-2] c.r.i.messaging.RoomEventWaitManager : 방 이벤트 자동 정리 (실패): eventId=1c309768-28d4-c6aa-dfb5-b6d86231a96a",
+  "[2026-08-26 22:56:12.803] [ERROR] [766fc1a17aff84846d76b7afb6afd44f,41874849cf11ca0e] --- [redis-stream-thread-pool-room:join2] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=RoomJoinConsumer, message=RoomJoinEvent[eventId=05e5e239-a403-b6c3-fb68-a3feb5a29dfa, timestamp=2026-08-26T13:56:12.798Z, joinCode=D2WQ, playerName=GUEST_5]",
+  "[2026-08-26 23:03:47.461] [ERROR] [e620904efb149e730ccb26f7057df25c,3c93acb272cb4076] --- [redis-stream-thread-pool-room:join1] c.r.application.service.RoomService : 방 참가 비동기 처리 실패: eventId=463d9c84-2178-9300-b58b-35c5b695a2e5, joinCode=F7HM, playerName=GUEST_1"
+ ],
+ "logEnvironment": "prod",
+ "expected": "아니오",
+ "axis": "near-miss-component"
+}

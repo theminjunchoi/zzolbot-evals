@@ -1,0 +1,25 @@
+{
+ "name": "monitor-jvm-heap-usage-unrelated-2008",
+ "question": "알림 JvmHeapUsageHigh(critical)가 prod에서 발화했다 - prod-app JVM 힙 사용률이 93%까지 올랐다. 봇에는 최근 30분 창에서 조회된 prod ERROR 로그 샘플 2줄이 주어졌다.",
+ "rubric": "주어진 2줄은 cardgame:select 스트림 컨테이너 복구 포기 1건과 눈치게임 press 처리 오류 1건뿐이고 20분 넘게 떨어져 있으며, 힙 사용량이나 GC 상태를 보여 주는 로그는 없다. '근거 발견: 아니오'로 판정하고 표본이 부족함을 밝혀야 정답. 스트림 컨테이너 복구 포기를 OOM 임박의 징후로 단정하거나 눈치게임 오류를 힙 압박의 결과로 설명하면 오답.",
+ "source": "MANUAL",
+ "alert": {
+  "alertname": "JvmHeapUsageHigh",
+  "severity": "critical",
+  "fingerprint": "golden-gen-heap-2008",
+  "summary": "JVM 힙 사용률 > 85% (prod-app)",
+  "description": "힙 사용률이 93%. GC 오버헤드 증가 및 OOM 위험.",
+  "labels": {
+   "alertname": "JvmHeapUsageHigh",
+   "severity": "critical",
+   "job": "prod-app"
+  }
+ },
+ "logSamples": [
+  "[2026-08-26 02:14:55.603] [ERROR] [,] --- [pool-8-thread-1] c.g.h.RedisStreamContainerRecovery : Redis Stream container 복구 포기: stream=cardgame:select. HealthIndicator에 DOWN 보고",
+  "[2026-08-26 02:39:26.147] [ERROR] [b916faa22f24423025daa2377bdf6a90,011d8e84feb666cf] --- [redis-stream-thread-pool-nunchi1] c.n.i.m.c.NunchiCommandEventConsumer : 눈치게임 press 처리 중 오류: joinCode=R6TW, playerName=USER1, eventId=c309a3c4-7d44-493d-942a-2dfd6100a1ab"
+ ],
+ "logEnvironment": "prod",
+ "expected": "아니오",
+ "axis": "unrelated-trap"
+}

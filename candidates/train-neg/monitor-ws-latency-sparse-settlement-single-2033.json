@@ -1,0 +1,24 @@
+{
+  "name": "monitor-ws-latency-sparse-settlement-single-2033",
+  "question": "알림 WsInboundLatencyHigh(critical)가 prod에서 발화했다 - WebSocket 메시지 처리 p99 > 500ms (prod-app). 봇에는 최근 30분 창에서 조회된 ERROR 로그 샘플 1줄이 주어졌다.",
+  "rubric": "주어진 로그는 14:26 SettlementStreamConsumer의 정산 처리 실패(ACK 보류, 재전달 대기) 1줄이 전부이며, WebSocket inbound 메시지 처리 구간에 대한 정보는 한 줄도 없다. 단일 라인으로는 p99 1.34s 지연을 재구성할 수 없다. '근거 발견: 아니오'로 판정하고 표본이 부족하다는 점을 밝혀야 정답. 정산 스트림 실패를 WS inbound 지연의 원인으로 지목하면 오답.",
+  "source": "MANUAL",
+  "alert": {
+    "alertname": "WsInboundLatencyHigh",
+    "severity": "critical",
+    "fingerprint": "golden-gen-sparse-2033",
+    "summary": "WebSocket 메시지 처리 p99 > 500ms (prod-app)",
+    "description": "WS inbound p99 처리 시간이 1.34s. 서비스 품질 저하 체감 수준.",
+    "labels": {
+      "alertname": "WsInboundLatencyHigh",
+      "severity": "critical",
+      "job": "prod-app"
+    }
+  },
+  "logSamples": [
+    "[2026-08-26 14:26:18.507] [ERROR] [676156cbbf4089222db891bcd01cf1cb,a742a2e3b96326f1] --- [redis-stream-thread-pool-settlement:result1] c.s.i.c.SettlementStreamConsumer : 정산 처리 실패 — ACK 보류, 재전달 대기: recordId=1756279578491-0"
+  ],
+  "logEnvironment": "prod",
+  "expected": "아니오",
+  "axis": "sparse-evidence"
+}

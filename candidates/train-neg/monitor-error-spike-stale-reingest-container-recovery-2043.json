@@ -1,0 +1,30 @@
+{
+  "name": "monitor-error-spike-stale-reingest-container-recovery-2043",
+  "question": "알림 AppErrorLogSpike(warning)가 prod에서 발화했다 - ERROR 로그 급증(최근 5분, prod-app). 봇에는 최근 30분 창에서 조회된 ERROR 로그 샘플 7줄이 주어졌다.",
+  "rubric": "샘플 7줄 중 6줄은 본문 타임스탬프가 전날인 2026-08-25 15:02부터 20:26 사이에 흩어져 있고, 2026-08-26 시각을 가진 줄은 마지막 04:18:05 한 줄뿐이다. 최근 30분 창 조회 결과와 본문 시각이 어긋난 재적재 아티팩트라 지금 5분 창 71건 급증을 뒷받침하지 못한다. '근거 발견: 아니오'로 판정하고 로그 타임스탬프가 조회 창과 어긋난다는 점을 지적해야 정답. 전날의 cardgame:select 컨테이너 복구 포기를 지금 급증의 원인으로 지목하면 오답.",
+  "source": "MANUAL",
+  "alert": {
+    "alertname": "AppErrorLogSpike",
+    "severity": "warning",
+    "fingerprint": "golden-gen-stale-2043",
+    "summary": "ERROR 로그 급증(최근 5분, prod-app)",
+    "description": "ERROR 로그가 71건(임계 30/5m)입니다. zzol-bot이 근본원인을 분석합니다.",
+    "labels": {
+      "alertname": "AppErrorLogSpike",
+      "severity": "warning",
+      "job": "prod-app"
+    }
+  },
+  "logSamples": [
+    "[2026-08-25 15:02:44.771] [ERROR] [,] --- [pool-8-thread-1] c.g.h.RedisStreamContainerRecovery : Redis Stream container 상태 확인 중 예외: stream=cardgame:select",
+    "[2026-08-25 15:47:31.208] [ERROR] [,] --- [pool-8-thread-1] c.g.h.RedisStreamContainerRecovery : Redis Stream container 복구 중 예외 발생: stream=cardgame:select",
+    "[2026-08-25 16:53:09.640] [ERROR] [365aac6dd09eece830b3e07515c2fc5b,6853f89f15b6bcf2] --- [redis-stream-thread-pool-cardgame:select1] c.g.r.c.RedisStreamListenerStarter : Redis Stream 처리 중 오류가 발생했습니다.",
+    "[2026-08-25 18:11:57.334] [ERROR] [,] --- [pool-8-thread-2] c.g.h.RedisStreamContainerRecovery : Redis Stream container 복구 포기: stream=cardgame:select. HealthIndicator에 DOWN 보고",
+    "[2026-08-25 19:04:22.885] [ERROR] [1979f668cb611e597778bd1bfb84be1c,251d3ec84d04cb1d] --- [redis-stream-thread-pool-cardgame:select2] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=SelectCardCommandEventConsumer, message=SelectCardCommandEvent[eventId=b3b52ba4-530e-4b28-89b2-01243f6bf4d9, timestamp=2026-08-25T10:04:22.873604118Z, joinCode=J8FD, playerName=PLAYER_3, cardIndex=4]",
+    "[2026-08-25 20:26:48.019] [ERROR] [,] --- [pool-8-thread-1] c.g.h.RedisStreamContainerRecovery : Redis Stream container 상태 확인 중 예외: stream=blindtimer",
+    "[2026-08-26 04:18:05.463] [ERROR] [,] --- [pool-12-thread-1] c.g.h.RedisStreamContainerRecovery : Redis Stream container 상태 확인 중 예외: stream=cardgame:select"
+  ],
+  "logEnvironment": "prod",
+  "expected": "아니오",
+  "axis": "stale-reingested"
+}

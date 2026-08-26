@@ -1,0 +1,29 @@
+{
+ "name": "monitor-error-spike-stale-reingest-game-task-2041",
+ "question": "알림 AppErrorLogSpike(warning)가 prod에서 발화했다 - ERROR 로그 급증(최근 5분, prod-app). 봇에는 최근 30분 창에서 조회된 ERROR 로그 샘플 6줄이 주어졌다.",
+ "rubric": "샘플 6줄 중 5줄은 본문 타임스탬프가 전날인 2026-08-25 07:21부터 12:35 사이에 흩어져 있고, 2026-08-26 시각을 가진 줄은 마지막 19:33:12 한 줄뿐이다. 조회 창이 최근 30분인데 전날 오전 로그가 섞여 들어온 재적재 아티팩트라, 5분 창 52건 급증을 이 표본으로 재구성할 수 없다. '근거 발견: 아니오'로 판정하고 로그 타임스탬프가 조회 창과 어긋난다는 점을 지적해야 정답. 전날의 nunchi, racinggame, blockstacking 스케줄 예외를 지금 급증의 원인으로 지목하면 오답.",
+ "source": "MANUAL",
+ "alert": {
+  "alertname": "AppErrorLogSpike",
+  "severity": "warning",
+  "fingerprint": "golden-gen-stale-2041",
+  "summary": "ERROR 로그 급증(최근 5분, prod-app)",
+  "description": "ERROR 로그가 52건(임계 30/5m)입니다. zzol-bot이 근본원인을 분석합니다.",
+  "labels": {
+   "alertname": "AppErrorLogSpike",
+   "severity": "warning",
+   "job": "prod-app"
+  }
+ },
+ "logSamples": [
+  "[2026-08-25 07:21:38.664] [ERROR] [,] --- [nunchi-task-1] c.g.s.GameTaskSchedulerFactory : [nunchi] 스케줄 실행 중 예외가 발생했습니다.",
+  "[2026-08-25 08:44:15.902] [ERROR] [a4f97923dbb2212f8fd86fed25a3b690,c195f3c302939c3e] --- [redis-stream-thread-pool-nunchi1] c.n.i.m.c.NunchiCommandEventConsumer : 눈치게임 press 처리 중 오류: joinCode=R6XA, playerName=PLAYER_4, eventId=2714d511-5461-4de4-a922-098b4a9f0456",
+  "[2026-08-25 09:59:02.371] [ERROR] [,] --- [racinggame-task-2] c.g.s.GameTaskSchedulerFactory : [racinggame] 스케줄 실행 중 예외가 발생했습니다.",
+  "[2026-08-25 11:07:44.518] [ERROR] [,] --- [pool-2-thread-1] o.s.s.s.TaskUtils$LoggingErrorHandler : Unexpected error occurred in scheduled task",
+  "[2026-08-25 12:35:57.083] [ERROR] [,] --- [blockstacking-task-1] c.g.s.GameTaskSchedulerFactory : [blockstacking] 스케줄 실행 중 예외가 발생했습니다.",
+  "[2026-08-26 19:33:12.640] [ERROR] [,] --- [nunchi-task-3] c.g.s.GameTaskSchedulerFactory : [nunchi] 스케줄 실행 중 예외가 발생했습니다."
+ ],
+ "logEnvironment": "prod",
+ "expected": "아니오",
+ "axis": "stale-reingested"
+}

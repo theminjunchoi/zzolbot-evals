@@ -1,0 +1,31 @@
+{
+ "name": "monitor-error-spike-stale-reingest-room-join-2040",
+ "question": "알림 AppErrorLogSpike(warning)가 prod에서 발화했다 - ERROR 로그 급증(최근 5분, prod-app). 봇에는 최근 30분 창에서 조회된 ERROR 로그 샘플 8줄이 주어졌다.",
+ "rubric": "샘플 8줄 중 7줄은 본문 타임스탬프가 전날인 2026-08-25 18:03부터 23:31 사이에 흩어져 있고, 2026-08-26 시각을 가진 줄은 마지막 14:12:58 한 줄뿐이다. 최근 30분 창으로 조회했는데 전날 저녁 로그가 되돌아온 재적재 아티팩트라, 지금 5분 창 39건 급증을 이 로그로 설명할 수 없다. '근거 발견: 아니오'로 판정하고 로그 타임스탬프가 조회 창과 어긋난다는 점을 지적해야 정답. 전날의 방 참가 이벤트 처리 실패를 지금 급증의 원인으로 지목하면 오답.",
+ "source": "MANUAL",
+ "alert": {
+  "alertname": "AppErrorLogSpike",
+  "severity": "warning",
+  "fingerprint": "golden-gen-stale-2040",
+  "summary": "ERROR 로그 급증(최근 5분, prod-app)",
+  "description": "ERROR 로그가 39건(임계 30/5m)입니다. zzol-bot이 근본원인을 분석합니다.",
+  "labels": {
+   "alertname": "AppErrorLogSpike",
+   "severity": "warning",
+   "job": "prod-app"
+  }
+ },
+ "logSamples": [
+  "[2026-08-25 18:03:11.229] [ERROR] [bd94275b8db30a6b1560f5ce7a641195,f980fb6f4c4444ce] --- [redis-stream-thread-pool-room:join1] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=RoomJoinConsumer, message=RoomJoinEvent[eventId=0cd3beae-a56c-496f-a98d-6d7fc21c42f9, timestamp=2026-08-25T09:03:11.217884512Z, joinCode=Q4LM, playerName=PLAYER_1]",
+  "[2026-08-25 18:44:52.601] [ERROR] [0575a7a9dfb13c063c517b9014af5363,571636e19e45004f] --- [redis-stream-thread-pool-room:join2] c.r.application.service.RoomService : 방 참가 비동기 처리 실패: eventId=a2d87757-faf1-4016-bb0e-63413c1b33c4, joinCode=Q4LM, playerName=PLAYER_4",
+  "[2026-08-25 19:57:26.318] [ERROR] [,] --- [pool-5-thread-2] c.r.i.messaging.RoomEventWaitManager : 방 이벤트 자동 정리 (실패): eventId=93c420d8-f0c1-41a5-850b-e7f79522f44f",
+  "[2026-08-25 20:38:04.775] [ERROR] [06eb4923aaf28a35cd807b1aad03c223,464837bd1cf88213] --- [redis-stream-thread-pool-room:join1] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=RoomJoinConsumer, message=RoomJoinEvent[eventId=f114728a-0526-4bd3-bb4e-6a7e6c317063, timestamp=2026-08-25T11:38:04.763551209Z, joinCode=D7SB, playerName=PLAYER_2]",
+  "[2026-08-25 21:49:33.140] [ERROR] [d5aa7f7e47b218d39443e1bd92e8638a,7907d945a2434ee7] --- [redis-stream-thread-pool-room1] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=PlayerDisconnectedConsumer, message=PlayerDisconnectedEvent[eventId=b33f52bf-7724-4b1b-9641-594efa3e2b05, timestamp=2026-08-25T12:49:33.128470663Z, joinCode=D7SB, playerName=PLAYER_2]",
+  "[2026-08-25 22:16:47.982] [ERROR] [cf9b506e057d211ef227f2757163f1f3,3b832068d2dc9e87] --- [redis-stream-thread-pool-room:join2] c.r.application.service.RoomService : 방 참가 비동기 처리 실패: eventId=f0985e6b-32a7-4ea3-959d-065a5ec809de, joinCode=H2NC, playerName=PLAYER_6",
+  "[2026-08-25 23:31:20.556] [ERROR] [,] --- [pool-5-thread-1] c.r.i.messaging.RoomEventWaitManager : 방 이벤트 자동 정리 (실패): eventId=1129e92d-dac7-4ba4-ba8a-02a3fe7a0804",
+  "[2026-08-26 14:12:58.407] [ERROR] [4c84c6b97fefb00fa368368037100080,f52e9b9e50d2b7db] --- [redis-stream-thread-pool-room:join1] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=RoomJoinConsumer, message=RoomJoinEvent[eventId=9a195516-6e43-48d2-904d-a0de512d05c5, timestamp=2026-08-26T05:12:58.395112774Z, joinCode=V5TG, playerName=PLAYER_3]"
+ ],
+ "logEnvironment": "prod",
+ "expected": "아니오",
+ "axis": "stale-reingested"
+}

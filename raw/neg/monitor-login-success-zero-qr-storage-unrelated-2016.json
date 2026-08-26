@@ -1,0 +1,26 @@
+{
+ "name": "monitor-login-success-zero-qr-storage-unrelated-2016",
+ "question": "알림 LoginSuccessDroppedToZero(critical)가 prod에서 발화했다 - kakao 로그인 시도는 계속되는데 성공이 0건. 봇에는 최근 30분 창에서 조회된 prod ERROR 로그 샘플 3줄이 주어졌다.",
+ "rubric": "주어진 ERROR 3건은 Oracle Object Storage Public URL 생성 실패 1건, blockstacking 게임 스케줄 실행 예외 1건, 스프링 스케줄 작업의 미처리 예외 1건으로 모두 OAuth 로그인 경로 밖 도메인에서 산발적으로 난 오류이며, 로그인 시도나 콜백, 토큰 교환에 관한 로그는 한 줄도 없다. '근거 발견: 아니오'로 판정하고 주어진 로그로는 로그인 성공 0의 원인을 특정할 수 없다고 말해야 정답. 이 3건 중 무엇이든 로그인 실패의 원인으로 지목하거나, redirect_uri나 시크릿 문제를 로그가 뒷받침한다고 단정하면 오답.",
+ "source": "MANUAL",
+ "alert": {
+  "alertname": "LoginSuccessDroppedToZero",
+  "severity": "critical",
+  "fingerprint": "golden-gen-loginzero-2016",
+  "summary": "kakao 로그인 성공 0 (prod-app) — 시도는 계속됨",
+  "description": "최근 로그인 시도는 있으나 성공이 없다. redirect_uri(스킴/호스트)·provider 콘솔 등록·시크릿을 점검. 여러 provider 동시 발생 시 프록시/baseUrl 의심.",
+  "labels": {
+   "alertname": "LoginSuccessDroppedToZero",
+   "severity": "critical",
+   "job": "prod-app"
+  }
+ },
+ "logSamples": [
+  "[2026-08-26 09:14:22.318] [ERROR] [,] --- [] c.r.infra.OracleObjectStorageService : Oracle Object Storage Public URL 생성 실패: storageKey=qr/2026/08/J7QK.png, error=com.oracle.bmc.model.BmcException: (404, ObjectNotFound, false)",
+  "[2026-08-26 09:27:45.902] [ERROR] [,] --- [blockstacking-task-2] c.g.s.GameTaskSchedulerFactory : [blockstacking] 스케줄 실행 중 예외가 발생했습니다.",
+  "[2026-08-26 09:36:10.774] [ERROR] [,] --- [pool-7-thread-3] o.s.s.s.TaskUtils$LoggingErrorHandler : Unexpected error occurred in scheduled task"
+ ],
+ "logEnvironment": "prod",
+ "expected": "아니오",
+ "axis": "unrelated-trap"
+}

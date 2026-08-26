@@ -1,0 +1,30 @@
+{
+  "name": "monitor-error-spike-stale-reingest-settlement-2039",
+  "question": "알림 AppErrorLogSpike(warning)가 prod에서 발화했다 - ERROR 로그 급증(최근 5분, prod-app). 봇에는 최근 30분 창에서 조회된 ERROR 로그 샘플 7줄이 주어졌다.",
+  "rubric": "샘플 7줄 중 6줄은 본문 타임스탬프가 전날인 2026-08-25 09:12부터 16:40 사이에 흩어져 있고, 2026-08-26 시각을 가진 줄은 마지막 08:51:44 한 줄뿐이다. 조회 창은 최근 30분인데 대부분이 전날 로그로 채워진 재적재 아티팩트라, 지금 5분 창에서 44건이 났다는 급증의 근거가 되지 못한다. '근거 발견: 아니오'로 판정하고 로그 타임스탬프가 조회 창과 어긋난다는 점을 지적해야 정답. 전날의 정산 처리 실패와 pending 재처리 실패를 지금 급증의 원인으로 지목하면 오답.",
+  "source": "MANUAL",
+  "alert": {
+    "alertname": "AppErrorLogSpike",
+    "severity": "warning",
+    "fingerprint": "golden-gen-stale-2039",
+    "summary": "ERROR 로그 급증(최근 5분, prod-app)",
+    "description": "ERROR 로그가 44건(임계 30/5m)입니다. zzol-bot이 근본원인을 분석합니다.",
+    "labels": {
+      "alertname": "AppErrorLogSpike",
+      "severity": "warning",
+      "job": "prod-app"
+    }
+  },
+  "logSamples": [
+    "[2026-08-25 09:12:41.507] [ERROR] [c1c6a8507e83c28ed2fb486cec84fa1e,5e184a4eb987cb9f] --- [redis-stream-thread-pool-settlement:result1] c.s.i.c.SettlementStreamConsumer : 정산 처리 실패 — ACK 보류, 재전달 대기: recordId=1756080761498-0",
+    "[2026-08-25 10:47:03.221] [ERROR] [,] --- [pool-4-thread-1] c.s.i.c.SettlementPendingSweeper : pending 정산 메시지 재처리 실패: recordId=1756080761498-0",
+    "[2026-08-25 11:58:36.884] [ERROR] [8bb1f79d0ed57e89f6f061b33e197957,92dd7c4b3838c41d] --- [redis-stream-thread-pool-settlement:result2] c.s.i.c.SettlementStreamConsumer : 정산 스트림 처리 중 오류가 발생했습니다.",
+    "[2026-08-25 13:05:19.660] [ERROR] [,] --- [pool-4-thread-2] c.global.outbox.OutboxEventProcessor : Outbox 이벤트 최대 재시도 초과, DEAD_LETTER 전환: id=3318, streamKey=settlement:result",
+    "[2026-08-25 14:22:58.113] [ERROR] [,] --- [pool-4-thread-1] c.s.i.c.SettlementPendingSweeper : pending 정산 메시지 재처리 실패: recordId=1756099378099-0",
+    "[2026-08-25 16:40:07.435] [ERROR] [ba0f2e3a81c47ba2835954024777958a,bc7e9c88e33b814f] --- [redis-stream-thread-pool-settlement:result1] c.s.i.c.SettlementStreamConsumer : 정산 처리 실패 — ACK 보류, 재전달 대기: recordId=1756107607421-0",
+    "[2026-08-26 08:51:44.902] [ERROR] [,] --- [pool-7-thread-3] c.global.outbox.OutboxEventProcessor : Outbox 이벤트 최대 재시도 초과, DEAD_LETTER 전환: id=3402, streamKey=settlement:result"
+  ],
+  "logEnvironment": "prod",
+  "expected": "아니오",
+  "axis": "stale-reingested"
+}

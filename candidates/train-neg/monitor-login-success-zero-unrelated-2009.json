@@ -1,0 +1,27 @@
+{
+  "name": "monitor-login-success-zero-unrelated-2009",
+  "question": "알림 LoginSuccessDroppedToZero(critical)가 prod에서 발화했다 - google 로그인 시도는 이어지는데 성공이 0이 됐다. 봇에는 최근 30분 창에서 조회된 prod ERROR 로그 샘플 4줄이 주어졌다.",
+  "rubric": "주어진 4줄은 랜덤 닉네임 조회 요청 예외 1건, QR 코드 생성 실패 1건, speedtouch 스케줄 실행 예외 1건, pending 정산 메시지 재처리 실패 1건이고, 유일한 HTTP 요청 오류도 /rooms/nickname/random 요청이라 로그인 경로와 무관하다. '근거 발견: 아니오'로 판정하고 provider 설정 문제를 주어진 로그로는 확인할 수 없다고 밝혀야 정답. 닉네임 조회 실패나 나머지 오류를 google 로그인 성공 0의 원인으로 지목하면 오답.",
+  "source": "MANUAL",
+  "alert": {
+    "alertname": "LoginSuccessDroppedToZero",
+    "severity": "critical",
+    "fingerprint": "golden-gen-login-2009",
+    "summary": "google 로그인 성공 0 (prod-app) — 시도는 계속됨",
+    "description": "최근 로그인 시도는 있으나 성공이 없다. redirect_uri(스킴/호스트)·provider 콘솔 등록·시크릿을 점검. 여러 provider 동시 발생 시 프록시/baseUrl 의심.",
+    "labels": {
+      "alertname": "LoginSuccessDroppedToZero",
+      "severity": "critical",
+      "job": "prod-app"
+    }
+  },
+  "logSamples": [
+    "[2026-08-26 18:02:19.774] [ERROR] [455450f25a8bbd65abef99c6a3e25d5e,0e762d7e684a6f11] --- [http-nio-8080-exec-14] c.web.exception.RestExceptionHandler : method=GET uri=/rooms/nickname/random exception=java.lang.IllegalStateException message=닉네임 후보를 생성하지 못했습니다.",
+    "[2026-08-26 18:11:47.339] [ERROR] [,] --- [] c.r.application.service.QrCodeService : QR 코드 생성 실패: joinCode=D5KP, error=java.io.IOException: Broken pipe",
+    "[2026-08-26 18:19:58.026] [ERROR] [,] --- [speedtouch-task-3] c.g.s.GameTaskSchedulerFactory : [speedtouch] 스케줄 실행 중 예외가 발생했습니다.",
+    "[2026-08-26 18:28:36.581] [ERROR] [,] --- [pool-2-thread-3] c.s.i.c.SettlementPendingSweeper : pending 정산 메시지 재처리 실패: recordId=1756240116577-0"
+  ],
+  "logEnvironment": "prod",
+  "expected": "아니오",
+  "axis": "unrelated-trap"
+}

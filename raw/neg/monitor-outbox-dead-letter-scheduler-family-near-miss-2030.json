@@ -1,0 +1,27 @@
+{
+ "name": "monitor-outbox-dead-letter-scheduler-family-near-miss-2030",
+ "question": "알림 OutboxDeadLetterHigh(warning)가 prod에서 발화했다 - 재시도 초과로 DEAD_LETTER 전환된 outbox 이벤트가 23건. 봇에는 최근 30분 창에서 조회된 prod ERROR 로그 샘플 4줄이 주어졌다.",
+ "rubric": "주어진 ERROR 4건은 방 이벤트 자동 정리 실패 2건, laddergame 게임 스케줄 실행 예외 1건, 스프링 스케줄 작업의 미처리 예외 1건이다. 네 건 모두 outbox 릴레이와 같은 스케줄러 계열에서 돌긴 하지만 서로 다른 컴포넌트이고, outbox 레코드를 재시도하다 DEAD_LETTER로 전환하는 OutboxEventProcessor의 로그는 한 줄도 없다. 같은 스케줄러 풀에서 다른 작업이 실패했다는 사실만으로는 outbox 발행이 왜 재시도를 소진했는지 알 수 없다. '근거 발견: 아니오'로 판정하고 발행 경로 로그가 없다는 점을 말해야 정답. 스케줄러 계열이 같다는 이유로 이 실패들을 DEAD_LETTER 적체의 원인으로 지목하거나, 스케줄러 전반이 죽었다고 단정하면 오답.",
+ "source": "MANUAL",
+ "alert": {
+  "alertname": "OutboxDeadLetterHigh",
+  "severity": "warning",
+  "fingerprint": "golden-gen-outboxdl-2030",
+  "summary": "Outbox DEAD_LETTER 적체 (> 10, prod-app)",
+  "description": "재시도 초과로 DEAD_LETTER 전환된 outbox 이벤트가 23건. 다운스트림 발행 경로 점검 필요.",
+  "labels": {
+   "alertname": "OutboxDeadLetterHigh",
+   "severity": "warning",
+   "job": "prod-app"
+  }
+ },
+ "logSamples": [
+  "[2026-08-26 01:33:27.155] [ERROR] [,] --- [pool-13-thread-2] c.r.i.messaging.RoomEventWaitManager : 방 이벤트 자동 정리 (실패): eventId=44c68f9b-f707-8072-e136-cd2fd1d68595",
+  "[2026-08-26 01:41:52.690] [ERROR] [,] --- [pool-13-thread-2] c.r.i.messaging.RoomEventWaitManager : 방 이벤트 자동 정리 (실패): eventId=503b77cc-7ad1-b424-157f-7a117372b13d",
+  "[2026-08-26 01:49:18.334] [ERROR] [,] --- [laddergame-task-2] c.g.s.GameTaskSchedulerFactory : [laddergame] 스케줄 실행 중 예외가 발생했습니다.",
+  "[2026-08-26 01:56:40.977] [ERROR] [,] --- [pool-13-thread-5] o.s.s.s.TaskUtils$LoggingErrorHandler : Unexpected error occurred in scheduled task"
+ ],
+ "logEnvironment": "prod",
+ "expected": "아니오",
+ "axis": "near-miss-component"
+}

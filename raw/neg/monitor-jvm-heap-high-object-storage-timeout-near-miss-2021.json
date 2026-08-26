@@ -1,0 +1,26 @@
+{
+ "name": "monitor-jvm-heap-high-object-storage-timeout-near-miss-2021",
+ "question": "알림 JvmHeapUsageHigh(critical)가 prod에서 발화했다 - JVM 힙 사용률이 91%까지 올랐다. 봇에는 최근 30분 창에서 조회된 prod ERROR 로그 샘플 3줄이 주어졌다.",
+ "rubric": "주어진 ERROR 3건은 Oracle Object Storage QR 코드 업로드 실패 2건과 QR 코드 생성 실패 1건으로 모두 원격 스토리지 호출의 타임아웃이며, 힙 사용률이나 GC 시간, OutOfMemoryError를 담은 로그는 없다. 원격 I/O 타임아웃은 힙과 다른 자원(네트워크와 외부 서비스 응답)의 문제라 힙 사용률 91%를 설명하지 못한다. '근거 발견: 아니오'로 판정하고 메모리 관련 로그가 없다는 점을 말해야 정답. 스토리지 타임아웃을 힙 압박이나 GC 스톨의 증거로 삼아 원인을 단정하면 오답.",
+ "source": "MANUAL",
+ "alert": {
+  "alertname": "JvmHeapUsageHigh",
+  "severity": "critical",
+  "fingerprint": "golden-gen-heap-2021",
+  "summary": "JVM 힙 사용률 > 85% (prod-app)",
+  "description": "힙 사용률이 91%. GC 오버헤드 증가 및 OOM 위험.",
+  "labels": {
+   "alertname": "JvmHeapUsageHigh",
+   "severity": "critical",
+   "job": "prod-app"
+  }
+ },
+ "logSamples": [
+  "[2026-08-26 07:22:14.606] [ERROR] [,] --- [] c.r.infra.OracleObjectStorageService : Oracle Object Storage QR 코드 업로드 실패: contents=qr-B6XT.png, error=java.net.SocketTimeoutException: connect timed out",
+  "[2026-08-26 07:29:48.133] [ERROR] [,] --- [] c.r.infra.OracleObjectStorageService : Oracle Object Storage QR 코드 업로드 실패: contents=qr-M2FL.png, error=java.net.SocketTimeoutException: connect timed out",
+  "[2026-08-26 07:36:02.517] [ERROR] [,] --- [] c.r.application.service.QrCodeService : QR 코드 생성 실패: joinCode=M2FL, error=java.io.IOException: upload timed out"
+ ],
+ "logEnvironment": "prod",
+ "expected": "아니오",
+ "axis": "near-miss-component"
+}

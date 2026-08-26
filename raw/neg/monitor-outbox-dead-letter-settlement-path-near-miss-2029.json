@@ -1,0 +1,27 @@
+{
+ "name": "monitor-outbox-dead-letter-settlement-path-near-miss-2029",
+ "question": "알림 OutboxDeadLetterHigh(warning)가 prod에서 발화했다 - 재시도 초과로 DEAD_LETTER 전환된 outbox 이벤트가 17건. 봇에는 최근 30분 창에서 조회된 prod ERROR 로그 샘플 4줄이 주어졌다.",
+ "rubric": "주어진 ERROR 4건은 정산 스트림 처리 오류 1건, pending 정산 메시지 재처리 실패 2건, settlement:result 컨테이너 복구 예외 1건으로 전부 정산 결과 스트림을 소비하고 재전달하는 경로에서 났다. 정산 재전달은 이미 스트림에 실린 메시지를 다시 읽는 일이고, outbox 레코드를 재시도하다 DEAD_LETTER로 바꾸는 OutboxEventProcessor는 로그에 한 번도 등장하지 않으므로 17건이 어디서 나왔는지는 이 로그로 확인되지 않는다. '근거 발견: 아니오'로 판정하고 outbox 발행 경로의 로그가 없다는 점을 말해야 정답. 정산 재처리 실패 건수를 DEAD_LETTER 건수와 같은 것으로 보거나 그것을 원인으로 지목하면 오답.",
+ "source": "MANUAL",
+ "alert": {
+  "alertname": "OutboxDeadLetterHigh",
+  "severity": "warning",
+  "fingerprint": "golden-gen-outboxdl-2029",
+  "summary": "Outbox DEAD_LETTER 적체 (> 10, prod-app)",
+  "description": "재시도 초과로 DEAD_LETTER 전환된 outbox 이벤트가 17건. 다운스트림 발행 경로 점검 필요.",
+  "labels": {
+   "alertname": "OutboxDeadLetterHigh",
+   "severity": "warning",
+   "job": "prod-app"
+  }
+ },
+ "logSamples": [
+  "[2026-08-26 19:04:36.712] [ERROR] [eadc40eabab06130c8c2a77bcbc7b011,f5259e1d24342bea] --- [redis-stream-thread-pool-settlement:result1] c.s.i.c.SettlementStreamConsumer : 정산 스트림 처리 중 오류가 발생했습니다.",
+  "[2026-08-26 19:12:08.359] [ERROR] [,] --- [pool-9-thread-2] c.s.i.c.SettlementPendingSweeper : pending 정산 메시지 재처리 실패: recordId=1756203128344-0",
+  "[2026-08-26 19:20:44.126] [ERROR] [,] --- [pool-9-thread-2] c.s.i.c.SettlementPendingSweeper : pending 정산 메시지 재처리 실패: recordId=1756203643110-1",
+  "[2026-08-26 19:28:19.803] [ERROR] [,] --- [pool-9-thread-4] c.g.h.RedisStreamContainerRecovery : Redis Stream container 복구 중 예외 발생: stream=settlement:result"
+ ],
+ "logEnvironment": "prod",
+ "expected": "아니오",
+ "axis": "near-miss-component"
+}

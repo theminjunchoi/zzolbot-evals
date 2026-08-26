@@ -1,0 +1,25 @@
+{
+  "name": "monitor-ws-latency-sparse-nunchi-storage-2036",
+  "question": "알림 WsInboundLatencyHigh(critical)가 prod에서 발화했다 - WebSocket 메시지 처리 p99 > 500ms (prod-app). 봇에는 최근 30분 창에서 조회된 ERROR 로그 샘플 2줄이 주어졌다.",
+  "rubric": "주어진 2줄은 11:09 NunchiCommandEventConsumer의 press 처리 오류 1건과 11:33 OracleObjectStorageService의 Public URL 생성 실패 1건으로 24분 떨어져 있다. 앞 줄은 redis-stream-thread-pool-nunchi2 스레드, 뒤 줄은 무명 가상 스레드에서 났고 둘 다 WebSocket inbound 처리 구간의 라인이 아니다. '근거 발견: 아니오'로 판정하고 표본이 부족하다는 점을 밝혀야 정답. 눈치게임 press 오류나 스토리지 실패를 WS inbound p99 지연의 원인으로 지목하면 오답.",
+  "source": "MANUAL",
+  "alert": {
+    "alertname": "WsInboundLatencyHigh",
+    "severity": "critical",
+    "fingerprint": "golden-gen-sparse-2036",
+    "summary": "WebSocket 메시지 처리 p99 > 500ms (prod-app)",
+    "description": "WS inbound p99 처리 시간이 0.87s. 서비스 품질 저하 체감 수준.",
+    "labels": {
+      "alertname": "WsInboundLatencyHigh",
+      "severity": "critical",
+      "job": "prod-app"
+    }
+  },
+  "logSamples": [
+    "[2026-08-26 11:09:26.744] [ERROR] [a56f767f333a4a302e57b6fb122ba8c1,2fb9519a1ecc8279] --- [redis-stream-thread-pool-nunchi2] c.n.i.m.c.NunchiCommandEventConsumer : 눈치게임 press 처리 중 오류: joinCode=B8VR, playerName=PLAYER_2, eventId=b9bb834d-7c39-449f-8b98-38423addcda2",
+    "[2026-08-26 11:33:40.612] [ERROR] [,] --- [] c.r.infra.OracleObjectStorageService : Oracle Object Storage Public URL 생성 실패: storageKey=qr/B8VR.png, error=java.net.SocketTimeoutException: connect timed out"
+  ],
+  "logEnvironment": "prod",
+  "expected": "아니오",
+  "axis": "sparse-evidence"
+}

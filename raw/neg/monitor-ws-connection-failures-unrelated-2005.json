@@ -1,0 +1,25 @@
+{
+ "name": "monitor-ws-connection-failures-unrelated-2005",
+ "question": "알림 WsConnectionFailuresHigh(warning)가 prod에서 발화했다 - 최근 5분 WS 연결 실패가 17건으로 임계 10을 넘었다. 봇에는 최근 30분 창에서 조회된 prod ERROR 로그 샘플 2줄이 주어졌다.",
+ "rubric": "주어진 2줄은 QR 코드 생성 실패 1건과 blockstacking 스트림 컨테이너 복구 중 예외 1건으로 13분 남짓 떨어져 발생한 서로 무관한 오류이고, WebSocket 연결이나 STOMP 세션에서 남은 로그는 없다. '근거 발견: 아니오'로 판정하고 표본이 알림과 무관함을 밝혀야 정답. QR 생성 실패나 스트림 컨테이너 복구 예외를 WS 연결 실패 급증의 원인으로 삼으면 오답.",
+ "source": "MANUAL",
+ "alert": {
+  "alertname": "WsConnectionFailuresHigh",
+  "severity": "warning",
+  "fingerprint": "golden-gen-wsfail-2005",
+  "summary": "WebSocket 연결 실패 급증 (prod-app)",
+  "description": "최근 5분 WS 연결 실패가 17건 (임계 10). STOMP 연결 단계 실패 누적.",
+  "labels": {
+   "alertname": "WsConnectionFailuresHigh",
+   "severity": "warning",
+   "job": "prod-app"
+  }
+ },
+ "logSamples": [
+  "[2026-08-26 06:52:09.318] [ERROR] [,] --- [] c.r.application.service.QrCodeService : QR 코드 생성 실패: joinCode=B2NR, error=java.util.concurrent.TimeoutException",
+  "[2026-08-26 07:05:33.744] [ERROR] [,] --- [pool-9-thread-2] c.g.h.RedisStreamContainerRecovery : Redis Stream container 복구 중 예외 발생: stream=blockstacking"
+ ],
+ "logEnvironment": "prod",
+ "expected": "아니오",
+ "axis": "unrelated-trap"
+}

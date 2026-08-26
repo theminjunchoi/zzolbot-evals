@@ -1,0 +1,26 @@
+{
+  "name": "monitor-login-success-zero-unrelated-2004",
+  "question": "알림 LoginSuccessDroppedToZero(critical)가 prod에서 발화했다 - kakao 로그인 시도는 계속되는데 성공이 0으로 떨어졌다. 봇에는 최근 30분 창에서 조회된 prod ERROR 로그 샘플 3줄이 주어졌다.",
+  "rubric": "주어진 3줄은 눈치게임 press 처리 오류 1건, pending 정산 메시지 재처리 실패 1건, Redis Stream 처리 오류 1건으로 모두 게임과 정산 비동기 경로의 산발적 오류이며, 로그인이나 OAuth 콜백 처리에서 남은 로그는 한 줄도 없다. '근거 발견: 아니오'로 판정하고 redirect_uri나 시크릿 같은 점검 항목을 주어진 로그로는 확인할 수 없다고 밝혀야 정답. 세 오류 중 하나를 kakao 로그인 성공 0의 원인으로 지목하면 오답.",
+  "source": "MANUAL",
+  "alert": {
+    "alertname": "LoginSuccessDroppedToZero",
+    "severity": "critical",
+    "fingerprint": "golden-gen-login-2004",
+    "summary": "kakao 로그인 성공 0 (prod-app) — 시도는 계속됨",
+    "description": "최근 로그인 시도는 있으나 성공이 없다. redirect_uri(스킴/호스트)·provider 콘솔 등록·시크릿을 점검. 여러 provider 동시 발생 시 프록시/baseUrl 의심.",
+    "labels": {
+      "alertname": "LoginSuccessDroppedToZero",
+      "severity": "critical",
+      "job": "prod-app"
+    }
+  },
+  "logSamples": [
+    "[2026-08-26 22:03:12.556] [ERROR] [c1b84fc4d6538eefafa2ff3d80e7a837,a060ceecade5cd0f] --- [redis-stream-thread-pool-nunchi1] c.n.i.m.c.NunchiCommandEventConsumer : 눈치게임 press 처리 중 오류: joinCode=9FQD, playerName=USER2, eventId=0213f3d1-ae84-4999-94e2-a77bfe662ecb",
+    "[2026-08-26 22:14:38.902] [ERROR] [,] --- [pool-3-thread-1] c.s.i.c.SettlementPendingSweeper : pending 정산 메시지 재처리 실패: recordId=1756257278431-0",
+    "[2026-08-26 22:27:51.470] [ERROR] [def96b07dcdd4b5418013ab3daf39cdf,2ec5d30188f65663] --- [redis-stream-thread-pool-minigame1] c.g.r.c.RedisStreamListenerStarter : Redis Stream 처리 중 오류가 발생했습니다."
+  ],
+  "logEnvironment": "prod",
+  "expected": "아니오",
+  "axis": "unrelated-trap"
+}
