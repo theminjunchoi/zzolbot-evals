@@ -36,7 +36,7 @@ def main() -> int:
     parser.add_argument("--arm", action="append", type=parse_arm, required=True,
                         help="이름=어댑터경로. 어댑터가 비면 베이스 모델")
     parser.add_argument("--scenarios-dir", type=Path, default=Path("golden-set/monitor"))
-    parser.add_argument("--out-dir", type=Path, default=Path("reports"))
+    parser.add_argument("--out-dir", type=Path, default=Path("reports/runs"))
     parser.add_argument("--local-model", default=DEFAULT_MODEL)
     parser.add_argument("--prompt-variant", default="production", choices=sorted(PROMPT_VARIANTS))
     args = parser.parse_args()

@@ -45,7 +45,7 @@ def main() -> int:
                         help="분석기 프롬프트 변형. production은 팀 레포와 동일한 운영 프롬프트다")
     parser.add_argument("--min-interval", type=float, default=6.5,
                         help="LLM 호출 간 최소 간격(초). 무료 티어는 6.5 권장, 유료 티어는 1~2로 단축 가능")
-    parser.add_argument("--out-dir", type=Path, default=Path("reports"))
+    parser.add_argument("--out-dir", type=Path, default=Path("reports/runs"))
     args = parser.parse_args()
 
     api_key = os.environ.get(KEY_ENV, "")

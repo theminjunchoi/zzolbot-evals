@@ -52,8 +52,8 @@ def main() -> int:
     parser.add_argument("--label", required=True)
     parser.add_argument("--scenarios", type=int, default=10, help="프로브를 만들 시나리오 수")
     parser.add_argument("--golden-dir", type=Path, default=Path("golden-set/monitor"))
-    parser.add_argument("--reports-dir", type=Path, default=Path("reports"))
-    parser.add_argument("--out-dir", type=Path, default=Path("reports"))
+    parser.add_argument("--reports-dir", type=Path, default=Path("reports/runs"))
+    parser.add_argument("--out-dir", type=Path, default=Path("reports/runs"))
     parser.add_argument("--model", default="gemini-2.5-flash", help="judge 모델. 실측과 같아야 한다")
     parser.add_argument("--min-interval", type=float, default=1.5)
     parser.add_argument("--judge-variant", default="production", choices=sorted(JUDGE_VARIANTS),
