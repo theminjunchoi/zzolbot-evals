@@ -1,0 +1,25 @@
+{
+  "name": "monitor-http-5xx-ratio-high-20",
+  "question": "알림 Http5xxRatioHigh(critical)가 prod에서 발화했다 - 최근 5분간 HTTP 5xx 응답이 급증하여 성공률이 5% 밑으로 떨어짐. 봇에는 최근 30분 창에서 조회된 prod-app의 ERROR 로그 샘플 2줄이 주어졌다.",
+  "rubric": "알림은 5분간의 광범위한 서버 실패를 지목하나, 주어진 로그는 20분 이상의 간격을 두고 발생한 서로 다른 기능의 단발성 오류이며 5xx 응답을 직접적으로 설명하는 트래픽 오류 데이터가 부족하다. '근거 발견: 아니오'로 판정하고 표본이 부족하여 현재의 5xx 급증을 설명하기 어렵다고 서술해야 정답. 주어진 로그를 바탕으로 장애 원인을 단정 지으면 오답.",
+  "source": "MANUAL",
+  "alert": {
+    "alertname": "Http5xxRatioHigh",
+    "severity": "critical",
+    "fingerprint": "golden-gen-sparse-20",
+    "summary": "HTTP 5xx 비율 5% 초과 (prod-app)",
+    "description": "최근 5분 5xx 비율이 8.5%. 서버 측 광범위 실패 가능성.",
+    "labels": {
+      "alertname": "Http5xxRatioHigh",
+      "severity": "critical",
+      "job": "prod-app"
+    }
+  },
+  "logSamples": [
+    "[2026-08-26 14:10:22.105] [ERROR] [d9a1b2c3d4e5f678901234567890abcd,a1b2c3d4e5f67890] --- [http-nio-8080-exec-5] c.web.exception.RestExceptionHandler : method=GET uri=/rooms/PXMH/probabilities exception=java.lang.NullPointerException message=null",
+    "[2026-08-26 14:35:48.512] [ERROR] [,] --- [] c.r.application.service.QrCodeService : QR 코드 생성 실패: joinCode=PXMH, error=java.net.SocketTimeoutException: Read timed out"
+  ],
+  "logEnvironment": "prod",
+  "expected": "아니오",
+  "axis": "sparse-evidence"
+}

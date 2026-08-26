@@ -1,0 +1,27 @@
+{
+  "name": "monitor-5xx-compound-cause-32",
+  "question": "알림 Http5xxRatioHigh(critical)가 prod에서 발화했다 - 최근 5분 5xx 비율 5% 초과. 봇에는 최근 30분 ERROR 로그 샘플 6줄(Redis Stream 복구 실패와 그에 따른 HTTP 요청 5xx)이 주어졌다.",
+  "rubric": "주어진 ERROR 로그는 Redis Stream 컨테이너 복구가 포기된 시점부터 해당 컨테이너를 의존하는 엔드포인트에서 5xx 오류가 연쇄적으로 발생함을 보여주며, 이는 Redis Stream 장애가 근본 원인이고 HTTP 5xx는 그 파급 증상임을 나타낸다. '근거 발견: 예'로 판정하고 Redis Stream 복구 실패를 근본 원인으로, HTTP 5xx를 파급 증상으로 명확히 구분하여 가설을 제시하면 정답. '근거 발견: 아니오'로 판정하거나 단순히 5xx 발생 사실만 언급하고 근본 원인을 특정하지 못하면 오답.",
+  "source": "MANUAL",
+  "alert": {
+    "alertname": "Http5xxRatioHigh",
+    "severity": "critical",
+    "fingerprint": "golden-gen-cc-32",
+    "summary": "HTTP 5xx 비율 5% 초과 (prod-app)",
+    "description": "최근 5분 5xx 비율이 8.2%. 서버 측 광범위 실패 가능성.",
+    "labels": {
+      "alertname": "Http5xxRatioHigh",
+      "severity": "critical",
+      "job": "prod-app"
+    }
+  },
+  "logSamples": [
+    "[2026-08-26 14:00:05.112] [ERROR] [a1b2c3d4e5f60708090a1b2c3d4e5f60,a1b2c3d4e5f60708] --- [pool-1-thread-2] c.g.h.RedisStreamContainerRecovery : Redis Stream container 복구 중 예외 발생: stream=room:join",
+    "[2026-08-26 14:00:15.223] [ERROR] [a1b2c3d4e5f60708090a1b2c3d4e5f60,a1b2c3d4e5f60708] --- [pool-1-thread-2] c.g.h.RedisStreamContainerRecovery : Redis Stream container 복구 포기: stream=room:join. HealthIndicator에 DOWN 보고",
+    "[2026-08-26 14:01:10.456] [ERROR] [b2c3d4e5f60708090a1b2c3d4e5f6070,b2c3d4e5f6070809] --- [http-nio-8080-exec-5] c.web.exception.RestExceptionHandler : method=POST uri=/rooms exception=InfrastructureException message=Stream container for room:join is down",
+    "[2026-08-26 14:01:22.789] [ERROR] [c3d4e5f60708090a1b2c3d4e5f607080,c3d4e5f60708090a] --- [http-nio-8080-exec-8] c.web.exception.RestExceptionHandler : method=POST uri=/rooms exception=InfrastructureException message=Stream container for room:join is down",
+    "[2026-08-26 14:02:45.333] [ERROR] [d4e5f60708090a1b2c3d4e5f60708090,d4e5f60708090a1b] --- [http-nio-8080-exec-2] c.web.exception.RestExceptionHandler : method=GET uri=/rooms/PXMH/probabilities exception=InfrastructureException message=Stream container for room:join is down",
+    "[2026-08-26 14:03:10.999] [ERROR] [e5f60708090a1b2c3d4e5f60708090a1,e5f60708090a1b2c] --- [http-nio-8080-exec-9] c.web.exception.RestExceptionHandler : method=POST uri=/rooms/PXMH/settings exception=InfrastructureException message=Stream container for room:join is down"
+  ],
+  "logEnvironment": "prod"
+}

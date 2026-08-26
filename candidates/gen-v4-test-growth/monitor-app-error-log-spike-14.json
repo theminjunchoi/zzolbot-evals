@@ -1,0 +1,31 @@
+{
+  "name": "monitor-app-error-log-spike-14",
+  "question": "알림 AppErrorLogSpike(warning)가 prod에서 발화했다 - ERROR 로그 급증(최근 5분, prod-app). 봇에는 최근 30분 창에서 조회된 ERROR 로그 샘플 8줄이 주어졌다.",
+  "rubric": "조회된 로그 샘플 8줄 중 7줄은 전날 발생한 로그이며, 5분 내 급증했다는 알림의 근거인 최근 5분 시점의 로그는 마지막 1줄뿐이다. 근거 발견: 아니오. 기대 판정: 아니오. 표본 데이터에 전날의 로그가 대거 포함되어 있어 실제 실시간 급증 여부를 판단할 수 없다고 답해야 정답. 로그 샘플 전체를 최신 데이터로 오인하여 장애를 분석하면 오답.",
+  "source": "MANUAL",
+  "alert": {
+    "alertname": "AppErrorLogSpike",
+    "severity": "warning",
+    "fingerprint": "golden-gen-sre-14",
+    "summary": "ERROR 로그 급증(최근 5분, prod-app)",
+    "description": "ERROR 로그가 35건(임계 30/5m)입니다. zzol-bot이 근본원인을 분석합니다.",
+    "labels": {
+      "alertname": "AppErrorLogSpike",
+      "severity": "warning",
+      "job": "prod-app"
+    }
+  },
+  "logSamples": [
+    "[2026-08-25 14:10:05.123] [ERROR] [a1b2c3d4e5f678901234567890abcdef,1234567890abcdef] --- [redis-stream-thread-pool-nunchi1] c.n.i.m.c.NunchiCommandEventConsumer : 눈치게임 press 처리 중 오류: joinCode=PXMH, playerName=USER1, eventId=550e8400-e29b-41d4-a716-446655440000",
+    "[2026-08-25 14:12:44.556] [ERROR] [b2c3d4e5f678901234567890abcdef12,234567890abcdef1] --- [redis-stream-thread-pool-settlement:result1] c.s.i.c.SettlementStreamConsumer : 정산 처리 실패 — ACK 보류, 재전달 대기: recordId=1724562764556-0",
+    "[2026-08-25 15:30:11.889] [ERROR] [,] --- [pool-1-thread-2] c.s.i.c.SettlementPendingSweeper : pending 정산 메시지 재처리 실패: recordId=1724562764556-0",
+    "[2026-08-25 16:45:22.001] [ERROR] [c3d4e5f678901234567890abcdef1234,34567890abcdef12] --- [redis-stream-thread-pool-room:join1] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=RoomJoinConsumer(RoomJoinEvent), message=RoomJoinEvent{joinCode=PXMH}",
+    "[2026-08-25 18:05:01.333] [ERROR] [,] --- [] c.r.infra.OracleObjectStorageService : Oracle Object Storage QR 코드 업로드 실패: contents=blob, error=java.net.ConnectException: Connection refused",
+    "[2026-08-25 20:20:10.999] [ERROR] [d4e5f678901234567890abcdef123456,4567890abcdef123] --- [http-nio-8080-exec-5] c.web.exception.RestExceptionHandler : method=POST uri=/rooms/PXMH/settings exception=RuntimeException message=Internal Server Error",
+    "[2026-08-25 22:15:33.777] [ERROR] [,] --- [blindtimer-task-1] c.g.s.GameTaskSchedulerFactory : [blindtimer] 스케줄 실행 중 예외가 발생했습니다.",
+    "[2026-08-26 14:58:10.222] [ERROR] [e5f678901234567890abcdef12345678,567890abcdef1234] --- [redis-stream-thread-pool-nunchi2] c.n.i.m.c.NunchiCommandEventConsumer : 눈치게임 press 처리 중 오류: joinCode=PXMH, playerName=USER9, eventId=770e8400-e29b-41d4-a716-446655449999"
+  ],
+  "logEnvironment": "prod",
+  "expected": "아니오",
+  "axis": "stale-reingested"
+}

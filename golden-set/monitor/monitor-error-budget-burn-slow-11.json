@@ -1,0 +1,23 @@
+{
+  "name": "monitor-error-budget-burn-slow-11",
+  "question": "알림 ErrorBudgetBurnSlow(warning)가 prod에서 발화했다 - 에러버짓 느린 소진 (SLO 99.5%, burn-rate 6×). 봇에는 최근 30분 창에서 조회된 prod 앱 ERROR 로그 샘플 2줄이 주어졌다.",
+  "rubric": "주어진 로그는 QR 코드 생성 실패와 특정 스케줄러의 비정기적 예외로, 6시간 동안의 3% 5xx 에러 비율을 유발하는 시스템 전체의 에러버짓 소진과는 무관하다. '근거 발견: 아니오'로 판정하고 로그 간의 상관관계가 없음을 기술해야 정답. 무관한 개별 로그를 장애 원인으로 지목하면 오답.",
+  "source": "MANUAL",
+  "alert": {
+    "alertname": "ErrorBudgetBurnSlow",
+    "severity": "warning",
+    "fingerprint": "golden-gen-ebbs-11",
+    "summary": "에러버짓 느린 소진 (SLO 99.5%, burn-rate 6×)",
+    "description": "prod-app 5xx 비율이 6h·30m 양 창에서 3%를 초과. 누적 시 에러버짓 위협.",
+    "labels": {
+      "alertname": "ErrorBudgetBurnSlow",
+      "severity": "warning",
+      "job": "prod-app"
+    }
+  },
+  "logSamples": [
+    "[2026-08-26 14:05:12.441] [ERROR] [,] --- [] c.r.application.service.QrCodeService : QR 코드 생성 실패: joinCode=PXMH, error=java.net.SocketTimeoutException: Read timed out",
+    "[2026-08-26 14:28:15.902] [ERROR] [,] --- [pool-3-thread-5] o.s.s.s.TaskUtils$LoggingErrorHandler : Unexpected error occurred in scheduled task"
+  ],
+  "logEnvironment": "prod"
+}

@@ -23,12 +23,16 @@
     "monitor-ws-probe-failed-edge-layer"
   ],
   "test": [
+    "monitor-5xx-compound-cause-32",
     "monitor-app-error-log-spike-17",
     "monitor-app-error-log-spike-19",
     "monitor-circuit-breaker-open-02",
     "monitor-disk-usage-high-unrelated-trap-08",
+    "monitor-error-budget-burn-slow-11",
     "monitor-http-5xx-ratio-high-sparse-logs",
     "monitor-jvm-heap-high-unrelated-redis-errors-31",
+    "monitor-redis-stream-e2e-latency-27",
+    "monitor-redis-stream-e2e-latency-35",
     "monitor-redis-stream-e2e-latency-high-05",
     "monitor-ws-inbound-latency-sparse-evidence-18"
   ]

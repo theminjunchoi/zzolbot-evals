@@ -1,0 +1,25 @@
+{
+  "name": "monitor-app-error-log-spike-22",
+  "question": "알림 AppErrorLogSpike(warning)가 prod에서 발화했다 - ERROR 로그 급증(최근 5분, prod-app). 봇에는 최근 30분 창에서 조회된 ERROR 로그 샘플 2줄이 주어졌다.",
+  "rubric": "주어진 로그는 15분 간격으로 발생한 개별 기능의 산발적 오류일 뿐, 5분 내 30건 이상의 ERROR 로그가 급증했다는 알림의 근거가 되지 않는다. '근거 발견: 아니오'로 판정하고 로그 표본이 현저히 부족하여 알림의 트리거 원인을 식별할 수 없음을 명시해야 정답. 주어진 로그 샘플을 근거로 시스템 장애를 단정하거나 무의미한 연관 관계를 분석하면 오답.",
+  "source": "MANUAL",
+  "alert": {
+    "alertname": "AppErrorLogSpike",
+    "severity": "warning",
+    "fingerprint": "golden-gen-sparse-22",
+    "summary": "ERROR 로그 급증(최근 5분, prod-app)",
+    "description": "ERROR 로그가 34건(임계 30/5m)입니다. zzol-bot이 근본원인을 분석합니다.",
+    "labels": {
+      "alertname": "AppErrorLogSpike",
+      "severity": "warning",
+      "job": "prod-app"
+    }
+  },
+  "logSamples": [
+    "[2026-08-26 14:10:05.123] [ERROR] [a9f8b7c6d5e4f3a2b1c0d9e8f7a6b5c4,1234567890abcdef] --- [redis-stream-thread-pool-nunchi1] c.n.i.m.c.NunchiCommandEventConsumer : 눈치게임 press 처리 중 오류: joinCode=A1B2, playerName=USER_A, eventId=7b8c9d0e-1f2a-3b4c-5d6e-7f8a9b0c1d2e",
+    "[2026-08-26 14:25:42.887] [ERROR] [,] --- [] c.r.infra.OracleObjectStorageService : Oracle Object Storage QR 코드 업로드 실패: contents=base64-data-blob, error=IOException: Connection reset"
+  ],
+  "logEnvironment": "prod",
+  "expected": "아니오",
+  "axis": "sparse-evidence"
+}

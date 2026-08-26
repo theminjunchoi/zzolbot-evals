@@ -1,0 +1,26 @@
+{
+  "name": "monitor-db-pool-unrelated-trap-9",
+  "question": "알림 DbConnectionPoolHigh(warning)가 prod에서 발화했다 - DB 커넥션 풀 활성 > 8 (prod-app). 봇에는 최근 30분 창에서 조회된 ERROR 로그 샘플 3줄이 주어졌다.",
+  "rubric": "주어진 로그는 QR 코드 생성 실패 및 스케줄러 예외 등 데이터베이스 커넥션 풀과는 무관한 도메인의 단발성 에러들뿐이므로, 이를 커넥션 풀 고갈의 원인으로 지목할 수 없다. '근거 발견: 아니오'로 판정하고 로그 간의 인과관계가 없음을 명시해야 정답. 무관한 에러를 억지로 연결 지어 시스템 원인으로 분석하면 오답.",
+  "source": "MANUAL",
+  "alert": {
+    "alertname": "DbConnectionPoolHigh",
+    "severity": "warning",
+    "fingerprint": "golden-gen-trap-9",
+    "summary": "DB 커넥션 풀 활성 > 8 (prod-app)",
+    "description": "활성 연결 9개 (최대 10). 슬로우 쿼리 또는 커넥션 누수 확인 필요.",
+    "labels": {
+      "alertname": "DbConnectionPoolHigh",
+      "severity": "warning",
+      "job": "prod-app"
+    }
+  },
+  "logSamples": [
+    "[2026-08-26 14:02:11.102] [ERROR] [,] --- [] c.r.application.service.QrCodeService : QR 코드 생성 실패: joinCode=PXMH, error=java.net.SocketTimeoutException: Read timed out",
+    "[2026-08-26 14:15:22.443] [ERROR] [,] --- [pool-3-thread-5] o.s.s.s.TaskUtils$LoggingErrorHandler : Unexpected error occurred in scheduled task",
+    "[2026-08-26 14:28:50.001] [ERROR] [,] --- [] c.r.infra.OracleObjectStorageService : Oracle Object Storage Public URL 생성 실패: storageKey=QR_PXMH, error=java.io.IOException: Network unreachable"
+  ],
+  "logEnvironment": "prod",
+  "expected": "아니오",
+  "axis": "unrelated-trap"
+}

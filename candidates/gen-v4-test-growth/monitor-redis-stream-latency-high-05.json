@@ -1,0 +1,29 @@
+{
+  "name": "monitor-redis-stream-latency-high-05",
+  "question": "알림 RedisStreamE2eLatencyHigh(warning)가 prod에서 발화했다 - 최근 30분 Redis Stream E2E 지연 p95 > 500ms 발생. 봇에는 최근 30분 ERROR 로그 샘플 6줄(정산 스트림 처리 오류)이 주어졌다.",
+  "rubric": "주어진 ERROR 로그는 SettlementStreamConsumer가 정산 레코드 처리 중 반복적인 ACK 보류 및 재전달 대기 상태를 보이고 있어, Redis 스트림 컨슈머의 처리 지연이 E2E 지연 증가의 직접적인 원인임을 명확히 보여준다. 근거 발견: 예로 판정하고 정산 스트림 컨슈머의 병목 또는 외부 의존성 지연을 원인으로 제시하면 정답. 근거 발견: 아니오로 판정하거나 단순 부하 문제로 치부하면 오답.",
+  "source": "MANUAL",
+  "alert": {
+    "alertname": "RedisStreamE2eLatencyHigh",
+    "severity": "warning",
+    "fingerprint": "golden-gen-psd-05",
+    "summary": "Redis Stream E2E 지연 p95 > 500ms (prod-app)",
+    "description": "스트림 처리 p95 지연이 1.2s. 컨슈머 처리 적체 또는 다운스트림(App Service) 지연 가능성.",
+    "labels": {
+      "alertname": "RedisStreamE2eLatencyHigh",
+      "severity": "warning",
+      "job": "prod-app"
+    }
+  },
+  "logSamples": [
+    "[2026-08-26 14:10:05.123] [ERROR] [a3c8e9f2d1b4a7c6e5d8f9a2b3c4d5e6,1a2b3c4d5e6f7a8b] --- [redis-stream-thread-pool-settlement:result1] c.s.i.c.SettlementStreamConsumer : 정산 처리 실패 — ACK 보류, 재전달 대기: recordId=1756172841203-0",
+    "[2026-08-26 14:10:15.842] [ERROR] [f9e8d7c6b5a4d3c2b1a0f9e8d7c6b5a4,2b3c4d5e6f7a8b9c] --- [redis-stream-thread-pool-settlement:result2] c.s.i.c.SettlementStreamConsumer : 정산 처리 실패 — ACK 보류, 재전달 대기: recordId=1756172841203-1",
+    "[2026-08-26 14:11:02.456] [ERROR] [c6b5a4d3e2f1a0b9c8d7e6f5a4b3c2d1,3c4d5e6f7a8b9c0d] --- [redis-stream-thread-pool-settlement:result3] c.s.i.c.SettlementStreamConsumer : 정산 처리 실패 — ACK 보류, 재전달 대기: recordId=1756172841203-2",
+    "[2026-08-26 14:12:45.912] [ERROR] [d7e6f5a4b3c2d1a0b9c8e7f6a5b4c3d2,4d5e6f7a8b9c0d1e] --- [redis-stream-thread-pool-settlement:result4] c.s.i.c.SettlementStreamConsumer : 정산 처리 실패 — ACK 보류, 재전달 대기: recordId=1756172841203-3",
+    "[2026-08-26 14:13:22.333] [ERROR] [b9c8e7f6a5b4c3d2d1a0f9e8d7c6b5a4,5e6f7a8b9c0d1e2f] --- [redis-stream-thread-pool-settlement:result5] c.s.i.c.SettlementStreamConsumer : 정산 처리 실패 — ACK 보류, 재전달 대기: recordId=1756172841203-4",
+    "[2026-08-26 14:14:10.001] [ERROR] [a0b9c8d7e6f5a4b3c2d1e0f9a8b7c6d5,6f7a8b9c0d1e2f3a] --- [redis-stream-thread-pool-settlement:result6] c.s.i.c.SettlementStreamConsumer : 정산 처리 실패 — ACK 보류, 재전달 대기: recordId=1756172841203-5"
+  ],
+  "logEnvironment": "prod",
+  "expected": "예",
+  "axis": "positive-dense"
+}
