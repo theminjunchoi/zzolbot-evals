@@ -1,0 +1,31 @@
+{
+  "name": "monitor-app-error-log-spike-06",
+  "question": "알림 AppErrorLogSpike(warning)가 prod에서 발화했다 - ERROR 로그 급증(최근 5분, prod-app). 봇에는 최근 30분 ERROR 로그 샘플 8줄(Redis Stream 복구 실패 및 이벤트 처리 오류)이 주어졌다.",
+  "rubric": "주어진 로그는 Redis Stream 컨테이너 복구 실패라는 근본 원인 장애와 그로 인해 파생된 이벤트 처리 실패 및 스트림 리스너 오류를 포함하고 있다. '근거 발견: 예'로 판정하고 Redis Stream 컨테이너의 상태 이상을 근본 원인으로 지목하면 정답. '근거 발견: 아니오'로 판정하거나 단순한 이벤트 처리 로직의 버그를 원인으로 지목하면 오답.",
+  "source": "MANUAL",
+  "alert": {
+    "alertname": "AppErrorLogSpike",
+    "severity": "warning",
+    "fingerprint": "golden-gen-ces-06",
+    "summary": "ERROR 로그 급증(최근 5분, prod-app)",
+    "description": "ERROR 로그가 38건(임계 30/5m)입니다. zzol-bot이 근본원인을 분석합니다.",
+    "labels": {
+      "alertname": "AppErrorLogSpike",
+      "severity": "warning",
+      "job": "prod-app"
+    }
+  },
+  "logSamples": [
+    "[2026-08-26 14:05:12.102] [ERROR] [a1b2c3d4e5f60718293a4b5c6d7e8f90,1234567890abcdef] --- [pool-1-thread-5] c.g.h.RedisStreamContainerRecovery : Redis Stream container 상태 확인 중 예외: stream=settlement:result",
+    "[2026-08-26 14:05:12.105] [ERROR] [a1b2c3d4e5f60718293a4b5c6d7e8f90,1234567890abcdef] --- [pool-1-thread-5] c.g.h.RedisStreamContainerRecovery : Redis Stream container 복구 중 예외 발생: stream=settlement:result",
+    "[2026-08-26 14:05:12.110] [ERROR] [a1b2c3d4e5f60718293a4b5c6d7e8f90,1234567890abcdef] --- [pool-1-thread-5] c.g.h.RedisStreamContainerRecovery : Redis Stream container 복구 포기: stream=settlement:result. HealthIndicator에 DOWN 보고",
+    "[2026-08-26 14:05:15.442] [ERROR] [b2c3d4e5f60718293a4b5c6d7e8f90a1,234567890abcdef1] --- [redis-stream-thread-pool-settlement:result1] c.s.i.c.SettlementStreamConsumer : 정산 스트림 처리 중 오류가 발생했습니다.",
+    "[2026-08-26 14:05:18.221] [ERROR] [c3d4e5f60718293a4b5c6d7e8f90a1b2,34567890abcdef12] --- [redis-stream-thread-pool-nunchi1] c.n.i.m.c.NunchiCommandEventConsumer : 눈치게임 press 처리 중 오류: joinCode=PXMH, playerName=user1, eventId=550e8400-e29b-41d4-a716-446655440000",
+    "[2026-08-26 14:05:22.890] [ERROR] [d4e5f60718293a4b5c6d7e8f90a1b2c3,4567890abcdef123] --- [redis-stream-thread-pool-minigame1] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=MiniGameStartConsumer, message=event-data-payload",
+    "[2026-08-26 14:05:25.112] [ERROR] [e5f60718293a4b5c6d7e8f90a1b2c3d4,567890abcdef1234] --- [redis-stream-thread-pool-settlement:result2] c.s.i.c.SettlementStreamConsumer : 정산 처리 실패 — ACK 보류, 재전달 대기: recordId=1756172841203-0",
+    "[2026-08-26 14:05:30.001] [ERROR] [f60718293a4b5c6d7e8f90a1b2c3d4e5,67890abcdef12345] --- [redis-stream-thread-pool-nunchi2] c.n.i.m.c.NunchiCommandEventConsumer : 눈치게임 press 처리 중 오류: joinCode=PXMH, playerName=user2, eventId=550e8400-e29b-41d4-a716-446655440001"
+  ],
+  "logEnvironment": "prod",
+  "expected": "예",
+  "axis": "compound-cause"
+}

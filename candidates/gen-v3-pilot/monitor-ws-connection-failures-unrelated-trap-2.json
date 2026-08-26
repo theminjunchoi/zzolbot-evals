@@ -1,0 +1,25 @@
+{
+  "name": "monitor-ws-connection-failures-unrelated-trap-2",
+  "question": "알림 WsConnectionFailuresHigh(warning)가 prod에서 발화했다 - 최근 5분 WS 연결 실패가 12건 (임계 10). STOMP 연결 단계 실패 누적. 봇에는 최근 30분 ERROR 로그 샘플 2줄(정산 처리 실패, QR 코드 생성 실패)이 주어졌다.",
+  "rubric": "주어진 ERROR 로그는 정산 스트림 처리 실패와 QR 코드 생성 실패로, WebSocket 연결 실패 급증과는 도메인이 완전히 다르며 연결 관련 로그가 전혀 없다. 근거 발견: 아니오로 판정하고 원인 가설을 내지 않아야 정답. 정산이나 QR 코드 오류를 WS 연결 실패의 원인으로 지목하면 오답.",
+  "source": "MANUAL",
+  "alert": {
+    "alertname": "WsConnectionFailuresHigh",
+    "severity": "warning",
+    "fingerprint": "golden-gen-ws-02",
+    "summary": "WebSocket 연결 실패 급증 (prod-app)",
+    "description": "최근 5분 WS 연결 실패가 12건 (임계 10). STOMP 연결 단계 실패 누적.",
+    "labels": {
+      "alertname": "WsConnectionFailuresHigh",
+      "severity": "warning",
+      "job": "prod-app"
+    }
+  },
+  "logSamples": [
+    "[2026-08-26 14:10:05.123] [ERROR] [,] --- [redis-stream-thread-pool-settlement:result1] c.s.i.c.SettlementStreamConsumer : 정산 처리 실패 — ACK 보류, 재전달 대기: recordId=1756172841203-0",
+    "[2026-08-26 14:25:42.891] [ERROR] [,] --- [] c.r.application.service.QrCodeService : QR 코드 생성 실패: joinCode=PXMH, error=java.io.IOException: Connection reset"
+  ],
+  "logEnvironment": "prod",
+  "expected": "아니오",
+  "axis": "unrelated-trap"
+}
