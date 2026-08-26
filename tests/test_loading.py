@@ -7,10 +7,10 @@ from harness.loading import ScenarioLoader
 GOLDEN_DIR = Path(__file__).parent.parent / "golden-set" / "monitor"
 
 
-def test_실제_골든셋_20종을_전부_읽는다():
+def test_실제_골든셋을_전부_읽는다():
     scenarios = ScenarioLoader().load_dir(GOLDEN_DIR)
 
-    assert len(scenarios) == 20
+    assert len(scenarios) == 29
     names = {s.name for s in scenarios}
     assert "monitor-mass-ip-blocking-description-echo-trap" in names
     assert all(s.log_environment == "prod" for s in scenarios)

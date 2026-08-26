@@ -1,0 +1,23 @@
+{
+  "name": "monitor-app-error-log-spike-17",
+  "question": "알림 AppErrorLogSpike(warning)가 prod에서 발화했다 - ERROR 로그 급증(최근 5분, prod-app). 봇에는 최근 30분 창에서 조회된 ERROR 로그 샘플 2줄이 주어졌다.",
+  "rubric": "주어진 로그는 20분 간격으로 발생한 서로 다른 기능의 단발성 오류일 뿐, 5분 내 30건 이상의 ERROR 로그가 급증했다는 알림의 근거가 되지 않는다. '근거 발견: 아니오'로 판정하고 표본 부족을 언급해야 정답. 주어진 로그를 근거로 시스템 장애를 단정하면 오답.",
+  "source": "MANUAL",
+  "alert": {
+    "alertname": "AppErrorLogSpike",
+    "severity": "warning",
+    "fingerprint": "golden-gen-sparse-17",
+    "summary": "ERROR 로그 급증(최근 5분, prod-app)",
+    "description": "ERROR 로그가 32건(임계 30/5m)입니다. zzol-bot이 근본원인을 분석합니다.",
+    "labels": {
+      "alertname": "AppErrorLogSpike",
+      "severity": "warning",
+      "job": "prod-app"
+    }
+  },
+  "logSamples": [
+    "[2026-08-26 10:05:12.441] [ERROR] [a1b2c3d4e5f678901234567890abcdef,1234567890abcdef] --- [redis-stream-thread-pool-nunchi1] c.n.i.m.c.NunchiCommandEventConsumer : 눈치게임 press 처리 중 오류: joinCode=PXMH, playerName=USER1, eventId=550e8400-e29b-41d4-a716-446655440000",
+    "[2026-08-26 10:25:48.912] [ERROR] [,] --- [] c.r.application.service.QrCodeService : QR 코드 생성 실패: joinCode=PXMH, error=java.net.SocketTimeoutException: Read timed out"
+  ],
+  "logEnvironment": "prod"
+}
