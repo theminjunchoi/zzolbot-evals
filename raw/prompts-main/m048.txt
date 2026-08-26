@@ -50,7 +50,9 @@
 - Outbox 이벤트 id는 숫자다 (예: id=8241). UUID 금지. streamKey는 실제 스트림 키만.
 - 정산 recordId는 <ms타임스탬프>-<seq> 형식 (예: 1756172841203-0).
 - HTTP uri는 실제 엔드포인트만: /rooms, /rooms/check-joinCode, /rooms/check-guestName, /rooms/nickname/random, /rooms/<대문자숫자4자리>/probabilities, /rooms/<대문자숫자4자리>/settings
-- EventDispatcher의 consumer=는 실제 클래스만: RoomJoinConsumer(RoomJoinEvent), SelectCardCommandEventConsumer(SelectCardCommandEvent), PlayerDisconnectedConsumer(PlayerDisconnectedEvent), MiniGameStartConsumer, TapCommandEventConsumer, TouchProgressEventConsumer, StopCommandEventConsumer, LadderDrawCommandEventConsumer
+- EventDispatcher 메시지는 `이벤트 처리 실패: consumer=<클래스>, message=<이벤트>[필드=값, ...]` 형식이다. 클래스명 뒤에 괄호를 붙이지 마라.
+  짝이 정해진 것: RoomJoinConsumer는 RoomJoinEvent, SelectCardCommandEventConsumer는 SelectCardCommandEvent, PlayerDisconnectedConsumer는 PlayerDisconnectedEvent를 다룬다.
+  그 외 쓸 수 있는 consumer: MiniGameStartConsumer, TapCommandEventConsumer, TouchProgressEventConsumer, StopCommandEventConsumer, LadderDrawCommandEventConsumer
 - GameTaskSchedulerFactory의 [게임]과 <게임>-task 스레드의 게임 이름: nunchi, cardgame, racinggame, speedtouch, blindtimer, blockstacking, laddergame
 - joinCode는 대문자/숫자 4자리 (예: PXMH).
 - 로그 샘플은 반드시 시각 오름차순으로 나열한다.
@@ -62,6 +64,7 @@
 - HTTP 요청(RestExceptionHandler, IpBlockFilter/Store): http-nio-8080-exec-<N>
 - 스케줄러(OutboxEventProcessor, SettlementPendingSweeper, RedisStreamContainerRecovery, TaskUtils): pool-<N>-thread-<M>
 - 게임 스케줄러(GameTaskSchedulerFactory): nunchi-task-1 같은 <게임>-task-<N>
+- 방 도메인(RoomService, RoomEventWaitManager): redis-stream-thread-pool-room:join<N> 또는 pool-<N>-thread-<M>
 - QR/스토리지(QrCodeService, OracleObjectStorageService): 무명 가상 스레드라 빈 문자열, 즉 '--- []' 형태
 
 ## 기존 골든 시나리오 예시 (형식 참고, 내용 복제 금지)
