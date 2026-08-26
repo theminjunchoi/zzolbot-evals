@@ -1,0 +1,53 @@
+{
+ "base": {
+  "monitor-5xx-compound-cause-32": false,
+  "monitor-5xx-db-connection-failure": false,
+  "monitor-5xx-redis-connection-failure": true,
+  "monitor-circuit-breaker-open-02": false,
+  "monitor-circuit-breaker-open-qr-uploads": false,
+  "monitor-db-pool-exhaustion-request-timeouts": false,
+  "monitor-error-spike-cardgame-select-burst": true,
+  "monitor-error-spike-nunchi-consumer": false,
+  "monitor-error-spike-roomjoin-current-window": true,
+  "monitor-outbox-deadletter-publish-failures": false,
+  "monitor-redis-stream-e2e-latency-27": false,
+  "monitor-redis-stream-e2e-latency-35": false,
+  "monitor-redis-stream-e2e-latency-high-05": false,
+  "monitor-settlement-backlog-consumer-failures": false,
+  "monitor-stream-latency-container-recovery": false
+ },
+ "v2-s1": {
+  "monitor-5xx-compound-cause-32": false,
+  "monitor-5xx-db-connection-failure": true,
+  "monitor-5xx-redis-connection-failure": true,
+  "monitor-circuit-breaker-open-02": true,
+  "monitor-circuit-breaker-open-qr-uploads": true,
+  "monitor-db-pool-exhaustion-request-timeouts": false,
+  "monitor-error-spike-cardgame-select-burst": true,
+  "monitor-error-spike-nunchi-consumer": true,
+  "monitor-error-spike-roomjoin-current-window": true,
+  "monitor-outbox-deadletter-publish-failures": true,
+  "monitor-redis-stream-e2e-latency-27": true,
+  "monitor-redis-stream-e2e-latency-35": false,
+  "monitor-redis-stream-e2e-latency-high-05": true,
+  "monitor-settlement-backlog-consumer-failures": true,
+  "monitor-stream-latency-container-recovery": false
+ },
+ "v2-s2": {
+  "monitor-5xx-compound-cause-32": true,
+  "monitor-5xx-db-connection-failure": true,
+  "monitor-5xx-redis-connection-failure": true,
+  "monitor-circuit-breaker-open-02": true,
+  "monitor-circuit-breaker-open-qr-uploads": true,
+  "monitor-db-pool-exhaustion-request-timeouts": false,
+  "monitor-error-spike-cardgame-select-burst": true,
+  "monitor-error-spike-nunchi-consumer": true,
+  "monitor-error-spike-roomjoin-current-window": true,
+  "monitor-outbox-deadletter-publish-failures": true,
+  "monitor-redis-stream-e2e-latency-27": false,
+  "monitor-redis-stream-e2e-latency-35": false,
+  "monitor-redis-stream-e2e-latency-high-05": false,
+  "monitor-settlement-backlog-consumer-failures": true,
+  "monitor-stream-latency-container-recovery": true
+ }
+}
