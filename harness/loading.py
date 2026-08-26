@@ -23,10 +23,13 @@ class ScenarioLoader:
         return scenarios
 
     def load_file(self, path: Path) -> Scenario:
-        raw = json.loads(path.read_text(encoding="utf-8"))
+        return self.from_dict(json.loads(path.read_text(encoding="utf-8")), source=path.name)
+
+    def from_dict(self, raw: dict, source: str = "<dict>") -> Scenario:
+        path = source
         missing = [key for key in self.REQUIRED_FIELDS if key not in raw]
         if missing:
-            raise ValueError(f"{path.name}: 필수 필드 누락 {missing}")
+            raise ValueError(f"{path}: 필수 필드 누락 {missing}")
         alert_raw = raw["alert"]
         alert = Alert(
             alertname=alert_raw["alertname"],

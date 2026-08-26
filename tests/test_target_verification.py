@@ -102,3 +102,27 @@ def test_학습_샘플은_대화_형식으로_직렬화된다():
     assert [m["role"] for m in chat["messages"]] == ["system", "user", "assistant"]
     assert '"evidenceFound": true' in chat["messages"][2]["content"]
     assert LOG_A in chat["messages"][2]["content"]
+
+
+def test_내용이_같은_시나리오는_이름이_달라도_중복이다():
+    from harness.similarity import find_duplicates, signature
+
+    a = scenario(YES_RUBRIC)
+    b = Scenario(name="monitor-y", question=a.question, rubric=a.rubric, source=a.source,
+                 alert=a.alert,
+                 log_samples=tuple(l.replace("8241", "9999").replace("10:00:00.000", "11:22:33.444")
+                                   for l in a.log_samples),
+                 log_environment=a.log_environment)
+
+    assert signature(a) == signature(b)
+    assert find_duplicates([b], against=[a]) == [("monitor-y", "monitor-x")]
+
+
+def test_로그_구성이_다르면_중복이_아니다():
+    from harness.similarity import find_duplicates
+
+    a = scenario(YES_RUBRIC)
+    b = Scenario(name="monitor-z", question=a.question, rubric=a.rubric, source=a.source,
+                 alert=a.alert, log_samples=a.log_samples[:1], log_environment=a.log_environment)
+
+    assert find_duplicates([b], against=[a]) == []

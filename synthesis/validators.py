@@ -279,6 +279,37 @@ class RubricValidator(Validator):
         return found
 
 
+class DuplicateContentValidator(Validator):
+    """이름이 달라도 내용이 같은 후보를 막는다.
+
+    타임스탬프와 트레이스 ID만 다른 쌍둥이가 실제로 나왔고(생성기가 결정적으로 돌던 시기의
+    잔재), 그중 하나가 평가 test 분할에 있어 학습에 쓰면 오염될 뻔했다.
+    """
+
+    name = "duplicate-content"
+
+    def __init__(self, existing_scenarios=None):
+        from harness.similarity import signature
+
+        self._signature = signature
+        self._seen = {}
+        for scenario in (existing_scenarios or []):
+            self._seen.setdefault(signature(scenario), scenario.name)
+
+    def violations(self, candidate: dict) -> list[str]:
+        from harness.loading import ScenarioLoader
+
+        try:
+            scenario = ScenarioLoader().from_dict(candidate)
+        except Exception:  # noqa: BLE001 - 스키마 문제는 SchemaValidator가 본다
+            return []
+        key = self._signature(scenario)
+        if key in self._seen:
+            return [f"내용이 같은 시나리오가 이미 있음: {self._seen[key]}"]
+        self._seen[key] = scenario.name
+        return []
+
+
 class DuplicateNameValidator(Validator):
     name = "duplicate"
 
@@ -291,7 +322,8 @@ class DuplicateNameValidator(Validator):
         return []
 
 
-def default_validators(existing_names: set[str] | None = None) -> list[Validator]:
+def default_validators(existing_names: set[str] | None = None,
+                       existing_scenarios=None) -> list[Validator]:
     return [
         SchemaValidator(),
         AlertValidator(),
@@ -302,6 +334,7 @@ def default_validators(existing_names: set[str] | None = None) -> list[Validator
         TimestampValidator(),
         RubricValidator(),
         DuplicateNameValidator(existing_names or set()),
+        DuplicateContentValidator(existing_scenarios),
     ]
 
 

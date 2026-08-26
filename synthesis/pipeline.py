@@ -33,6 +33,7 @@ class SynthesisPipeline:
         self._existing_names = set(existing_names)
         self._out_dir = out_dir
         self._screener = screener
+        self._shared_validators = None
         self.stats = FilterStats()
 
     def run(self, batch: list[BatchItem], on_progress=print) -> list[Path]:
@@ -80,7 +81,7 @@ class SynthesisPipeline:
         return self._accept(candidate, f"(이름 없음 #{ordinal})", on_progress)
 
     def _accept(self, candidate: dict, fallback_name: str, on_progress) -> Path | None:
-        failures = validate(candidate, default_validators(self._existing_names))
+        failures = validate(candidate, self._validators())
         name = candidate.get("name", fallback_name)
         # rule 필터를 통과한 후보만 스크리닝한다. 이미 탈락한 후보에 LLM 호출을 쓸 이유가 없다.
         if self._screener is not None and not any(failures.values()):
@@ -96,6 +97,11 @@ class SynthesisPipeline:
         path.write_text(json.dumps(candidate, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
         on_progress(f"[KEEP] {name} ({candidate.get('axis', '?')}, {candidate['alert']['alertname']})")
         return path
+
+    def _validators(self):
+        if self._shared_validators is None:
+            self._shared_validators = default_validators(self._existing_names, self._exemplars)
+        return self._shared_validators
 
     def _pick_exemplars(self, axis: Axis) -> list[Scenario]:
         matching = [s for s in self._exemplars

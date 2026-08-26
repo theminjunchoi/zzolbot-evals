@@ -35,6 +35,8 @@ class StubScreener(CandidateScreener):
 def valid_candidate():
     raw = json.loads((GOLDEN_DIR / "monitor-db-pool-high-unrelated-game-errors.json").read_text(encoding="utf-8"))
     raw["name"] = "monitor-stub-candidate"
+    # 골든셋 원본을 그대로 쓰면 내용 중복 검증기에 걸린다. 로그 구성을 바꿔 다른 문제로 만든다.
+    raw["logSamples"] = raw["logSamples"][:1]
     return raw
 
 
