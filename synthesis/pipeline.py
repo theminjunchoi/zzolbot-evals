@@ -27,12 +27,16 @@ class BatchItem:
 class SynthesisPipeline:
     def __init__(self, generator: ScenarioGenerator, exemplars: list[Scenario],
                  existing_names: set[str], out_dir: Path,
-                 screener: CandidateScreener | None = None):
+                 screener: CandidateScreener | None = None,
+                 dedup_against: list[Scenario] | None = None):
         self._generator = generator
         self._exemplars = exemplars
         self._existing_names = set(existing_names)
         self._out_dir = out_dir
         self._screener = screener
+        # 중복 비교 대상. 적재 실행이 나뉘면 이전 실행에서 채택한 것들과도 대조해야
+        # 배치 사이의 중복을 잡는다.
+        self._dedup_against = list(exemplars) + list(dedup_against or [])
         self._shared_validators = None
         self.stats = FilterStats()
 
@@ -100,7 +104,7 @@ class SynthesisPipeline:
 
     def _validators(self):
         if self._shared_validators is None:
-            self._shared_validators = default_validators(self._existing_names, self._exemplars)
+            self._shared_validators = default_validators(self._existing_names, self._dedup_against)
         return self._shared_validators
 
     def _pick_exemplars(self, axis: Axis) -> list[Scenario]:

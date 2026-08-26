@@ -32,10 +32,14 @@ def main() -> int:
     parser.add_argument("--no-screen", action="store_true",
                         help="스크리닝을 끈다. 학습 데이터처럼 양이 많고 사람 검토를 생략하는 경우 비용을 보고 판단한다")
     parser.add_argument("--min-interval", type=float, default=1.5)
+    parser.add_argument("--compare-dirs", nargs="*", type=Path, default=[],
+                        help="중복 비교에 함께 넣을 기존 후보 디렉터리. 배치 사이 중복을 막는다")
     args = parser.parse_args()
 
-    exemplars = ScenarioLoader().load_dir(args.golden_dir)
-    existing = {s.name for s in exemplars}
+    loader = ScenarioLoader()
+    exemplars = loader.load_dir(args.golden_dir)
+    previous = [s for d in args.compare_dirs if d.exists() for s in loader.load_dir(d)]
+    existing = {s.name for s in exemplars} | {s.name for s in previous}
 
     screener = None
     if not args.no_screen:
@@ -48,7 +52,7 @@ def main() -> int:
 
     pipeline = SynthesisPipeline(
         generator=None, exemplars=exemplars, existing_names=existing,
-        out_dir=args.out_dir / args.label, screener=screener)
+        out_dir=args.out_dir / args.label, screener=screener, dedup_against=previous)
     paths = sorted(args.input_dir.glob("*.json"))
     if not paths:
         print(f"입력 후보가 없다: {args.input_dir}", file=sys.stderr)

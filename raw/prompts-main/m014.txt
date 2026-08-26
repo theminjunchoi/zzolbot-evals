@@ -1,0 +1,123 @@
+너는 운영 모니터링 봇의 평가 시나리오를 만드는 합성 데이터 엔지니어다.
+실제 시스템(zzol: 미니게임 추첨 서비스, Spring 백엔드)의 알림과 로그를 재현한
+골든 시나리오를 JSON으로 생성한다.
+
+반드시 지켜야 하는 형식:
+1. 로그 한 줄 = "[yyyy-MM-dd HH:mm:ss.SSS] [ERROR|WARN] [<32자리hex트레이스,16자리hex스팬 또는 빈값>,] --- [<스레드명>] <로거축약형> : <메시지>"
+   - 트레이스가 없으면 "[,]" 형태다. HTTP 요청 로그는 트레이스가 있고, 스케줄 스레드는 "[,]"다.
+   - 스레드명과 로거와 메시지는 아래 카탈로그에 있는 것만 사용한다. 새로 지어내면 탈락한다.
+2. 알림은 카탈로그의 alertname만 쓰고 severity와 라벨을 카탈로그와 일치시킨다.
+3. rubric은 judge가 로그를 못 보므로 사실관계를 1문장으로 서술한 뒤,
+   '근거 발견: 예' 또는 '근거 발견: 아니오' 중 기대 판정을 그대로 인용해 정답 조건을 쓰고,
+   이어서 오답 조건을 쓴다.
+4. question은 "알림 <Alertname>(<severity>)가 prod에서 발화했다 - <요지>. 봇에는 <입력 서술>이 주어졌다." 형식.
+5. 출력은 JSON 객체 하나: {"name", "question", "rubric", "source": "MANUAL", "alert": {"alertname",
+   "severity", "fingerprint", "summary", "description", "labels"}, "logSamples": [...],
+   "logEnvironment": "prod", "expected": "예" 또는 "아니오", "axis": "<축 키>"}
+6. name은 monitor-로 시작하는 소문자 케밥 케이스, fingerprint는 golden-gen-<축약어>-<숫자> 형식.
+7. joinCode는 대문자 4자리, eventId는 UUID, 트레이스는 무작위 hex로 매번 다르게 만든다.
+
+## 이번에 사용할 알림 (이것만 사용)
+- alertname: OutboxDeadLetterHigh / severity: warning
+- labels는 정확히 이것만 넣는다 (env 같은 라벨 추가 금지): {"alertname": "OutboxDeadLetterHigh", "severity": "warning", "job": "prod-app"}
+- summary는 다음 템플릿의 {}에 값만 채운 형태여야 한다: Outbox DEAD_LETTER 적체 (> 10, prod-app)
+- description도 마찬가지: 재시도 초과로 DEAD_LETTER 전환된 outbox 이벤트가 {}건. 다운스트림 발행 경로 점검 필요.
+
+## 사용 가능한 로그 메시지 카탈로그 ({}는 값 슬롯. 이 목록에 없는 로거/메시지 금지)
+- [ERROR] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer={}, message={}
+- [ERROR] c.r.application.service.RoomService : 방 참가 비동기 처리 실패: eventId={}, joinCode={}, playerName={}
+- [ERROR] c.r.i.messaging.RoomEventWaitManager : 방 이벤트 자동 정리 (실패): eventId={}
+- [ERROR] c.s.i.c.SettlementStreamConsumer : 정산 처리 실패 — ACK 보류, 재전달 대기: recordId={}
+- [ERROR] c.s.i.c.SettlementStreamConsumer : 정산 스트림 처리 중 오류가 발생했습니다.
+- [ERROR] c.s.i.c.SettlementPendingSweeper : pending 정산 메시지 재처리 실패: recordId={}
+- [ERROR] c.g.h.RedisStreamContainerRecovery : Redis Stream container 상태 확인 중 예외: stream={}
+- [ERROR] c.g.h.RedisStreamContainerRecovery : Redis Stream container 복구 중 예외 발생: stream={}
+- [ERROR] c.g.h.RedisStreamContainerRecovery : Redis Stream container 복구 포기: stream={}. HealthIndicator에 DOWN 보고
+- [ERROR] c.g.r.c.RedisStreamListenerStarter : Redis Stream 처리 중 오류가 발생했습니다.
+- [ERROR] c.global.outbox.OutboxEventProcessor : Outbox 이벤트 최대 재시도 초과, DEAD_LETTER 전환: id={}, streamKey={}
+- [ERROR] c.web.exception.RestExceptionHandler : method={} uri={} exception={} message={}
+- [ERROR] c.n.i.m.c.NunchiCommandEventConsumer : 눈치게임 press 처리 중 오류: joinCode={}, playerName={}, eventId={}
+- [ERROR] c.g.s.GameTaskSchedulerFactory : [{}] 스케줄 실행 중 예외가 발생했습니다.
+- [ERROR] o.s.s.s.TaskUtils$LoggingErrorHandler : Unexpected error occurred in scheduled task
+- [ERROR] c.r.infra.OracleObjectStorageService : Oracle Object Storage QR 코드 업로드 실패: contents={}, error={}
+- [ERROR] c.r.infra.OracleObjectStorageService : Oracle Object Storage Public URL 생성 실패: storageKey={}, error={}
+- [ERROR] c.r.application.service.QrCodeService : QR 코드 생성 실패: joinCode={}, error={}
+- [WARN] c.global.ipblock.IpBlockFilter : 차단된 IP 접근 시도: ip={} uri={}
+- [WARN] c.global.ipblock.IpBlockFilter : 악성 경로 접근 감지 → IP 즉시 차단: ip={} uri={}
+- [WARN] c.global.ipblock.IpBlockStore : IP 차단 등록: ip={} ttl={}
+
+## 값 형식 규칙 (슬롯 값도 검증기가 확인한다)
+- Outbox 이벤트 id는 숫자다 (예: id=8241). UUID 금지. streamKey는 실제 스트림 키만.
+- 정산 recordId는 <ms타임스탬프>-<seq> 형식 (예: 1756172841203-0).
+- HTTP uri는 실제 엔드포인트만: /rooms, /rooms/check-joinCode, /rooms/check-guestName, /rooms/nickname/random, /rooms/<대문자숫자4자리>/probabilities, /rooms/<대문자숫자4자리>/settings
+- EventDispatcher의 consumer=는 실제 클래스만: RoomJoinConsumer(RoomJoinEvent), SelectCardCommandEventConsumer(SelectCardCommandEvent), PlayerDisconnectedConsumer(PlayerDisconnectedEvent), MiniGameStartConsumer, TapCommandEventConsumer, TouchProgressEventConsumer, StopCommandEventConsumer, LadderDrawCommandEventConsumer
+- GameTaskSchedulerFactory의 [게임]과 <게임>-task 스레드의 게임 이름: nunchi, cardgame, racinggame, speedtouch, blindtimer, blockstacking, laddergame
+- joinCode는 대문자/숫자 4자리 (예: PXMH).
+- 로그 샘플은 반드시 시각 오름차순으로 나열한다.
+- 스레드 번호 앞에 하이픈을 넣지 마라: redis-stream-thread-pool-settlement:result1 (O), redis-stream-thread-pool-settlement:result-1 (X)
+- question에서 조회 창을 언급하면 반드시 '최근 30분'이다 (시스템의 실제 조회 창).
+
+## 스레드명 규칙 (로거가 실제로 도는 스레드에만 배치한다)
+- Redis Stream 컨슈머(EventDispatcher, NunchiCommandEventConsumer, SettlementStreamConsumer, RedisStreamListenerStarter): redis-stream-thread-pool-<키><N>. <키>는 다음만 유효: blindtimer, blockstacking, cardgame:select, concurrent, laddergame, minigame, nunchi, racinggame, room, room:join, settlement:result, speedtouch
+- HTTP 요청(RestExceptionHandler, IpBlockFilter/Store): http-nio-8080-exec-<N>
+- 스케줄러(OutboxEventProcessor, SettlementPendingSweeper, RedisStreamContainerRecovery, TaskUtils): pool-<N>-thread-<M>
+- 게임 스케줄러(GameTaskSchedulerFactory): nunchi-task-1 같은 <게임>-task-<N>
+- QR/스토리지(QrCodeService, OracleObjectStorageService): 무명 가상 스레드라 빈 문자열, 즉 '--- []' 형태
+
+## 기존 골든 시나리오 예시 (형식 참고, 내용 복제 금지)
+{
+ "name": "monitor-5xx-compound-cause-32",
+ "question": "알림 Http5xxRatioHigh(critical)가 prod에서 발화했다 - 최근 5분 5xx 비율 5% 초과. 봇에는 최근 30분 ERROR 로그 샘플 6줄(Redis Stream 복구 실패와 그에 따른 HTTP 요청 5xx)이 주어졌다.",
+ "rubric": "주어진 ERROR 로그는 Redis Stream 컨테이너 복구가 포기된 시점부터 해당 컨테이너를 의존하는 엔드포인트에서 5xx 오류가 연쇄적으로 발생함을 보여주며, 이는 Redis Stream 장애가 근본 원인이고 HTTP 5xx는 그 파급 증상임을 나타낸다. '근거 발견: 예'로 판정하고 Redis Stream 복구 실패를 근본 원인으로, HTTP 5xx를 파급 증상으로 명확히 구분하여 가설을 제시하면 정답. '근거 발견: 아니오'로 판정하거나 단순히 5xx 발생 사실만 언급하고 근본 원인을 특정하지 못하면 오답.",
+ "alert": {
+  "alertname": "Http5xxRatioHigh",
+  "severity": "critical",
+  "fingerprint": "golden-gen-cc-32",
+  "summary": "HTTP 5xx 비율 5% 초과 (prod-app)",
+  "description": "최근 5분 5xx 비율이 8.2%. 서버 측 광범위 실패 가능성.",
+  "labels": {
+   "alertname": "Http5xxRatioHigh",
+   "severity": "critical",
+   "job": "prod-app"
+  }
+ },
+ "logSamples": [
+  "[2026-08-26 14:00:05.112] [ERROR] [a1b2c3d4e5f60708090a1b2c3d4e5f60,a1b2c3d4e5f60708] --- [pool-1-thread-2] c.g.h.RedisStreamContainerRecovery : Redis Stream container 복구 중 예외 발생: stream=room:join",
+  "[2026-08-26 14:00:15.223] [ERROR] [a1b2c3d4e5f60708090a1b2c3d4e5f60,a1b2c3d4e5f60708] --- [pool-1-thread-2] c.g.h.RedisStreamContainerRecovery : Redis Stream container 복구 포기: stream=room:join. HealthIndicator에 DOWN 보고",
+  "[2026-08-26 14:01:10.456] [ERROR] [b2c3d4e5f60708090a1b2c3d4e5f6070,b2c3d4e5f6070809] --- [http-nio-8080-exec-5] c.web.exception.RestExceptionHandler : method=POST uri=/rooms exception=InfrastructureException message=Stream container for room:join is down"
+ ],
+ "logEnvironment": "prod"
+}
+{
+ "name": "monitor-5xx-db-connection-failure",
+ "question": "알림 Http5xxRatioHigh(critical)가 prod에서 발화했다 - 최근 5분 5xx 비율 5% 초과. 봇에는 최근 30분 ERROR 로그 샘플 4줄(JDBC 커넥션 확보 실패)이 주어졌다.",
+ "rubric": "주어진 ERROR 로그는 서로 다른 여러 HTTP 요청이 JDBC Connection 확보 실패(JDBCConnectionException: Unable to acquire JDBC Connection)로 실패한 내용으로, 광범위한 5xx의 직접 근거다. '근거 발견: 예'로 판정하고 DB 연결 실패(MySQL 장애 또는 커넥션 확보 불가)를 근본 원인 가설로 제시하면 정답. '근거 발견: 아니오'로 판정하거나 Redis, 게임 로직을 원인으로 지목하면 오답.",
+ "alert": {
+  "alertname": "Http5xxRatioHigh",
+  "severity": "critical",
+  "fingerprint": "golden-synth-19",
+  "summary": "HTTP 5xx 비율 5% 초과 (prod-app)",
+  "description": "최근 5분 5xx 비율이 9.8%. 서버 측 광범위 실패 가능성.",
+  "labels": {
+   "alertname": "Http5xxRatioHigh",
+   "severity": "critical",
+   "job": "prod-app"
+  }
+ },
+ "logSamples": [
+  "[2026-08-26 11:18:07.335] [ERROR] [61d43a90c8e2f5b7a3b8c04e97d15f28,4c07e9a25d81b3f6] --- [http-nio-8080-exec-14] c.web.exception.RestExceptionHandler : method=POST uri=/rooms exception=JDBCConnectionException message=Unable to acquire JDBC Connection",
+  "[2026-08-26 11:18:36.902] [ERROR] [08b5e2c74a91d3f6b6d0a95c21e84f73,7e51a3c80d94b2f6] --- [http-nio-8080-exec-22] c.web.exception.RestExceptionHandler : method=POST uri=/rooms exception=JDBCConnectionException message=Unable to acquire JDBC Connection",
+  "[2026-08-26 11:19:14.478] [ERROR] [95c2d7a40e83f1b6b1e6a38c50d97f42,0a68d5c93e27b1f4] --- [http-nio-8080-exec-09] c.web.exception.RestExceptionHandler : method=POST uri=/rooms exception=JDBCConnectionException message=Unable to acquire JDBC Connection"
+ ],
+ "logEnvironment": "prod"
+}
+
+## 이번 생성 과제
+- 축: positive-dense (기대 판정: 근거 발견 예)
+- 축 설명: 알림과 직접 관련된 에러가 알림 시각과 정합하는 좁은 시간창(5분 이내)에 밀집 반복된다. 봇은 근거를 인정하고 원인을 짚어야 한다.
+- 알림: OutboxDeadLetterHigh
+- 로그 샘플 수: 6~12줄
+- name 뒤에 붙일 일련번호: 1014
+- 알림 발생 시각은 2026-08-26 근처의 임의 시각으로 잡고, 로그 시각은 축 설명의 시간 관계를 따른다.
+
+위 조건으로 시나리오 JSON 하나를 생성하라.
