@@ -30,7 +30,6 @@ AXIS_ALERTS: dict[str, list[str]] = {
     "sparse-evidence": ["AppErrorLogSpike", "Http5xxRatioHigh", "WsInboundLatencyHigh"],
     "partial-relevance": ["Http5xxRatioHigh", "AppErrorLogSpike", "RedisStreamE2eLatencyHigh"],
     "compound-cause": ["Http5xxRatioHigh", "AppErrorLogSpike", "RedisStreamE2eLatencyHigh"],
-    "borderline-window": ["AppErrorLogSpike", "Http5xxRatioHigh"],
     "near-miss-component": ["DbConnectionPoolHigh", "RedisStreamBacklogHigh", "OutboxDeadLetterHigh",
                             "JvmHeapUsageHigh"],
 }
@@ -44,6 +43,8 @@ def main() -> int:
     parser.add_argument("--golden-dir", type=Path, default=Path("golden-set/monitor"))
     parser.add_argument("--out-dir", type=Path, default=Path("candidates"))
     parser.add_argument("--min-interval", type=float, default=6.5)
+    parser.add_argument("--model", default="gemini-3.1-flash-lite",
+                        help="생성 모델. 피평가 모델(gemini-2.5-flash)과 분리해 자기 생성 편향을 줄인다")
     parser.add_argument("--seed", type=int, default=20260826, help="알림 순환 선택 시드")
     args = parser.parse_args()
 
@@ -63,7 +64,7 @@ def main() -> int:
         for i in range(args.per_axis):
             batch.append(BatchItem(axis, alerts[(i + rng.randrange(len(alerts))) % len(alerts)], 1))
 
-    client = GeminiJsonClient(api_key=api_key, min_interval_s=args.min_interval)
+    client = GeminiJsonClient(api_key=api_key, model=args.model, min_interval_s=args.min_interval)
     pipeline = SynthesisPipeline(
         ScenarioGenerator(client), exemplars, existing_names, args.out_dir / args.label)
     saved = pipeline.run(batch)

@@ -60,9 +60,16 @@ def build_prompt(axis: Axis, alertname: str, exemplars: list[Scenario], ordinal:
         "## 사용 가능한 로그 메시지 카탈로그 ({}는 값 슬롯. 이 목록에 없는 로거/메시지 금지)",
         *message_lines,
         "",
-        "## 값 형식 규칙",
-        "- Outbox 이벤트 id는 숫자다 (예: id=8241). UUID 금지.",
+        "## 값 형식 규칙 (슬롯 값도 검증기가 확인한다)",
+        "- Outbox 이벤트 id는 숫자다 (예: id=8241). UUID 금지. streamKey는 실제 스트림 키만.",
         "- 정산 recordId는 <ms타임스탬프>-<seq> 형식 (예: 1756172841203-0).",
+        "- HTTP uri는 실제 엔드포인트만: /rooms, /rooms/check-joinCode, /rooms/check-guestName, /rooms/nickname/random, /rooms/<대문자숫자4자리>/probabilities, /rooms/<대문자숫자4자리>/settings",
+        "- EventDispatcher의 consumer=는 실제 클래스만: RoomJoinConsumer(RoomJoinEvent), SelectCardCommandEventConsumer(SelectCardCommandEvent), PlayerDisconnectedConsumer(PlayerDisconnectedEvent), MiniGameStartConsumer, TapCommandEventConsumer, TouchProgressEventConsumer, StopCommandEventConsumer, LadderDrawCommandEventConsumer",
+        "- GameTaskSchedulerFactory의 [게임]과 <게임>-task 스레드의 게임 이름: nunchi, cardgame, racinggame, speedtouch, blindtimer, blockstacking, laddergame",
+        "- joinCode는 대문자/숫자 4자리 (예: PXMH).",
+        "- 로그 샘플은 반드시 시각 오름차순으로 나열한다.",
+        "- 스레드 번호 앞에 하이픈을 넣지 마라: redis-stream-thread-pool-settlement:result1 (O), redis-stream-thread-pool-settlement:result-1 (X)",
+        "- question에서 조회 창을 언급하면 반드시 '최근 30분'이다 (시스템의 실제 조회 창).",
         "",
         "## 스레드명 규칙 (로거가 실제로 도는 스레드에만 배치한다)",
         f"- Redis Stream 컨슈머(EventDispatcher, NunchiCommandEventConsumer, SettlementStreamConsumer, RedisStreamListenerStarter): redis-stream-thread-pool-<키><N>. <키>는 다음만 유효: {', '.join(sorted(STREAM_POOL_NAMES))}",
@@ -93,4 +100,9 @@ class ScenarioGenerator:
     def generate(self, axis: Axis, alertname: str, exemplars: list[Scenario], ordinal: int) -> dict:
         raw = self._client.generate_json(
             SYSTEM_INSTRUCTION, build_prompt(axis, alertname, exemplars, ordinal))
-        return json.loads(raw)
+        parsed = json.loads(raw)
+        if isinstance(parsed, list):
+            parsed = next((item for item in parsed if isinstance(item, dict)), None)
+        if not isinstance(parsed, dict):
+            raise ValueError(f"생성 응답이 JSON 객체가 아님: {type(parsed).__name__}")
+        return parsed
