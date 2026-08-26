@@ -17,7 +17,7 @@
   },
   "logSamples": [
     "[2026-08-26 14:10:05.123] [ERROR] [a1b2c3d4e5f678901234567890abcdef,1234567890abcdef] --- [redis-stream-thread-pool-nunchi1] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=TapCommandEventConsumer, message=TapCommandEvent[eventId=f47ac10b-58cc-4372-a567-0e02b2c3d479, joinCode=PXMH, playerName=USER_A]",
-    "[2026-08-26 14:35:42.891] [ERROR] [b2c3d4e5f678901234567890abcdef12,234567890abcdef1] --- [redis-stream-thread-pool-room:join1] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=RoomJoinConsumer(RoomJoinEvent), message=RoomJoinEvent[eventId=d9e8f7a6-b5c4-4321-9876-543210fedcba, joinCode=PXMH, playerName=USER_B]"
+    "[2026-08-26 14:35:42.891] [ERROR] [b2c3d4e5f678901234567890abcdef12,234567890abcdef1] --- [redis-stream-thread-pool-room:join1] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=RoomJoinConsumer, message=RoomJoinEvent[eventId=d9e8f7a6-b5c4-4321-9876-543210fedcba, timestamp=2026-08-26T05:35:42.101923847Z, joinCode=PXMH, guestName=USER_B, userId=null]"
   ],
   "logEnvironment": "prod"
 }

@@ -184,6 +184,10 @@ class SlotValueValidator(Validator):
             if not match:
                 continue
             message = match.group("message")
+            # 형식이 어긋난 변형(consumer=Foo(Bar), message=Baz{)은 search가 실패해 조용히 통과한다.
+            # 접두사로 먼저 걸러야 지어낸 형식이 새지 않는다.
+            if message.startswith("이벤트 처리 실패: ") and not self._CONSUMER.search(message):
+                found.append(f"로그 {i}: 이벤트 처리 실패 메시지 형식 위반: {message[:70]}")
             consumer = self._CONSUMER.search(message)
             if consumer:
                 name, event = consumer.group(1), consumer.group(2)
