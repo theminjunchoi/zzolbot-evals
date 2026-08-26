@@ -28,7 +28,11 @@ def load_passing_answers(reports_dir: Path) -> dict[str, str]:
     for path in sorted(glob.glob(str(reports_dir / "*.jsonl"))):
         for line in open(path, encoding="utf-8"):
             row = json.loads(line)
-            if row["score"]["verdict"] == "PASS" and row["scenario_name"] not in answers:
+            # 같은 폴더에 캘리브레이션 출력(스키마가 다름)이 섞여 있으므로 평가 결과만 고른다.
+            score = row.get("score")
+            if not isinstance(score, dict) or score.get("verdict") != "PASS":
+                continue
+            if row["scenario_name"] not in answers:
                 answers[row["scenario_name"]] = row["answer"]
     return answers
 
