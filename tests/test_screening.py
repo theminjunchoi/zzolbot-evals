@@ -87,3 +87,34 @@ def test_스크리닝_프롬프트는_알림과_로그와_기준을_담는다():
     prompt = build_prompt(valid_candidate())
 
     assert "[알림]" in prompt and "[로그]" in prompt and "[채점 기준]" in prompt
+
+
+def test_외부_생성_후보도_같은_필터를_거친다(tmp_path):
+    raw = tmp_path / "raw"
+    raw.mkdir()
+    good = valid_candidate()
+    good["name"] = "monitor-ingested-good"
+    (raw / "a.json").write_text(json.dumps(good, ensure_ascii=False), encoding="utf-8")
+    broken = valid_candidate()
+    broken["name"] = "monitor-ingested-broken"
+    broken["alert"]["alertname"] = "MadeUpAlert"
+    (raw / "b.json").write_text(json.dumps(broken, ensure_ascii=False), encoding="utf-8")
+
+    pipeline = make_pipeline(tmp_path / "out", StubScreener(contradiction=False))
+    saved = pipeline.ingest(sorted(raw.glob("*.json")), on_progress=lambda _: None)
+
+    assert len(saved) == 1
+    assert saved[0].name == "monitor-ingested-good.json"
+    assert pipeline.stats.dropped_by["alert"] == 1
+
+
+def test_읽을_수_없는_후보는_통계에_남는다(tmp_path):
+    raw = tmp_path / "raw"
+    raw.mkdir()
+    (raw / "bad.json").write_text("not json", encoding="utf-8")
+
+    pipeline = make_pipeline(tmp_path / "out", StubScreener(contradiction=False))
+    saved = pipeline.ingest(sorted(raw.glob("*.json")), on_progress=lambda _: None)
+
+    assert saved == []
+    assert pipeline.stats.dropped_by["generation"] == 1

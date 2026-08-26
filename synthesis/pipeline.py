@@ -48,6 +48,26 @@ class SynthesisPipeline:
                 ordinal += 1
         return saved
 
+    def ingest(self, paths: list[Path], on_progress=print) -> list[Path]:
+        """외부에서 미리 생성한 후보를 같은 필터에 통과시킨다.
+
+        Claude 에이전트로 생성하는 경로에서 쓴다. 생성 주체가 달라도 검증기와 스크리너,
+        통계 집계는 동일해야 품질 기준이 흔들리지 않는다.
+        """
+        self._out_dir.mkdir(parents=True, exist_ok=True)
+        saved = []
+        for path in paths:
+            try:
+                candidate = json.loads(path.read_text(encoding="utf-8"))
+            except Exception as e:  # noqa: BLE001 - 읽기 실패도 통계에 남긴다
+                self.stats.record(path.name, {"generation": [str(e)]})
+                on_progress(f"[DROP] {path.name}: 읽기 실패 {str(e)[:60]}")
+                continue
+            accepted = self._accept(candidate, path.stem, on_progress)
+            if accepted:
+                saved.append(accepted)
+        return saved
+
     def _one(self, item: BatchItem, exemplars: list[Scenario], ordinal: int, on_progress) -> Path | None:
         try:
             candidate = self._generator.generate(item.axis, item.alertname, exemplars, ordinal)
@@ -57,8 +77,11 @@ class SynthesisPipeline:
             return None
         candidate.setdefault("axis", item.axis.key)
         candidate.setdefault("expected", item.axis.expected)
+        return self._accept(candidate, f"(이름 없음 #{ordinal})", on_progress)
+
+    def _accept(self, candidate: dict, fallback_name: str, on_progress) -> Path | None:
         failures = validate(candidate, default_validators(self._existing_names))
-        name = candidate.get("name", f"(이름 없음 #{ordinal})")
+        name = candidate.get("name", fallback_name)
         # rule 필터를 통과한 후보만 스크리닝한다. 이미 탈락한 후보에 LLM 호출을 쓸 이유가 없다.
         if self._screener is not None and not any(failures.values()):
             screened = self._screener.screen(candidate)
@@ -71,7 +94,7 @@ class SynthesisPipeline:
         self._existing_names.add(name)
         path = self._out_dir / f"{name}.json"
         path.write_text(json.dumps(candidate, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-        on_progress(f"[KEEP] {name} ({item.axis.key}, {item.alertname})")
+        on_progress(f"[KEEP] {name} ({candidate.get('axis', '?')}, {candidate['alert']['alertname']})")
         return path
 
     def _pick_exemplars(self, axis: Axis) -> list[Scenario]:
