@@ -48,17 +48,40 @@ SYSTEM_INSTRUCTION = """\
 조치는 제안일 뿐 자동 실행되지 않는다. 설명 텍스트 없이 JSON 객체 하나만 출력하라."""
 
 
+# 실험 변형. production은 팀 레포 GeminiAnomalyAnalyzer와 문자열이 같아야 하며 절대 수정하지 않는다.
+# 변형은 규칙을 덧붙이는 방식으로만 만들어 차이가 한 곳에 모이게 한다.
+MECHANISM_RULE = """
+- 컴포넌트 정합성: 알림이 가리키는 지표를 실제로 움직이는 주체와, 로그가 보여주는 실패의 주체가
+  같은지 확인하라. 같은 도메인이라도 역할이 다르면 서로 다른 메커니즘이다. 예를 들어 이벤트를
+  내보내는 발행 측과 그것을 받아 처리하는 소비 측은 다르고, 애플리케이션과 그 애플리케이션을
+  관측하는 수집기도 다르다. 로그의 실패가 알림 지표를 움직일 수 있는 경로를 설명하지 못하면
+  주제가 비슷해 보여도 근거가 아니다. evidenceFound를 false로 두라."""
+
+
+def _with_extra_rule(base: str, rule: str) -> str:
+    marker = "\n\n없는 수치"
+    head, tail = base.split(marker, 1)
+    return head + rule + marker + tail
+
+
+PROMPT_VARIANTS: dict[str, str] = {
+    "production": SYSTEM_INSTRUCTION,
+    "mechanism-aware": _with_extra_rule(SYSTEM_INSTRUCTION, MECHANISM_RULE),
+}
+
+
 class Analyzer(ABC):
     @abstractmethod
     def analyze(self, scenario: Scenario) -> Analysis: ...
 
 
 class GeminiAnalyzer(Analyzer):
-    def __init__(self, client: LlmJsonClient):
+    def __init__(self, client: LlmJsonClient, system_instruction: str = SYSTEM_INSTRUCTION):
         self._client = client
+        self._system_instruction = system_instruction
 
     def analyze(self, scenario: Scenario) -> Analysis:
-        raw = self._client.generate_json(SYSTEM_INSTRUCTION, build_prompt(scenario))
+        raw = self._client.generate_json(self._system_instruction, build_prompt(scenario))
         return parse_analysis(raw)
 
 

@@ -12,7 +12,7 @@ import os
 import sys
 from pathlib import Path
 
-from harness.analyzer import GeminiAnalyzer
+from harness.analyzer import PROMPT_VARIANTS, GeminiAnalyzer
 from harness.judge import GeminiJudge
 from harness.llm import GeminiJsonClient
 from harness.loading import ScenarioLoader
@@ -34,6 +34,8 @@ def main() -> int:
                         help="평가할 분할. 개선 실험은 dev, 최종 보고 숫자는 test에서 낸다")
     parser.add_argument("--splits-file", type=Path, default=Path("golden-set/splits.json"))
     parser.add_argument("--model", default=DEFAULT_MODEL)
+    parser.add_argument("--prompt-variant", default="production", choices=sorted(PROMPT_VARIANTS),
+                        help="분석기 프롬프트 변형. production은 팀 레포와 동일한 운영 프롬프트다")
     parser.add_argument("--min-interval", type=float, default=6.5,
                         help="LLM 호출 간 최소 간격(초). 무료 티어는 6.5 권장, 유료 티어는 1~2로 단축 가능")
     parser.add_argument("--out-dir", type=Path, default=Path("reports"))
@@ -63,7 +65,8 @@ def main() -> int:
               f"acc={result.score.accuracy} grd={result.score.groundedness}")
 
     runner = EvalRunner(
-        analyzer=GeminiAnalyzer(client), judge=GeminiJudge(client), on_result=on_result)
+        analyzer=GeminiAnalyzer(client, PROMPT_VARIANTS[args.prompt_variant]),
+        judge=GeminiJudge(client), on_result=on_result)
     results = runner.run(scenarios, repeats=args.repeats)
 
     builder = ReportBuilder()
