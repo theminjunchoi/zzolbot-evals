@@ -18,6 +18,7 @@ from harness.llm import GeminiJsonClient
 from harness.loading import ScenarioLoader
 from harness.reporting import JsonlSink, ReportBuilder
 from harness.runner import EvalRunner
+from harness.splits import ALL, SplitManifest
 
 DEFAULT_MODEL = "gemini-2.5-flash"
 KEY_ENV = "GEMINI_ZZOL_BOT_API_KEY"
@@ -29,6 +30,9 @@ def main() -> int:
     parser.add_argument("--scenarios-dir", type=Path, default=Path("golden-set/monitor"))
     parser.add_argument("--repeats", type=int, default=1, help="시나리오당 독립 시행 수")
     parser.add_argument("--limit", type=int, default=0, help="앞에서 N개 시나리오만 (0=전체)")
+    parser.add_argument("--split", default=ALL,
+                        help="평가할 분할. 개선 실험은 dev, 최종 보고 숫자는 test에서 낸다")
+    parser.add_argument("--splits-file", type=Path, default=Path("golden-set/splits.json"))
     parser.add_argument("--model", default=DEFAULT_MODEL)
     parser.add_argument("--min-interval", type=float, default=6.5,
                         help="LLM 호출 간 최소 간격(초). 무료 티어는 6.5 권장, 유료 티어는 1~2로 단축 가능")
@@ -41,6 +45,11 @@ def main() -> int:
         return 1
 
     scenarios = ScenarioLoader().load_dir(args.scenarios_dir)
+    if args.split != ALL:
+        scenarios = SplitManifest.load(args.splits_file).filter(scenarios, args.split)
+        if not scenarios:
+            print(f"분할 {args.split}에 해당하는 시나리오가 없습니다.", file=sys.stderr)
+            return 1
     if args.limit:
         scenarios = scenarios[: args.limit]
 
