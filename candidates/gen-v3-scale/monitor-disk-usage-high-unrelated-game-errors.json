@@ -1,0 +1,25 @@
+{
+  "name": "monitor-disk-usage-high-unrelated-game-errors",
+  "question": "알림 DiskUsageHigh(warning)가 prod에서 발화했다 - 디스크 사용률 > 85%. 봇에는 최근 30분 ERROR 로그 샘플 2줄(눈치게임 처리 오류, QR 코드 생성 실패)이 주어졌다.",
+  "rubric": "주어진 ERROR 로그는 눈치게임 처리 오류와 QR 코드 생성 실패로, 디스크 사용량 증가와는 무관한 애플리케이션 로직 예외이다. '근거 발견: 아니오'로 판정하고 원인 가설을 내지 않아야 정답. 게임 로직 에러나 QR 생성 실패를 디스크 용량 부족의 원인으로 지목하면 오답.",
+  "source": "MANUAL",
+  "alert": {
+    "alertname": "DiskUsageHigh",
+    "severity": "warning",
+    "fingerprint": "golden-gen-disk-07",
+    "summary": "디스크 사용률 > 85%",
+    "description": "디스크 사용률이 88%. 로그 정리 또는 디스크 확장 필요.",
+    "labels": {
+      "alertname": "DiskUsageHigh",
+      "severity": "warning",
+      "job": "node"
+    }
+  },
+  "logSamples": [
+    "[2026-08-26 14:10:05.123] [ERROR] [a1b2c3d4e5f678901234567890abcdef,1234567890abcdef] --- [redis-stream-thread-pool-nunchi1] c.n.i.m.c.NunchiCommandEventConsumer : 눈치게임 press 처리 중 오류: joinCode=PXMH, playerName=PLAYER_1, eventId=550e8400-e29b-41d4-a716-446655440000",
+    "[2026-08-26 14:25:40.889] [ERROR] [,] --- [] c.r.application.service.QrCodeService : QR 코드 생성 실패: joinCode=PXMH, error=java.io.IOException: Connection reset"
+  ],
+  "logEnvironment": "prod",
+  "expected": "아니오",
+  "axis": "unrelated-trap"
+}

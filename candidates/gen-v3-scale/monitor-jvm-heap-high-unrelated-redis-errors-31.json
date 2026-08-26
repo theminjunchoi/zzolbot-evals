@@ -1,0 +1,26 @@
+{
+  "name": "monitor-jvm-heap-high-unrelated-redis-errors-31",
+  "question": "알림 JvmHeapUsageHigh(critical)가 prod에서 발화했다 - JVM 힙 사용률 > 85% (prod-app). 봇에는 최근 30분 동안 발생한 Redis Stream 관련 ERROR 로그 샘플 3줄이 주어졌다.",
+  "rubric": "주어진 로그는 Redis Stream 컨테이너의 복구 실패 및 처리 오류에 관한 것으로, 이는 외부 인프라(Redis)와의 통신 문제나 스트림 상태에 관한 것이지 JVM 힙 메모리 점유율 상승과는 직접적인 인과관계가 없다. '근거 발견: 아니오'로 판정하고 원인 가설을 내지 않아야 정답. Redis Stream 오류를 JVM 힙 사용률 상승의 원인으로 지목하면 오답.",
+  "source": "MANUAL",
+  "alert": {
+    "alertname": "JvmHeapUsageHigh",
+    "severity": "critical",
+    "fingerprint": "golden-gen-jvm-31",
+    "summary": "JVM 힙 사용률 > 85% (prod-app)",
+    "description": "힙 사용률이 92%. GC 오버헤드 증가 및 OOM 위험.",
+    "labels": {
+      "alertname": "JvmHeapUsageHigh",
+      "severity": "critical",
+      "job": "prod-app"
+    }
+  },
+  "logSamples": [
+    "[2026-08-26 14:10:05.123] [ERROR] [,] --- [pool-5-thread-2] c.g.h.RedisStreamContainerRecovery : Redis Stream container 상태 확인 중 예외: stream=settlement:result",
+    "[2026-08-26 14:12:45.882] [ERROR] [,] --- [pool-5-thread-2] c.g.h.RedisStreamContainerRecovery : Redis Stream container 복구 중 예외 발생: stream=settlement:result",
+    "[2026-08-26 14:15:10.456] [ERROR] [,] --- [pool-5-thread-2] c.g.h.RedisStreamContainerRecovery : Redis Stream container 복구 포기: stream=settlement:result. HealthIndicator에 DOWN 보고"
+  ],
+  "logEnvironment": "prod",
+  "expected": "아니오",
+  "axis": "near-miss-component"
+}

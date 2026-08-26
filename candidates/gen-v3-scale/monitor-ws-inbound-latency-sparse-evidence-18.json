@@ -1,0 +1,25 @@
+{
+  "name": "monitor-ws-inbound-latency-sparse-evidence-18",
+  "question": "알림 WsInboundLatencyHigh(critical)가 prod에서 발화했다 - WebSocket 메시지 처리 p99 > 500ms. 봇에는 최근 30분 창에서 조회된 ERROR 로그 샘플 2줄이 주어졌다.",
+  "rubric": "주어진 로그는 20분 이상의 시간 간격을 두고 발생한 개별적인 이벤트 처리 실패일 뿐이며, WebSocket 인바운드 지연을 유발할 만한 시스템 부하, 스레드 풀 고갈, 혹은 대량의 에러 패턴이 보이지 않는다. '근거 발견: 아니오'로 판정하고 표본 부족을 인정해야 정답. 산발적인 에러 로그를 근거로 지연의 원인을 단정하면 오답.",
+  "source": "MANUAL",
+  "alert": {
+    "alertname": "WsInboundLatencyHigh",
+    "severity": "critical",
+    "fingerprint": "golden-gen-se-18",
+    "summary": "WebSocket 메시지 처리 p99 > 500ms (prod-app)",
+    "description": "WS inbound p99 처리 시간이 0.85s. 서비스 품질 저하 체감 수준.",
+    "labels": {
+      "alertname": "WsInboundLatencyHigh",
+      "severity": "critical",
+      "job": "prod-app"
+    }
+  },
+  "logSamples": [
+    "[2026-08-26 14:10:05.123] [ERROR] [a1b2c3d4e5f678901234567890abcdef,1234567890abcdef] --- [redis-stream-thread-pool-nunchi1] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=TapCommandEventConsumer, message=TapCommandEvent[eventId=f47ac10b-58cc-4372-a567-0e02b2c3d479, joinCode=PXMH, playerName=USER_A]",
+    "[2026-08-26 14:35:42.891] [ERROR] [b2c3d4e5f678901234567890abcdef12,234567890abcdef1] --- [redis-stream-thread-pool-room:join1] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=RoomJoinConsumer(RoomJoinEvent), message=RoomJoinEvent[eventId=d9e8f7a6-b5c4-4321-9876-543210fedcba, joinCode=PXMH, playerName=USER_B]"
+  ],
+  "logEnvironment": "prod",
+  "expected": "아니오",
+  "axis": "sparse-evidence"
+}

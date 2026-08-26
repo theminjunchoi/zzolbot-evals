@@ -1,0 +1,31 @@
+{
+  "name": "monitor-redis-stream-e2e-latency-23",
+  "question": "알림 RedisStreamE2eLatencyHigh(warning)가 prod에서 발화했다 - Redis Stream E2E 지연 p95 > 500ms (prod-app). 봇에는 최근 30분 ERROR 로그 샘플 8줄(정산 스트림 처리 오류와 무관한 QR 생성/IP 차단 로그)이 주어졌다.",
+  "rubric": "주어진 로그 중 SettlementStreamConsumer 관련 로그는 정산 스트림의 처리 지연 및 ACK 보류를 나타내어 Redis Stream E2E 지연의 직접적인 근거가 된다. '근거 발견: 예'로 판정하고 정산 스트림 컨슈머의 처리 적체를 원인으로 지목하면 정답. 반면, QR 코드 생성 실패나 IP 차단 로그는 본 알림과 무관한 별개의 오류이므로 이를 원인으로 언급하면 오답.",
+  "source": "MANUAL",
+  "alert": {
+    "alertname": "RedisStreamE2eLatencyHigh",
+    "severity": "warning",
+    "fingerprint": "golden-gen-rsel-23",
+    "summary": "Redis Stream E2E 지연 p95 > 500ms (prod-app)",
+    "description": "스트림 처리 p95 지연이 0.85s. 컨슈머 처리 적체 또는 다운스트림(App Service) 지연 가능성.",
+    "labels": {
+      "alertname": "RedisStreamE2eLatencyHigh",
+      "severity": "warning",
+      "job": "prod-app"
+    }
+  },
+  "logSamples": [
+    "[2026-08-26 14:05:12.102] [ERROR] [,] --- [redis-stream-thread-pool-settlement:result1] c.s.i.c.SettlementStreamConsumer : 정산 처리 실패 — ACK 보류, 재전달 대기: recordId=1756172841203-101",
+    "[2026-08-26 14:05:15.440] [ERROR] [,] --- [] c.r.application.service.QrCodeService : QR 코드 생성 실패: joinCode=PXMH, error=TimeoutException",
+    "[2026-08-26 14:06:02.881] [ERROR] [,] --- [redis-stream-thread-pool-settlement:result2] c.s.i.c.SettlementStreamConsumer : 정산 처리 실패 — ACK 보류, 재전달 대기: recordId=1756172841203-102",
+    "[2026-08-26 14:07:22.334] [WARN] [,] --- [http-nio-8080-exec-03] c.global.ipblock.IpBlockFilter : 차단된 IP 접근 시도: ip=192.168.0.1 uri=/rooms/PXMH/settings",
+    "[2026-08-26 14:08:45.119] [ERROR] [,] --- [redis-stream-thread-pool-settlement:result1] c.s.i.c.SettlementStreamConsumer : 정산 처리 실패 — ACK 보류, 재전달 대기: recordId=1756172841203-103",
+    "[2026-08-26 14:09:10.552] [ERROR] [,] --- [] c.r.infra.OracleObjectStorageService : Oracle Object Storage QR 코드 업로드 실패: contents=qr_data, error=IOException",
+    "[2026-08-26 14:10:05.993] [ERROR] [,] --- [redis-stream-thread-pool-settlement:result3] c.s.i.c.SettlementStreamConsumer : 정산 처리 실패 — ACK 보류, 재전달 대기: recordId=1756172841203-104",
+    "[2026-08-26 14:11:30.221] [ERROR] [,] --- [redis-stream-thread-pool-settlement:result2] c.s.i.c.SettlementStreamConsumer : 정산 처리 실패 — ACK 보류, 재전달 대기: recordId=1756172841203-105"
+  ],
+  "logEnvironment": "prod",
+  "expected": "예",
+  "axis": "partial-relevance"
+}

@@ -1,0 +1,25 @@
+{
+  "name": "monitor-error-budget-burn-slow-unrelated-trap-6",
+  "question": "알림 ErrorBudgetBurnSlow(warning)가 prod에서 발화했다 - 에러버짓 느린 소진 (SLO 99.5%, burn-rate 6×). 봇에는 최근 30분 동안 발생한 ERROR 로그 샘플 2줄이 주어졌다.",
+  "rubric": "주어진 로그는 특정 게임의 QR 코드 생성 실패와 IP 차단 관련 경고로, 시스템 전반의 5xx 에러 비율 상승과는 무관한 개별 기능 오류 및 보안 필터링 로그이다. '근거 발견: 아니오'로 판정하고 원인 가설을 내지 않아야 정답. QR 코드 생성 실패나 IP 차단을 에러버짓 소진의 원인으로 지목하면 오답.",
+  "source": "MANUAL",
+  "alert": {
+    "alertname": "ErrorBudgetBurnSlow",
+    "severity": "warning",
+    "fingerprint": "golden-gen-ebbs-6",
+    "summary": "에러버짓 느린 소진 (SLO 99.5%, burn-rate 6×)",
+    "description": "prod-app 5xx 비율이 6h·30m 양 창에서 3%를 초과. 누적 시 에러버짓 위협.",
+    "labels": {
+      "alertname": "ErrorBudgetBurnSlow",
+      "severity": "warning",
+      "job": "prod-app"
+    }
+  },
+  "logSamples": [
+    "[2026-08-26 14:12:05.123] [ERROR] [,] --- [] c.r.application.service.QrCodeService : QR 코드 생성 실패: joinCode=PXMH, error=java.net.ConnectException: Connection refused",
+    "[2026-08-26 14:28:44.982] [WARN] [,] --- [http-nio-8080-exec-5] c.global.ipblock.IpBlockFilter : 차단된 IP 접근 시도: ip=123.45.67.89 uri=/rooms/PXMH/settings"
+  ],
+  "logEnvironment": "prod",
+  "expected": "아니오",
+  "axis": "unrelated-trap"
+}

@@ -1,0 +1,25 @@
+{
+  "name": "monitor-jvm-heap-unrelated-trap-09",
+  "question": "알림 JvmHeapUsageHigh(critical)가 prod에서 발화했다 - JVM 힙 사용률 > 85% (prod-app). 봇에는 최근 30분 ERROR 로그 샘플 2줄(QR 코드 생성 실패, IP 차단 경고)이 주어졌다.",
+  "rubric": "주어진 ERROR 로그는 QR 코드 생성 실패와 IP 차단 경고로, JVM 힙 메모리 사용률 상승과 직접적인 인과관계가 없는 산발적 애플리케이션 에러이다. '근거 발견: 아니오'로 판정하고 원인 가설을 내지 않아야 정답. QR 코드 생성 실패나 IP 차단 로그를 힙 사용률 상승의 원인으로 지목하면 오답.",
+  "source": "MANUAL",
+  "alert": {
+    "alertname": "JvmHeapUsageHigh",
+    "severity": "critical",
+    "fingerprint": "golden-gen-jvm-09",
+    "summary": "JVM 힙 사용률 > 85% (prod-app)",
+    "description": "힙 사용률이 92%. GC 오버헤드 증가 및 OOM 위험.",
+    "labels": {
+      "alertname": "JvmHeapUsageHigh",
+      "severity": "critical",
+      "job": "prod-app"
+    }
+  },
+  "logSamples": [
+    "[2026-08-26 14:10:05.123] [ERROR] [,] --- [] c.r.application.service.QrCodeService : QR 코드 생성 실패: joinCode=PXMH, error=java.io.IOException: Connection reset",
+    "[2026-08-26 14:25:40.882] [WARN] [,] --- [http-nio-8080-exec-5] c.global.ipblock.IpBlockFilter : 차단된 IP 접근 시도: ip=192.168.0.55 uri=/rooms/PXMH/settings"
+  ],
+  "logEnvironment": "prod",
+  "expected": "아니오",
+  "axis": "unrelated-trap"
+}

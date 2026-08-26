@@ -1,0 +1,25 @@
+{
+  "name": "monitor-app-error-log-spike-19",
+  "question": "알림 AppErrorLogSpike(warning)가 prod에서 발화했다 - ERROR 로그 급증(최근 5분, prod-app). 봇에는 최근 30분 창에서 조회된 prod 앱 ERROR 로그 샘플 2줄이 주어졌다.",
+  "rubric": "주어진 로그는 20분 이상의 시간 간격을 두고 발생한 단 2건의 에러로, 5분 내 30건 이상의 임계치를 초과할 만한 급증 현상을 설명할 수 있는 근거가 부족하다. '근거 발견: 아니오'로 판정하고 표본 부족을 언급해야 정답. 단 2건의 로그를 근거로 시스템 전체의 에러 급증 원인을 단정 지으면 오답.",
+  "source": "MANUAL",
+  "alert": {
+    "alertname": "AppErrorLogSpike",
+    "severity": "warning",
+    "fingerprint": "golden-gen-sparse-19",
+    "summary": "ERROR 로그 급증(최근 5분, prod-app)",
+    "description": "ERROR 로그가 35건(임계 30/5m)입니다. zzol-bot이 근본원인을 분석합니다.",
+    "labels": {
+      "alertname": "AppErrorLogSpike",
+      "severity": "warning",
+      "job": "prod-app"
+    }
+  },
+  "logSamples": [
+    "[2026-08-26 10:05:12.441] [ERROR] [a1b2c3d4e5f60708090a0b0c0d0e0f10,1122334455667788] --- [redis-stream-thread-pool-nunchi1] c.n.i.m.c.NunchiCommandEventConsumer : 눈치게임 press 처리 중 오류: joinCode=PXMH, playerName=USER_A, eventId=550e8400-e29b-41d4-a716-446655440000",
+    "[2026-08-26 10:28:55.912] [ERROR] [,] --- [pool-3-thread-2] c.g.h.RedisStreamContainerRecovery : Redis Stream container 상태 확인 중 예외: stream=settlement:result"
+  ],
+  "logEnvironment": "prod",
+  "expected": "아니오",
+  "axis": "sparse-evidence"
+}
