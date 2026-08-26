@@ -164,3 +164,28 @@ ALERT_TEXT_TEMPLATES: dict[str, tuple[tuple[str, ...], tuple[str, ...]]] = {
     "ErrorBudgetBurnSlow": (("에러버짓 느린 소진 (SLO 99.5%, burn-rate 6×)",),
                             ("prod-app 5xx 비율이 6h·30m 양 창에서 3%를 초과. 누적 시 에러버짓 위협.",)),
 }
+
+
+# 메시지 슬롯에 들어갈 수 있는 실제 값들. 형식이 맞아도 값이 지어낸 것이면 탈락시키는 근거다.
+REAL_URIS_PATTERN = r"/rooms(/[A-Z0-9]{4}/probabilities|/[A-Z0-9]{4}/settings|/check-joinCode|/check-guestName|/nickname/random)?"
+
+# EventDispatcher "consumer={}" 슬롯의 실제 컨슈머 클래스명과, 확인된 컨슈머-이벤트 쌍.
+REAL_CONSUMERS: frozenset[str] = frozenset({
+    "RoomJoinConsumer", "SelectCardCommandEventConsumer", "PlayerDisconnectedConsumer",
+    "MiniGameStartConsumer", "NunchiCommandEventConsumer", "TapCommandEventConsumer",
+    "TouchProgressEventConsumer", "StopCommandEventConsumer", "LadderDrawCommandEventConsumer",
+})
+CONSUMER_EVENT_PAIRS: dict[str, str] = {
+    "RoomJoinConsumer": "RoomJoinEvent",
+    "SelectCardCommandEventConsumer": "SelectCardCommandEvent",
+    "PlayerDisconnectedConsumer": "PlayerDisconnectedEvent",
+}
+
+# GameTaskSchedulerFactory "[{}]" 슬롯과 {게임}-task-N 스레드의 실제 게임 이름.
+REAL_GAME_NAMES: frozenset[str] = frozenset({
+    "nunchi", "cardgame", "racinggame", "speedtouch", "blindtimer", "blockstacking", "laddergame",
+})
+
+JOIN_CODE_PATTERN = r"[A-Z0-9]{4}"
+RECORD_ID_PATTERN = r"\d{13}-\d+"
+UUID_PATTERN = r"[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"

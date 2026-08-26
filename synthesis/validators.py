@@ -15,10 +15,17 @@ from datetime import datetime
 from synthesis.catalog import (
     ALERT_RULES,
     ALERT_TEXT_TEMPLATES,
+    CONSUMER_EVENT_PAIRS,
+    JOIN_CODE_PATTERN,
     LOG_MESSAGES,
     LOGGER_THREAD_AFFINITY,
+    REAL_CONSUMERS,
+    REAL_GAME_NAMES,
+    REAL_URIS_PATTERN,
+    RECORD_ID_PATTERN,
     STREAM_POOL_NAMES,
     THREAD_PATTERNS,
+    UUID_PATTERN,
 )
 
 LOG_LINE = re.compile(
@@ -156,6 +163,59 @@ class AlertTextValidator(Validator):
         return found
 
 
+class SlotValueValidator(Validator):
+    """메시지 슬롯의 값이 실존하는 값 형식이어야 한다. 형식은 맞는데 값을 지어내는
+    생성 실패(가짜 URI, 가짜 consumer 이름)를 잡는다."""
+
+    name = "slot-value"
+
+    _CONSUMER = re.compile(r"이벤트 처리 실패: consumer=([A-Za-z]+), message=([A-Za-z]+)\[")
+    _URI = re.compile(r" uri=(\S+) ")
+    _OUTBOX = re.compile(r"DEAD_LETTER 전환: id=(\S+), streamKey=(\S+)$")
+    _STREAM_SLOT = re.compile(r"stream=([a-z:]+)")
+    _RECORD = re.compile(r"recordId=(\S+)$")
+    _GAME = re.compile(r"^\[([a-z]+)\] 스케줄 실행")
+    _JOIN = re.compile(r"joinCode=([A-Z0-9a-z]+)[,\s]")
+
+    def violations(self, candidate: dict) -> list[str]:
+        found = []
+        for i, line in enumerate(candidate.get("logSamples") or []):
+            match = LOG_LINE.match(line)
+            if not match:
+                continue
+            message = match.group("message")
+            consumer = self._CONSUMER.search(message)
+            if consumer:
+                name, event = consumer.group(1), consumer.group(2)
+                if name not in REAL_CONSUMERS:
+                    found.append(f"로그 {i}: 실존하지 않는 consumer: {name}")
+                expected_event = CONSUMER_EVENT_PAIRS.get(name)
+                if expected_event and event != expected_event:
+                    found.append(f"로그 {i}: {name}의 이벤트는 {expected_event}인데 {event}")
+            uri = self._URI.search(message)
+            if message.startswith("method=") and uri and not re.fullmatch(REAL_URIS_PATTERN, uri.group(1)):
+                found.append(f"로그 {i}: 실존하지 않는 URI: {uri.group(1)}")
+            outbox = self._OUTBOX.search(message)
+            if outbox:
+                if not outbox.group(1).isdigit():
+                    found.append(f"로그 {i}: outbox id는 숫자여야 함: {outbox.group(1)}")
+                if outbox.group(2) not in STREAM_POOL_NAMES - {"concurrent"}:
+                    found.append(f"로그 {i}: 실존하지 않는 streamKey: {outbox.group(2)}")
+            stream = self._STREAM_SLOT.search(message)
+            if "container" in message and stream and stream.group(1) not in STREAM_POOL_NAMES - {"concurrent"}:
+                found.append(f"로그 {i}: 실존하지 않는 stream: {stream.group(1)}")
+            record = self._RECORD.search(message)
+            if record and "정산" in message and not re.fullmatch(RECORD_ID_PATTERN, record.group(1)):
+                found.append(f"로그 {i}: recordId 형식 위반: {record.group(1)}")
+            game = self._GAME.match(message)
+            if game and game.group(1) not in REAL_GAME_NAMES:
+                found.append(f"로그 {i}: 실존하지 않는 게임 이름: {game.group(1)}")
+            join = self._JOIN.search(message)
+            if join and not re.fullmatch(JOIN_CODE_PATTERN, join.group(1)):
+                found.append(f"로그 {i}: joinCode 형식 위반(대문자/숫자 4자리): {join.group(1)}")
+        return found
+
+
 class TimestampValidator(Validator):
     """시각이 파싱 가능하고 오름차순이어야 한다. 창 정합 여부는 축(axis)의 의도이므로
     expected 메타와 함께 CoherenceValidator가 본다."""
@@ -217,6 +277,7 @@ def default_validators(existing_names: set[str] | None = None) -> list[Validator
         AlertValidator(),
         AlertTextValidator(),
         LogLineValidator(),
+        SlotValueValidator(),
         TimestampValidator(),
         RubricValidator(),
         DuplicateNameValidator(existing_names or set()),
