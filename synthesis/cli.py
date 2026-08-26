@@ -20,6 +20,10 @@ from synthesis.pipeline import BatchItem, SynthesisPipeline
 
 KEY_ENV = "GEMINI_ZZOL_BOT_API_KEY"
 
+# 합성 경로의 샘플링 기본값. 평가 경로(GeminiJsonClient 기본값 0.0)와 반드시 달라야 한다.
+DEFAULT_TEMPERATURE = 0.9
+DEFAULT_TOP_P = 0.95
+
 # 축별로 어울리는 알림 후보. 배치 구성 시 여기서 순환 선택한다.
 AXIS_ALERTS: dict[str, list[str]] = {
     "positive-dense": ["AppErrorLogSpike", "Http5xxRatioHigh", "RedisStreamBacklogHigh",
@@ -45,6 +49,10 @@ def main() -> int:
     parser.add_argument("--min-interval", type=float, default=6.5)
     parser.add_argument("--model", default="gemini-3.1-flash-lite",
                         help="생성 모델. 피평가 모델(gemini-2.5-flash)과 분리해 자기 생성 편향을 줄인다")
+    parser.add_argument("--temperature", type=float, default=DEFAULT_TEMPERATURE,
+                        help="생성 다양성. 평가 경로와 달리 결정적 디코딩을 쓰면 복제본이 나온다")
+    parser.add_argument("--top-p", type=float, default=DEFAULT_TOP_P,
+                        help="생성 다양성. temperature만 올리고 top_p를 0으로 두면 여전히 greedy에 가깝다")
     parser.add_argument("--seed", type=int, default=20260826, help="알림 순환 선택 시드")
     args = parser.parse_args()
 
@@ -64,7 +72,9 @@ def main() -> int:
         for i in range(args.per_axis):
             batch.append(BatchItem(axis, alerts[(i + rng.randrange(len(alerts))) % len(alerts)], 1))
 
-    client = GeminiJsonClient(api_key=api_key, model=args.model, min_interval_s=args.min_interval)
+    client = GeminiJsonClient(
+        api_key=api_key, model=args.model, min_interval_s=args.min_interval,
+        temperature=args.temperature, top_p=args.top_p)
     pipeline = SynthesisPipeline(
         ScenarioGenerator(client), exemplars, existing_names, args.out_dir / args.label)
     saved = pipeline.run(batch)

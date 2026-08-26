@@ -14,19 +14,27 @@ class LlmJsonClient(ABC):
 
 
 class GeminiJsonClient(LlmJsonClient):
-    """자바 봇과 동일 조건의 Gemini 호출: temperature 0, topP 0, JSON 강제.
+    """JSON 응답을 받는 Gemini 호출.
+
+    샘플링 파라미터는 용도에 따라 정반대다.
+    - 평가 경로(분석기, judge): temperature 0, topP 0. 자바 봇과 동일 조건이며 재현성이 목적이다.
+    - 합성 경로(생성기): 높은 temperature. 같은 프롬프트에서 서로 다른 시나리오가 나와야 하므로
+      결정적 디코딩을 쓰면 사실상 복제본이 생산된다(2026-08-26 실제 발생).
 
     무료 티어 분당 한도를 존중하기 위해 호출 간 최소 간격을 둔다 (기본 6.5초 = 약 9회/분).
     """
 
     def __init__(self, api_key: str, model: str = "gemini-2.5-flash",
-                 min_interval_s: float = 6.5, max_attempts: int = 3):
+                 min_interval_s: float = 6.5, max_attempts: int = 3,
+                 temperature: float = 0.0, top_p: float = 0.0):
         from google import genai  # 지연 import: 테스트가 SDK 없이도 다른 모듈을 쓸 수 있게
 
         self._client = genai.Client(api_key=api_key)
         self._model = model
         self._min_interval_s = min_interval_s
         self._max_attempts = max_attempts
+        self._temperature = temperature
+        self._top_p = top_p
         self._last_call_at = 0.0
 
     def generate_json(self, system_instruction: str, prompt: str) -> str:
@@ -34,8 +42,8 @@ class GeminiJsonClient(LlmJsonClient):
 
         config = types.GenerateContentConfig(
             system_instruction=system_instruction,
-            temperature=0.0,
-            top_p=0.0,
+            temperature=self._temperature,
+            top_p=self._top_p,
             response_mime_type="application/json",
         )
         last_error: Exception | None = None
