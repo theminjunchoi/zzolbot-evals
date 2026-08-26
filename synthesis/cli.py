@@ -17,6 +17,7 @@ from harness.loading import ScenarioLoader
 from synthesis.axes import AXES
 from synthesis.generator import ScenarioGenerator
 from synthesis.pipeline import BatchItem, SynthesisPipeline
+from synthesis.screening import LlmScreener
 
 KEY_ENV = "GEMINI_ZZOL_BOT_API_KEY"
 
@@ -54,6 +55,9 @@ def main() -> int:
     parser.add_argument("--top-p", type=float, default=DEFAULT_TOP_P,
                         help="생성 다양성. temperature만 올리고 top_p를 0으로 두면 여전히 greedy에 가깝다")
     parser.add_argument("--seed", type=int, default=20260826, help="알림 순환 선택 시드")
+    parser.add_argument("--screen-model", default="gemini-2.5-flash",
+                        help="정합성 스크리너 모델. 판정이 아니라 rubric-로그 모순만 본다")
+    parser.add_argument("--no-screen", action="store_true", help="스크리닝 단계를 끈다")
     args = parser.parse_args()
 
     api_key = os.environ.get(KEY_ENV, "")
@@ -75,8 +79,11 @@ def main() -> int:
     client = GeminiJsonClient(
         api_key=api_key, model=args.model, min_interval_s=args.min_interval,
         temperature=args.temperature, top_p=args.top_p)
+    screener = None if args.no_screen else LlmScreener(
+        GeminiJsonClient(api_key=api_key, model=args.screen_model, min_interval_s=args.min_interval))
     pipeline = SynthesisPipeline(
-        ScenarioGenerator(client), exemplars, existing_names, args.out_dir / args.label)
+        ScenarioGenerator(client), exemplars, existing_names, args.out_dir / args.label,
+        screener=screener)
     saved = pipeline.run(batch)
 
     stats_path = args.out_dir / f"{args.label}-stats.md"

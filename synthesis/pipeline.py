@@ -13,6 +13,7 @@ from pathlib import Path
 from harness.domain import Scenario
 from synthesis.axes import Axis
 from synthesis.generator import ScenarioGenerator
+from synthesis.screening import CandidateScreener
 from synthesis.validators import FilterStats, default_validators, validate
 
 
@@ -25,11 +26,13 @@ class BatchItem:
 
 class SynthesisPipeline:
     def __init__(self, generator: ScenarioGenerator, exemplars: list[Scenario],
-                 existing_names: set[str], out_dir: Path):
+                 existing_names: set[str], out_dir: Path,
+                 screener: CandidateScreener | None = None):
         self._generator = generator
         self._exemplars = exemplars
         self._existing_names = set(existing_names)
         self._out_dir = out_dir
+        self._screener = screener
         self.stats = FilterStats()
 
     def run(self, batch: list[BatchItem], on_progress=print) -> list[Path]:
@@ -56,6 +59,11 @@ class SynthesisPipeline:
         candidate.setdefault("expected", item.axis.expected)
         failures = validate(candidate, default_validators(self._existing_names))
         name = candidate.get("name", f"(이름 없음 #{ordinal})")
+        # rule 필터를 통과한 후보만 스크리닝한다. 이미 탈락한 후보에 LLM 호출을 쓸 이유가 없다.
+        if self._screener is not None and not any(failures.values()):
+            screened = self._screener.screen(candidate)
+            if screened.contradiction:
+                failures["screen"] = [screened.reason or "rubric과 로그가 모순"]
         if not self.stats.record(name, failures):
             reasons = [r for rs in failures.values() for r in rs]
             on_progress(f"[DROP] {name}: {reasons[0]}" + (f" 외 {len(reasons) - 1}건" if len(reasons) > 1 else ""))
