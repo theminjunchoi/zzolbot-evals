@@ -12,10 +12,11 @@ import os
 import sys
 from pathlib import Path
 
-from harness.analyzer import PROMPT_VARIANTS, GeminiAnalyzer
+from harness.analyzer import PROMPT_VARIANTS, PromptedAnalyzer
 from harness.judge import JUDGE_VARIANTS, GeminiJudge
 from harness.llm import GeminiJsonClient
 from harness.loading import ScenarioLoader
+from harness.local_model import DEFAULT_MODEL as DEFAULT_LOCAL_MODEL
 from harness.reporting import JsonlSink, ReportBuilder
 from harness.runner import EvalRunner
 from harness.splits import ALL, SplitManifest
@@ -34,6 +35,10 @@ def main() -> int:
                         help="평가할 분할. 개선 실험은 dev, 최종 보고 숫자는 test에서 낸다")
     parser.add_argument("--splits-file", type=Path, default=Path("golden-set/splits.json"))
     parser.add_argument("--model", default=DEFAULT_MODEL)
+    parser.add_argument("--analyzer", default="gemini", choices=("gemini", "local"),
+                        help="분석기 백엔드. local은 MLX 로컬 모델이라 API 비용이 judge만 남는다")
+    parser.add_argument("--local-model", default=DEFAULT_LOCAL_MODEL)
+    parser.add_argument("--adapter-path", default=None, help="학습한 LoRA 어댑터 경로")
     parser.add_argument("--judge-variant", default="production", choices=sorted(JUDGE_VARIANTS),
                         help="judge 프롬프트 변형. 바꾸면 과거 측정과 비교가 끊긴다")
     parser.add_argument("--prompt-variant", default="production", choices=sorted(PROMPT_VARIANTS),
@@ -58,6 +63,11 @@ def main() -> int:
         scenarios = scenarios[: args.limit]
 
     client = GeminiJsonClient(api_key=api_key, model=args.model, min_interval_s=args.min_interval)
+    if args.analyzer == "local":
+        from harness.local_model import MlxJsonClient
+        analyzer_client = MlxJsonClient(args.local_model, adapter_path=args.adapter_path)
+    else:
+        analyzer_client = client
     sink = JsonlSink(args.out_dir / f"{args.label}.jsonl")
 
     def on_result(result):
@@ -67,7 +77,7 @@ def main() -> int:
               f"acc={result.score.accuracy} grd={result.score.groundedness}")
 
     runner = EvalRunner(
-        analyzer=GeminiAnalyzer(client, PROMPT_VARIANTS[args.prompt_variant]),
+        analyzer=PromptedAnalyzer(analyzer_client, PROMPT_VARIANTS[args.prompt_variant]),
         judge=GeminiJudge(client, JUDGE_VARIANTS[args.judge_variant]), on_result=on_result)
     results = runner.run(scenarios, repeats=args.repeats)
 

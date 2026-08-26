@@ -31,3 +31,29 @@ def test_덧붙인_규칙은_출력_지시_앞에_온다():
     variant = PROMPT_VARIANTS["mechanism-aware"]
 
     assert variant.index("컴포넌트 정합성:") < variant.index("없는 수치")
+
+
+def test_코드_펜스에_감싼_JSON을_꺼낸다():
+    from harness.local_model import extract_json
+
+    assert extract_json('```json\n{"a": 1}\n```') == '{"a": 1}'
+
+
+def test_앞뒤_설명이_붙어도_JSON만_꺼낸다():
+    from harness.local_model import extract_json
+
+    assert extract_json('분석 결과입니다.\n{"a": 1}\n이상입니다.') == '{"a": 1}'
+
+
+def test_중첩된_객체와_문자열_속_중괄호를_구분한다():
+    from harness.local_model import extract_json
+
+    raw = '{"summary": "값 {안쪽}", "nested": {"b": 2}} 뒤쪽 텍스트'
+
+    assert extract_json(raw) == '{"summary": "값 {안쪽}", "nested": {"b": 2}}'
+
+
+def test_JSON이_없으면_원문을_돌려준다():
+    from harness.local_model import extract_json
+
+    assert extract_json("JSON을 만들 수 없습니다") == "JSON을 만들 수 없습니다"

@@ -75,7 +75,7 @@ class Analyzer(ABC):
     def analyze(self, scenario: Scenario) -> Analysis: ...
 
 
-class GeminiAnalyzer(Analyzer):
+class PromptedAnalyzer(Analyzer):
     def __init__(self, client: LlmJsonClient, system_instruction: str = SYSTEM_INSTRUCTION):
         self._client = client
         self._system_instruction = system_instruction
