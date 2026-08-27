@@ -17,13 +17,15 @@ import argparse
 import json
 import statistics
 import sys
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 
 from analysis.reward import RewardFunction, RewardSpec
 from harness.analyzer import PROMPT_VARIANTS, build_prompt, parse_analysis
 from harness.domain import Scenario
+from harness.grounding import GroundingPipeline
 from harness.loading import ScenarioLoader
+from harness.local_model import extract_json
 from training.verification import expects_evidence
 
 DEFAULT_MODEL = "mlx-community/Qwen2.5-1.5B-Instruct-4bit"
@@ -39,6 +41,9 @@ class ArmResult:
     false_positives: int
     positives: int
     negatives: int
+    # 시나리오별 샘플 점수 전체. 최고값만 남기면 "8번 중 몇 번 맞았나"를 알 수 없고,
+    # 그러면 잠재 능력과 동전 던지기를 구별하지 못한다.
+    samples: dict[str, list[float]] = field(default_factory=dict)
 
     @property
     def greedy_mean(self) -> float:
@@ -57,8 +62,13 @@ def parse_arm(raw: str) -> tuple[str, str]:
 
 
 def _score_one(reward: RewardFunction, scenario: Scenario, text: str):
+    """운영 경로와 같은 순서로 처리한다.
+
+    extract_json을 거치지 않으면 코드 펜스로 감싼 출력이 전부 파싱 실패가 된다. 학습 전
+    모델은 거의 항상 펜스를 붙이므로, 이걸 빼먹으면 33종 중 18종이 실패로 잡힌다(실제로 겪음).
+    """
     try:
-        analysis = parse_analysis(text)
+        analysis = parse_analysis(extract_json(text))
     except Exception:  # noqa: BLE001 - 파싱 실패도 결과의 일부다
         return reward.score(scenario, None), None
     return reward.score(scenario, analysis), analysis
@@ -71,12 +81,14 @@ def run_arm(label: str, adapter: str, scenarios: list[Scenario], model_path: str
     from mlx_lm.sample_utils import make_sampler
 
     model, tok = load(model_path, adapter_path=adapter or None)
+    grounding = GroundingPipeline()
     system = PROMPT_VARIANTS[variant]
     greedy_sampler = make_sampler(temp=0.0)
     warm_sampler = make_sampler(temp=temp, top_p=0.95)
 
     greedy: dict[str, float] = {}
     best: dict[str, float] = {}
+    per_sample: dict[str, list[float]] = {}
     parse_failures = citation_pass = false_positives = 0
     positives = sum(1 for s in scenarios if expects_evidence(s))
 
@@ -93,10 +105,12 @@ def run_arm(label: str, adapter: str, scenarios: list[Scenario], model_path: str
         if score.parse_failed:
             parse_failures += 1
         if analysis is not None:
-            grounded = score.parts.get("citation", 0.0) > 0.0 and analysis.evidence_found
-            if expects_evidence(scenario) and grounded:
+            # 인용 통과와 오탐은 기존 리포트와 같은 정의를 쓴다. 접지 파이프라인을 거친 뒤의
+            # grounded로 세지 않으면 과거 수치와 비교가 끊긴다.
+            settled = grounding.apply(analysis, scenario)
+            if expects_evidence(scenario) and settled.grounded:
                 citation_pass += 1
-            if not expects_evidence(scenario) and analysis.evidence_found:
+            if not expects_evidence(scenario) and settled.grounded:
                 false_positives += 1
 
         if samples > 1:
@@ -106,16 +120,16 @@ def run_arm(label: str, adapter: str, scenarios: list[Scenario], model_path: str
                 outs.extend(batch_generate(model, tok, ids[start:start + batch],
                                            max_tokens=700, sampler=warm_sampler,
                                            verbose=False).texts)
-            best[scenario.name] = max(
-                [greedy[scenario.name]]
-                + [_score_one(reward, scenario, t)[0].clamped for t in outs])
+            sample_scores = [_score_one(reward, scenario, t)[0].clamped for t in outs]
+            per_sample[scenario.name] = sample_scores
+            best[scenario.name] = max([greedy[scenario.name]] + sample_scores)
         else:
             best[scenario.name] = greedy[scenario.name]
         print(f"  [{label}] {i}/{len(scenarios)} {scenario.name} "
               f"그리디 {greedy[scenario.name]:.2f} 최고 {best[scenario.name]:.2f}", flush=True)
 
     return ArmResult(label, greedy, best, parse_failures, citation_pass,
-                     false_positives, positives, len(scenarios) - positives)
+                     false_positives, positives, len(scenarios) - positives, per_sample)
 
 
 def main() -> int:
@@ -166,8 +180,8 @@ def main() -> int:
     args.out_dir.mkdir(parents=True, exist_ok=True)
     (args.out_dir / f"{args.label}-reward.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
     (args.out_dir / f"{args.label}-reward.json").write_text(
-        json.dumps({r.label: {"greedy": r.greedy, "best": r.best} for r in results},
-                   ensure_ascii=False, indent=2), encoding="utf-8")
+        json.dumps({r.label: {"greedy": r.greedy, "best": r.best, "samples": r.samples}
+                    for r in results}, ensure_ascii=False, indent=2), encoding="utf-8")
     print()
     print("\n".join(lines))
     return 0
