@@ -18,25 +18,45 @@ from harness.domain import Scenario
 
 _LINE = re.compile(r"^\[[^\]]*\] \[[A-Z]+\] \[[^\]]*\] --- \[[^\]]*\] (?P<logger>\S+) : (?P<message>.+)$")
 
-_VOLATILE = (
+# 실행마다 달라지는 식별자. 이것만 지우면 "같은 문제"의 뼈대가 남는다.
+_VOLATILE_IDS = (
     (re.compile(r"\b[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\b"), "<uuid>"),
     (re.compile(r"\b[0-9a-f]{16,32}\b"), "<hex>"),
     (re.compile(r"\b\d{13}-\d+\b"), "<record>"),
     (re.compile(r"\b\d{4}-\d{2}-\d{2}T[\d:.]+Z\b"), "<ts>"),
     (re.compile(r"joinCode=[A-Z0-9]{4}"), "joinCode=<code>"),
     (re.compile(r"\b(?:playerName|guestName)=\S+"), "player=<name>"),
-    (re.compile(r"\b\d+\b"), "<n>"),
 )
+
+# 로그 본문의 남은 숫자(건수, id, 인덱스)까지 지운다. 알림 본문에는 적용하지 않는데,
+# 알림이 말하는 규모(5분에 50건 대 5분에 5건)는 문제를 가르는 정보이기 때문이다.
+_VOLATILE_NUMBERS = ((re.compile(r"\b\d+\b"), "<n>"),)
+
+_VOLATILE = _VOLATILE_IDS + _VOLATILE_NUMBERS
+
+
+def _apply(patterns, text: str) -> str:
+    for pattern, placeholder in patterns:
+        text = pattern.sub(placeholder, text)
+    return text.strip()
 
 
 def normalize_message(message: str) -> str:
-    for pattern, placeholder in _VOLATILE:
-        message = pattern.sub(placeholder, message)
-    return message.strip()
+    """로그 본문 정규화. 식별자와 숫자를 모두 지운다."""
+    return _apply(_VOLATILE, message)
+
+
+def normalize_alert_text(text: str) -> str:
+    """알림 본문 정규화. 식별자만 지우고 숫자는 남긴다."""
+    return _apply(_VOLATILE_IDS, text)
 
 
 def signature(scenario: Scenario) -> tuple:
-    """같은 문제인지 판단하는 뼈대. 알림과 (로거, 정규화된 메시지) 순서열로 정한다."""
+    """같은 문제인지 판단하는 뼈대.
+
+    알림명만으로는 부족하다. 로그를 고정하고 알림 대상만 바꾼 대조 쌍은 서로 다른 문제인데도
+    알림명이 같으면 충돌한다. 그래서 알림의 요약과 설명까지 뼈대에 넣는다.
+    """
     skeleton = []
     for line in scenario.log_samples:
         match = _LINE.match(line)
@@ -44,7 +64,13 @@ def signature(scenario: Scenario) -> tuple:
             skeleton.append((match.group("logger"), normalize_message(match.group("message"))))
         else:
             skeleton.append(("?", normalize_message(line)))
-    return (scenario.alert.alertname, tuple(skeleton))
+    alert = scenario.alert
+    return (
+        alert.alertname,
+        normalize_alert_text(alert.summary),
+        normalize_alert_text(alert.description),
+        tuple(skeleton),
+    )
 
 
 def find_duplicates(scenarios: list[Scenario],

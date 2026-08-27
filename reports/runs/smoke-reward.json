@@ -1,0 +1,12 @@
+{
+  "v4": {
+    "greedy": {
+      "monitor-5xx-compound-cause-32": 0.6,
+      "monitor-5xx-db-connection-failure": 1.0
+    },
+    "best": {
+      "monitor-5xx-compound-cause-32": 1.0,
+      "monitor-5xx-db-connection-failure": 1.0
+    }
+  }
+}
