@@ -23,6 +23,7 @@ from pathlib import Path
 from analysis.reward import RewardFunction, RewardSpec
 from harness.analyzer import PROMPT_VARIANTS, build_prompt, parse_analysis
 from harness.domain import Scenario
+from harness.constrained import CitationConstraint
 from harness.grounding import GroundingPipeline
 from harness.loading import ScenarioLoader
 from harness.local_model import extract_json
@@ -76,7 +77,7 @@ def _score_one(reward: RewardFunction, scenario: Scenario, text: str):
 
 def run_arm(label: str, adapter: str, scenarios: list[Scenario], model_path: str,
             variant: str, samples: int, temp: float, batch: int,
-            reward: RewardFunction) -> ArmResult:
+            reward: RewardFunction, constrained: bool = False) -> ArmResult:
     from mlx_lm import batch_generate, generate, load
     from mlx_lm.sample_utils import make_sampler
 
@@ -98,8 +99,9 @@ def run_arm(label: str, adapter: str, scenarios: list[Scenario], model_path: str
              {"role": "user", "content": build_prompt(scenario)}],
             tokenize=False, add_generation_prompt=True)
 
+        procs = [CitationConstraint(tok, list(scenario.log_samples))] if constrained else None
         raw = generate(model, tok, text_prompt, max_tokens=700,
-                       sampler=greedy_sampler, verbose=False)
+                       sampler=greedy_sampler, logits_processors=procs, verbose=False)
         score, analysis = _score_one(reward, scenario, raw)
         greedy[scenario.name] = score.clamped
         if score.parse_failed:
@@ -144,6 +146,8 @@ def main() -> int:
     parser.add_argument("--samples", type=int, default=1, help="1이면 그리디만, n>1이면 best-of-n")
     parser.add_argument("--temp", type=float, default=0.8)
     parser.add_argument("--batch", type=int, default=8)
+    parser.add_argument("--constrained", action="store_true",
+                        help="인용 필드를 실제 로그 줄로만 생성하도록 제약")
     parser.add_argument("--specificity", type=float, default=0.0,
                         help="구체성 배점. 사전 등록 검사 미통과로 기본 0")
     args = parser.parse_args()
@@ -157,7 +161,7 @@ def main() -> int:
         print(f"[{name}] 실행 중 (어댑터: {adapter or '없음'})", flush=True)
         results.append(run_arm(name, adapter, scenarios, args.local_model,
                                args.prompt_variant, args.samples, args.temp,
-                               args.batch, reward))
+                               args.batch, reward, args.constrained))
 
     lines = [
         f"# 보상 측정: {args.label}",
@@ -167,6 +171,7 @@ def main() -> int:
         f"- 배점 schema {spec.schema} / verdict {spec.verdict} / citation {spec.citation}"
         f" / specificity {spec.specificity}",
         f"- best-of-n: n={args.samples}, temperature={args.temp}",
+        f"- 인용 제약 디코딩: {'적용' if args.constrained else '없음'}",
         "",
         "| 팔 | 그리디 평균 | 최고 평균 | 상한 여유 | 인용 통과 | 오탐 | 파싱 실패 |",
         "|---|---|---|---|---|---|---|",
