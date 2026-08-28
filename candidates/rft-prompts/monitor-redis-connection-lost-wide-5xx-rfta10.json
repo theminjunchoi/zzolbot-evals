@@ -1,0 +1,29 @@
+{
+  "name": "monitor-redis-connection-lost-wide-5xx-rfta10",
+  "question": "알림 Http5xxRatioHigh(critical)가 prod에서 발화했다 - 최근 5분 5xx 비율이 18.4%로 임계 5%를 넘었다. 봇에는 최근 30분 창에서 조회된 prod ERROR 로그 샘플 6줄이 주어졌다.",
+  "rubric": "주어진 로그는 04:08부터 04:12까지 4분 사이에 몰려 있고, 서로 다른 네 엔드포인트가 모두 RedisConnectionFailureException과 Unable to connect to Redis 메시지로 실패했다. 같은 구간에 minigame 스트림 리스너에서도 처리 오류가 났으므로 실패 범위가 HTTP 계층에 한정되지 않는다. '근거 발견: 예'로 판정하고 Redis 연결 상실을 광범위 5xx의 근본 원인 가설로 제시하면 정답. '근거 발견: 아니오'로 판정하거나 특정 엔드포인트의 코드 결함으로 좁혀 단정하면 오답.",
+  "source": "MANUAL",
+  "alert": {
+    "alertname": "Http5xxRatioHigh",
+    "severity": "critical",
+    "fingerprint": "golden-gen-rfta-4210",
+    "summary": "HTTP 5xx 비율 5% 초과 (prod-app)",
+    "description": "최근 5분 5xx 비율이 18.4%. 서버 측 광범위 실패 가능성.",
+    "labels": {
+      "alertname": "Http5xxRatioHigh",
+      "severity": "critical",
+      "job": "prod-app"
+    }
+  },
+  "logSamples": [
+    "[2026-08-26 04:08:15.229] [ERROR] [e9359cc0ed7bcd9e1f8257cb713139e7,04f6b3748ff28c44] --- [http-nio-8080-exec-06] c.web.exception.RestExceptionHandler : method=POST uri=/rooms exception=RedisConnectionFailureException message=Unable to connect to Redis",
+    "[2026-08-26 04:09:02.746] [ERROR] [9734c63973f9569f44a42296a68fa008,bbec8251eae61a12] --- [http-nio-8080-exec-19] c.web.exception.RestExceptionHandler : method=GET uri=/rooms/check-joinCode exception=RedisConnectionFailureException message=Unable to connect to Redis",
+    "[2026-08-26 04:09:48.113] [ERROR] [7cfffa2cd317c046db61a59695c6bb55,6dd62bc874e550e6] --- [redis-stream-thread-pool-minigame1] c.g.r.c.RedisStreamListenerStarter : Redis Stream 처리 중 오류가 발생했습니다.",
+    "[2026-08-26 04:10:37.560] [ERROR] [266488f345f708bde58125d4264efdfa,4e045df7c013da4e] --- [http-nio-8080-exec-10] c.web.exception.RestExceptionHandler : method=GET uri=/rooms/nickname/random exception=RedisConnectionFailureException message=Unable to connect to Redis",
+    "[2026-08-26 04:11:29.884] [ERROR] [dae701b261e973d1c5fe5226d990c3b7,f9c7594d04d5f3ac] --- [http-nio-8080-exec-24] c.web.exception.RestExceptionHandler : method=PATCH uri=/rooms/L6ZN/settings exception=RedisConnectionFailureException message=Unable to connect to Redis",
+    "[2026-08-26 04:12:44.301] [ERROR] [5178bb39abc14919f98a48b90c7f3cb4,5feea2d3da2e3c24] --- [http-nio-8080-exec-15] c.web.exception.RestExceptionHandler : method=POST uri=/rooms exception=RedisConnectionFailureException message=Unable to connect to Redis"
+  ],
+  "logEnvironment": "prod",
+  "expected": "예",
+  "axis": "positive-dense"
+}

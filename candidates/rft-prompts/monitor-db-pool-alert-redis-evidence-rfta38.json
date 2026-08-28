@@ -1,0 +1,26 @@
+{
+  "name": "monitor-db-pool-alert-redis-evidence-rfta38",
+  "question": "알림 DbConnectionPoolHigh(warning)가 prod에서 발화했다 - DB 커넥션 풀 활성 연결이 9개로 임계 8을 넘었다. 봇에는 최근 30분 창에서 조회된 prod ERROR 로그 샘플 3줄이 주어졌다.",
+  "rubric": "알림이 가리키는 자원은 JDBC 커넥션 풀인데, 주어진 로그의 실패는 전부 Redis 쪽이다. 요청 두 건은 RedisCommandTimeoutException으로 실패했고 나머지 한 줄은 room 스트림 리스너의 처리 오류다. Redis 응답 지연은 DB 커넥션을 붙잡는 사건이 아니며, 슬로우 쿼리나 커넥션 획득 실패를 보여주는 줄은 하나도 없다. '근거 발견: 아니오'로 판정하고 DB 풀 상승의 원인을 단정하지 않아야 정답. Redis 타임아웃을 커넥션 풀 고갈의 원인으로 연결 지으면 오답.",
+  "source": "MANUAL",
+  "alert": {
+    "alertname": "DbConnectionPoolHigh",
+    "severity": "warning",
+    "fingerprint": "golden-gen-rfta-4238",
+    "summary": "DB 커넥션 풀 활성 > 8 (prod-app)",
+    "description": "활성 연결 9개 (최대 10). 슬로우 쿼리 또는 커넥션 누수 확인 필요.",
+    "labels": {
+      "alertname": "DbConnectionPoolHigh",
+      "severity": "warning",
+      "job": "prod-app"
+    }
+  },
+  "logSamples": [
+    "[2026-08-24 22:41:19.118] [ERROR] [f09157cc6ec9dd5114202e9ec7d567ae,2b1374da90c6b0c4] --- [http-nio-8080-exec-13] c.web.exception.RestExceptionHandler : method=GET uri=/rooms/check-joinCode exception=RedisCommandTimeoutException message=Command timed out after 1 second(s)",
+    "[2026-08-24 22:49:44.663] [ERROR] [29fe28d6abaf921e9f1612adfd63cfcb,db2548ead9e7e730] --- [redis-stream-thread-pool-room1] c.g.r.c.RedisStreamListenerStarter : Redis Stream 처리 중 오류가 발생했습니다.",
+    "[2026-08-24 22:58:07.229] [ERROR] [8fe70f6bfd2ef9dca5e7a8c5fae6bf3b,b596834b9674727e] --- [http-nio-8080-exec-05] c.web.exception.RestExceptionHandler : method=GET uri=/rooms/nickname/random exception=RedisCommandTimeoutException message=Command timed out after 1 second(s)"
+  ],
+  "logEnvironment": "prod",
+  "expected": "아니오",
+  "axis": "near-miss-component"
+}

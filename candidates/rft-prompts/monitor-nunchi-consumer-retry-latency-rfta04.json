@@ -1,0 +1,29 @@
+{
+  "name": "monitor-nunchi-consumer-retry-latency-rfta04",
+  "question": "알림 RedisStreamE2eLatencyHigh(warning)가 prod에서 발화했다 - 스트림 E2E 처리 p95 지연이 1.8초로 임계 500ms를 넘었다. 봇에는 최근 30분 창에서 조회된 prod ERROR 로그 샘플 6줄이 주어졌다.",
+  "rubric": "주어진 로그 전부가 nunchi 스트림 컨슈머 스레드에서 21:14부터 21:21까지 7분 사이에 발생한 눈치게임 press 처리 오류이며, 같은 방 코드 두 개에 여러 참가자가 걸쳐 있다. 컨슈머가 실패하면 메시지가 재전달되어 발행 시각부터 처리 완료까지의 E2E 시간이 늘어난다. '근거 발견: 예'로 판정하고 눈치게임 커맨드 컨슈머의 반복 실패와 재처리를 지연의 원인 가설로 제시하면 정답. '근거 발견: 아니오'로 판정하거나, 로그에 없는 네트워크 지연이나 DB 슬로우 쿼리를 단정하면 오답.",
+  "source": "MANUAL",
+  "alert": {
+    "alertname": "RedisStreamE2eLatencyHigh",
+    "severity": "warning",
+    "fingerprint": "golden-gen-rfta-4204",
+    "summary": "Redis Stream E2E 지연 p95 > 500ms (prod-app)",
+    "description": "스트림 처리 p95 지연이 1.8s. 컨슈머 처리 적체 또는 다운스트림(App Service) 지연 가능성.",
+    "labels": {
+      "alertname": "RedisStreamE2eLatencyHigh",
+      "severity": "warning",
+      "job": "prod-app"
+    }
+  },
+  "logSamples": [
+    "[2026-08-25 21:14:03.912] [ERROR] [0ae98cedfd3ce17662fad001ac38bc1e,6654e7c8b582dc51] --- [redis-stream-thread-pool-nunchi1] c.n.i.m.c.NunchiCommandEventConsumer : 눈치게임 press 처리 중 오류: joinCode=QM3F, playerName=USER1, eventId=9ae6c343-91e8-835a-d06e-2bc4dc22061e",
+    "[2026-08-25 21:15:21.447] [ERROR] [9e9e5828fa26f915a19e92d2771df50c,e7888858524af314] --- [redis-stream-thread-pool-nunchi2] c.n.i.m.c.NunchiCommandEventConsumer : 눈치게임 press 처리 중 오류: joinCode=QM3F, playerName=USER4, eventId=9eac5b1e-aa9e-bcc0-96aa-0388d2dd2b57",
+    "[2026-08-25 21:16:58.203] [ERROR] [6751c8357ffada5a45ef5b581607dcf5,9ae1b71a3c891586] --- [redis-stream-thread-pool-nunchi1] c.n.i.m.c.NunchiCommandEventConsumer : 눈치게임 press 처리 중 오류: joinCode=QM3F, playerName=USER2, eventId=c2fb6a1b-89d4-4c1f-6823-50d65ac1ea65",
+    "[2026-08-25 21:18:34.760] [ERROR] [81581f7854596fe2b733daace238622e,de0d18073a04cd2e] --- [redis-stream-thread-pool-nunchi2] c.n.i.m.c.NunchiCommandEventConsumer : 눈치게임 press 처리 중 오류: joinCode=H8CV, playerName=USER5, eventId=067be26e-a97c-2db0-9ab9-3779f82d2129",
+    "[2026-08-25 21:20:07.118] [ERROR] [8d80354da253b12e9a322fb4c5083725,f00738b23e5c11f2] --- [redis-stream-thread-pool-nunchi1] c.n.i.m.c.NunchiCommandEventConsumer : 눈치게임 press 처리 중 오류: joinCode=H8CV, playerName=USER3, eventId=ff2e7863-1f39-97b4-dd18-1e6e6e41bf84",
+    "[2026-08-25 21:21:49.585] [ERROR] [7f97916db2ae5df667351f12e02a5b2a,d8020ec150cbef12] --- [redis-stream-thread-pool-nunchi2] c.n.i.m.c.NunchiCommandEventConsumer : 눈치게임 press 처리 중 오류: joinCode=H8CV, playerName=USER6, eventId=28ca1064-26e2-7970-c667-ffdff9b7fd5b"
+  ],
+  "logEnvironment": "prod",
+  "expected": "예",
+  "axis": "positive-dense"
+}

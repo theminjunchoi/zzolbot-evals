@@ -1,0 +1,29 @@
+{
+  "name": "monitor-settlement-and-storage-error-spike-rfta18",
+  "question": "알림 AppErrorLogSpike(warning)가 prod에서 발화했다 - 최근 5분 ERROR 로그가 61건으로 임계 30건을 넘었다. 봇에는 최근 30분 창에서 조회된 prod ERROR 로그 샘플 6줄이 주어졌다.",
+  "rubric": "주어진 로그는 08:14부터 08:19까지 5분 구간에 두 계열이 함께 밀집한 형태다. 정산 스트림 컨슈머의 ACK 보류 두 건과 정산 스트림 처리 오류 한 건이 있고, 같은 구간에 오브젝트 스토리지 Public URL 생성 실패 두 건과 QR 코드 생성 실패 한 건이 있다. 두 계열 모두 짧은 구간에 반복되므로 급증 건수를 함께 설명한다. '근거 발견: 예'로 판정하고 정산 처리 실패와 오브젝트 스토리지 실패라는 두 갈래를 모두 제시하면 정답. '근거 발견: 아니오'로 판정하거나 한 계열만 보고 나머지를 무시한 채 단일 원인으로 단정하면 오답.",
+  "source": "MANUAL",
+  "alert": {
+    "alertname": "AppErrorLogSpike",
+    "severity": "warning",
+    "fingerprint": "golden-gen-rfta-4218",
+    "summary": "ERROR 로그 급증(최근 5분, prod-app)",
+    "description": "ERROR 로그가 61건(임계 30/5m)입니다. zzol-bot이 근본원인을 분석합니다.",
+    "labels": {
+      "alertname": "AppErrorLogSpike",
+      "severity": "warning",
+      "job": "prod-app"
+    }
+  },
+  "logSamples": [
+    "[2026-08-27 08:14:11.336] [ERROR] [67229958e44d511fc0d9a2886a414127,c5d67a28de6f4d09] --- [redis-stream-thread-pool-settlement:result1] c.s.i.c.SettlementStreamConsumer : 정산 처리 실패 — ACK 보류, 재전달 대기: recordId=1787786051336-0",
+    "[2026-08-27 08:15:02.884] [ERROR] [,] --- [] c.r.infra.OracleObjectStorageService : Oracle Object Storage Public URL 생성 실패: storageKey=qr/R4MC.png, error=java.net.SocketTimeoutException: connect timed out",
+    "[2026-08-27 08:16:20.117] [ERROR] [f793097268770dcc618784d3b2c79593,e27b7d0bd154c543] --- [redis-stream-thread-pool-settlement:result2] c.s.i.c.SettlementStreamConsumer : 정산 스트림 처리 중 오류가 발생했습니다.",
+    "[2026-08-27 08:16:58.640] [ERROR] [,] --- [] c.r.application.service.QrCodeService : QR 코드 생성 실패: joinCode=R4MC, error=Public URL 생성 실패",
+    "[2026-08-27 08:18:07.229] [ERROR] [e9af39656f8f7d72bd751c0f90fc51d7,6de02867ea2a9b91] --- [redis-stream-thread-pool-settlement:result1] c.s.i.c.SettlementStreamConsumer : 정산 처리 실패 — ACK 보류, 재전달 대기: recordId=1787786287229-2",
+    "[2026-08-27 08:19:33.775] [ERROR] [0bc869ecb071661eeb005fc7156e3942,eef9f3a2efe4251d] --- [] c.r.infra.OracleObjectStorageService : Oracle Object Storage Public URL 생성 실패: storageKey=qr/T9SB.png, error=java.net.SocketTimeoutException: connect timed out"
+  ],
+  "logEnvironment": "prod",
+  "expected": "예",
+  "axis": "compound-cause"
+}

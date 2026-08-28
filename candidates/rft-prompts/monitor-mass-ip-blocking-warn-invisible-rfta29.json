@@ -1,0 +1,26 @@
+{
+  "name": "monitor-mass-ip-blocking-warn-invisible-rfta29",
+  "question": "알림 MassIpBlockingSpike(critical)가 prod에서 발화했다 - IP 차단 요청이 12.4 req/s로 베이스라인 대비 급증했다. 봇에는 최근 30분 창에서 조회된 prod ERROR 로그 샘플 2줄이 주어졌다.",
+  "rubric": "IP 차단 필터가 남기는 차단 접근 시도와 즉시 차단 기록은 WARN 레벨이라 ERROR로 걸러 조회한 이 입력에는 처음부터 들어올 수 없다. 실제로 주어진 두 줄은 cardgame:select 스트림의 카드 선택 이벤트 처리 실패와 QR 코드 생성 실패로, 차단 대상 IP도 접근 경로도 알려주지 않는다. '근거 발견: 아니오'로 판정하고 차단 급증의 주체나 경로를 추측하지 않아야 정답. 주어진 앱 오류를 스캐너 트래픽이나 차단 급증의 근거로 삼으면 오답.",
+  "source": "MANUAL",
+  "alert": {
+    "alertname": "MassIpBlockingSpike",
+    "severity": "critical",
+    "fingerprint": "golden-gen-rfta-4229",
+    "summary": "IP 차단 요청 급증 (prod-app)",
+    "description": "차단 요청이 12.4 req/s. 베이스라인(약 0.5 req/s) 대비 급증. 차단된 IP와 요청 경로를 확인.",
+    "labels": {
+      "alertname": "MassIpBlockingSpike",
+      "severity": "critical",
+      "job": "prod-app",
+      "incident_group": "ip-blocking"
+    }
+  },
+  "logSamples": [
+    "[2026-08-25 13:22:07.441] [ERROR] [9688b1d671f601a03037b1895423748e,60ba868dd0d085ce] --- [redis-stream-thread-pool-cardgame:select1] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=SelectCardCommandEventConsumer, message=SelectCardCommandEvent[eventId=c5f53eb1-17bf-1600-948f-00a3bef3f421, timestamp=2026-08-25T04:22:07.441000133Z, joinCode=N2FP, playerName=USER3, cardIndex=4]",
+    "[2026-08-25 13:41:52.118] [ERROR] [,] --- [] c.r.application.service.QrCodeService : QR 코드 생성 실패: joinCode=N2FP, error=java.net.SocketTimeoutException: Read timed out"
+  ],
+  "logEnvironment": "prod",
+  "expected": "아니오",
+  "axis": "sparse-evidence"
+}

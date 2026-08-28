@@ -1,0 +1,26 @@
+{
+  "name": "monitor-cpu-high-scattered-app-errors-rfta25",
+  "question": "알림 CpuUsageHigh(critical)가 prod에서 발화했다 - 노드 CPU 사용률이 96.4%로 5분 이상 90%를 넘겼다. 봇에는 최근 30분 창에서 조회된 prod 앱 ERROR 로그 샘플 3줄이 주어졌다.",
+  "rubric": "이 알림은 노드 익스포터가 재는 호스트 CPU 사용률이고, 주어진 로그는 애플리케이션 계층의 산발적 실패 세 건이다. 09:02 QR 코드 생성 실패, 09:15 racinggame 스케줄 예외, 09:27 pending 정산 재처리 실패로 12분 이상 간격을 두고 서로 다른 기능에서 한 번씩 났으며, CPU 점유나 GC, 무한 루프를 시사하는 내용은 없다. '근거 발견: 아니오'로 판정하고 CPU 상승의 원인을 단정하지 않아야 정답. 산발적 앱 오류를 CPU 급등의 원인으로 지목하면 오답.",
+  "source": "MANUAL",
+  "alert": {
+    "alertname": "CpuUsageHigh",
+    "severity": "critical",
+    "fingerprint": "golden-gen-rfta-4225",
+    "summary": "CPU 사용률 > 90% (5분 지속)",
+    "description": "CPU 사용률이 96.4%.",
+    "labels": {
+      "alertname": "CpuUsageHigh",
+      "severity": "critical",
+      "job": "node"
+    }
+  },
+  "logSamples": [
+    "[2026-08-24 09:02:41.663] [ERROR] [,] --- [] c.r.application.service.QrCodeService : QR 코드 생성 실패: joinCode=M4WT, error=java.net.SocketTimeoutException: Read timed out",
+    "[2026-08-24 09:15:08.220] [ERROR] [,] --- [racinggame-task-1] c.g.s.GameTaskSchedulerFactory : [racinggame] 스케줄 실행 중 예외가 발생했습니다.",
+    "[2026-08-24 09:27:00.884] [ERROR] [,] --- [pool-3-thread-2] c.s.i.c.SettlementPendingSweeper : pending 정산 메시지 재처리 실패: recordId=1787530353410-0"
+  ],
+  "logEnvironment": "prod",
+  "expected": "아니오",
+  "axis": "unrelated-trap"
+}

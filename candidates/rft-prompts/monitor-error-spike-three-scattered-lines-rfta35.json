@@ -1,0 +1,26 @@
+{
+  "name": "monitor-error-spike-three-scattered-lines-rfta35",
+  "question": "알림 AppErrorLogSpike(warning)가 prod에서 발화했다 - 최근 5분 ERROR 로그가 44건으로 임계 30건을 넘었다. 봇에는 최근 30분 창에서 조회된 prod ERROR 로그 샘플 3줄이 주어졌다.",
+  "rubric": "알림은 5분에 44건이라는 규모를 말하는데, 주어진 로그는 30분 창 전체에 걸쳐 11분 이상 간격으로 흩어진 세 줄뿐이고 각각 정산 스트림 ACK 보류, cardgame:select 컨슈머 실패, blockstacking 스케줄 예외로 기능도 다르다. 이 표본으로는 어느 기능이 44건을 만들었는지 특정할 수 없다. '근거 발견: 아니오'로 판정하고 표본이 알림 규모를 설명하지 못한다는 점을 지적해야 정답. 세 줄 중 하나를 골라 급증의 근본 원인으로 단정하면 오답.",
+  "source": "MANUAL",
+  "alert": {
+    "alertname": "AppErrorLogSpike",
+    "severity": "warning",
+    "fingerprint": "golden-gen-rfta-4235",
+    "summary": "ERROR 로그 급증(최근 5분, prod-app)",
+    "description": "ERROR 로그가 44건(임계 30/5m)입니다. zzol-bot이 근본원인을 분석합니다.",
+    "labels": {
+      "alertname": "AppErrorLogSpike",
+      "severity": "warning",
+      "job": "prod-app"
+    }
+  },
+  "logSamples": [
+    "[2026-08-27 15:04:18.220] [ERROR] [9c4d2b7138a03107bf36621e10ac186d,b6f4b619c44441c3] --- [redis-stream-thread-pool-settlement:result1] c.s.i.c.SettlementStreamConsumer : 정산 처리 실패 — ACK 보류, 재전달 대기: recordId=1787810658220-0",
+    "[2026-08-27 15:16:41.663] [ERROR] [b069d316205acb6060b72cadfe9b188f,16db5be1c3635b13] --- [redis-stream-thread-pool-cardgame:select2] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=SelectCardCommandEventConsumer, message=SelectCardCommandEvent[eventId=d170c533-916b-9d00-5a51-a083af7cd8f6, timestamp=2026-08-27T06:16:41.663000711Z, joinCode=X7DM, playerName=USER5, cardIndex=1]",
+    "[2026-08-27 15:28:07.441] [ERROR] [,] --- [blockstacking-task-1] c.g.s.GameTaskSchedulerFactory : [blockstacking] 스케줄 실행 중 예외가 발생했습니다."
+  ],
+  "logEnvironment": "prod",
+  "expected": "아니오",
+  "axis": "sparse-evidence"
+}

@@ -1,0 +1,29 @@
+{
+  "name": "monitor-outbox-dead-letter-stream-down-rfta14",
+  "question": "알림 OutboxDeadLetterHigh(warning)가 prod에서 발화했다 - 재시도 초과로 DEAD_LETTER 전환된 outbox 이벤트가 23건이다. 봇에는 최근 30분 창에서 조회된 prod ERROR 로그 샘플 6줄이 주어졌다.",
+  "rubric": "주어진 로그는 minigame 스트림 하나를 축으로 이어진다. 06:41과 06:49에 RedisStreamContainerRecovery가 minigame 컨테이너 상태 확인과 복구에서 예외를 만났고 06:57에는 복구를 포기하고 DOWN을 보고했으며, 그 사이 06:45와 06:53과 07:01에 minigame 스트림 키로 발행하려던 outbox 이벤트가 재시도를 소진해 DEAD_LETTER로 넘어갔다. Redis 스트림 쪽 이상이 발행 실패와 시간적으로 맞물린다. '근거 발견: 예'로 판정하고 minigame 스트림 접근 불가를 DEAD_LETTER 급증의 원인 가설로 제시하면 정답. '근거 발견: 아니오'로 판정하거나 DEAD_LETTER를 애플리케이션 로직 버그로만 설명하면 오답.",
+  "source": "MANUAL",
+  "alert": {
+    "alertname": "OutboxDeadLetterHigh",
+    "severity": "warning",
+    "fingerprint": "golden-gen-rfta-4214",
+    "summary": "Outbox DEAD_LETTER 적체 (> 10, prod-app)",
+    "description": "재시도 초과로 DEAD_LETTER 전환된 outbox 이벤트가 23건. 다운스트림 발행 경로 점검 필요.",
+    "labels": {
+      "alertname": "OutboxDeadLetterHigh",
+      "severity": "warning",
+      "job": "prod-app"
+    }
+  },
+  "logSamples": [
+    "[2026-08-24 06:41:00.207] [ERROR] [,] --- [pool-5-thread-1] c.g.h.RedisStreamContainerRecovery : Redis Stream container 상태 확인 중 예외: stream=minigame",
+    "[2026-08-24 06:45:00.451] [ERROR] [,] --- [pool-2-thread-2] c.global.outbox.OutboxEventProcessor : Outbox 이벤트 최대 재시도 초과, DEAD_LETTER 전환: id=5512, streamKey=minigame",
+    "[2026-08-24 06:49:00.688] [ERROR] [,] --- [pool-5-thread-1] c.g.h.RedisStreamContainerRecovery : Redis Stream container 복구 중 예외 발생: stream=minigame",
+    "[2026-08-24 06:53:00.925] [ERROR] [,] --- [pool-2-thread-2] c.global.outbox.OutboxEventProcessor : Outbox 이벤트 최대 재시도 초과, DEAD_LETTER 전환: id=5527, streamKey=minigame",
+    "[2026-08-24 06:57:00.163] [ERROR] [,] --- [pool-5-thread-1] c.g.h.RedisStreamContainerRecovery : Redis Stream container 복구 포기: stream=minigame. HealthIndicator에 DOWN 보고",
+    "[2026-08-24 07:01:00.409] [ERROR] [,] --- [pool-2-thread-2] c.global.outbox.OutboxEventProcessor : Outbox 이벤트 최대 재시도 초과, DEAD_LETTER 전환: id=5544, streamKey=minigame"
+  ],
+  "logEnvironment": "prod",
+  "expected": "예",
+  "axis": "compound-cause"
+}

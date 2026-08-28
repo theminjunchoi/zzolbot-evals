@@ -1,0 +1,26 @@
+{
+  "name": "monitor-settlement-backlog-nunchi-logs-rfta37",
+  "question": "알림 RedisStreamBacklogHigh(warning)가 prod에서 발화했다 - settlement:result 스트림 길이가 5100으로 임계 1000을 넘었다. 봇에는 최근 30분 창에서 조회된 prod ERROR 로그 샘플 3줄이 주어졌다.",
+  "rubric": "적체가 난 스트림은 settlement:result인데, 주어진 로그 세 줄은 모두 nunchi 스트림 컨슈머의 press 처리 오류이고 정산 컨슈머나 정산 스윕의 실패는 한 줄도 없다. 같은 Redis Stream 계열이라도 컨슈머 그룹과 스트림 키가 다르므로 눈치게임 쪽 실패는 정산 스트림의 적체를 설명하지 못한다. '근거 발견: 아니오'로 판정하고 적체 원인을 단정하지 않아야 정답. 눈치게임 컨슈머 실패를 정산 스트림 적체의 원인으로 지목하면 오답.",
+  "source": "MANUAL",
+  "alert": {
+    "alertname": "RedisStreamBacklogHigh",
+    "severity": "warning",
+    "fingerprint": "golden-gen-rfta-4237",
+    "summary": "Redis Stream 적체 (length > 1000, prod-app)",
+    "description": "스트림 길이가 5100. 컨슈머 처리 속도가 발행을 못 따라가고 있습니다.",
+    "labels": {
+      "alertname": "RedisStreamBacklogHigh",
+      "severity": "warning",
+      "job": "prod-app"
+    }
+  },
+  "logSamples": [
+    "[2026-08-27 20:14:07.441] [ERROR] [3ac4dfbbb1a04ef227e830cb185056d9,7e4a7f2955489575] --- [redis-stream-thread-pool-nunchi1] c.n.i.m.c.NunchiCommandEventConsumer : 눈치게임 press 처리 중 오류: joinCode=K9PT, playerName=USER2, eventId=28cfc4d4-72d2-0534-f3d3-9a4a714ffe72",
+    "[2026-08-27 20:22:33.885] [ERROR] [8da84bf5168d36768db2bea39c7efa5a,4f597188f4325949] --- [redis-stream-thread-pool-nunchi2] c.n.i.m.c.NunchiCommandEventConsumer : 눈치게임 press 처리 중 오류: joinCode=K9PT, playerName=USER5, eventId=c93eb6f6-ffd9-e3b2-1d47-2539970f84b6",
+    "[2026-08-27 20:31:18.220] [ERROR] [70b5ac1ec606bb66391a85ccc8f42427,8f3bfd31f882626c] --- [redis-stream-thread-pool-nunchi1] c.n.i.m.c.NunchiCommandEventConsumer : 눈치게임 press 처리 중 오류: joinCode=K9PT, playerName=USER3, eventId=fcd9208f-06c5-8c4f-e26c-420d605c35df"
+  ],
+  "logEnvironment": "prod",
+  "expected": "아니오",
+  "axis": "near-miss-component"
+}

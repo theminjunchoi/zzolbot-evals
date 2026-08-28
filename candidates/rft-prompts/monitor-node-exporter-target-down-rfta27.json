@@ -1,0 +1,27 @@
+{
+  "name": "monitor-node-exporter-target-down-rfta27",
+  "question": "알림 MonitoringTargetDown(warning)이 prod에서 발화했다 - node-exporter 타깃이 5분 이상 스크레이프에 응답하지 않는다. 봇에는 최근 30분 창에서 조회된 prod 앱 ERROR 로그 샘플 2줄이 주어졌다.",
+  "rubric": "이 알림의 대상은 애플리케이션이 아니라 호스트 지표를 내보내는 익스포터 프로세스이며, 앱 로그에는 익스포터의 상태가 남지 않는다. 주어진 두 줄은 speedtouch 스트림의 진행도 이벤트 처리 실패와 스케줄러 스레드의 예기치 못한 오류로 스크레이프 실패와 아무 관계가 없다. '근거 발견: 아니오'로 판정하고 익스포터 다운의 원인을 앱 로그에서 찾지 않아야 정답. 무관한 앱 오류를 타깃 다운의 원인으로 지목하면 오답.",
+  "source": "MANUAL",
+  "alert": {
+    "alertname": "MonitoringTargetDown",
+    "severity": "warning",
+    "fingerprint": "golden-gen-rfta-4227",
+    "summary": "모니터링 타깃 down (node-exporter / prod-node-1)",
+    "description": "node-exporter 익스포터가 5분 이상 응답하지 않습니다. 이 타깃에 의존하는 알림이 평가 불능 상태일 수 있습니다.",
+    "labels": {
+      "alertname": "MonitoringTargetDown",
+      "severity": "warning",
+      "job": "node-exporter",
+      "instance": "prod-node-1",
+      "env": "prod"
+    }
+  },
+  "logSamples": [
+    "[2026-08-25 11:18:44.229] [ERROR] [aeb6920239a8af9e65d0301aea0e808f,56c5444cf488b3be] --- [redis-stream-thread-pool-speedtouch2] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=TouchProgressEventConsumer, message=TouchProgressEvent[eventId=bf94ef48-d68b-2a3b-38a4-ca0ca7a0e7af, timestamp=2026-08-25T02:18:44.229000590Z, joinCode=B3XR, playerName=USER4, progress=77]",
+    "[2026-08-25 11:33:00.661] [ERROR] [,] --- [pool-9-thread-2] o.s.s.s.TaskUtils$LoggingErrorHandler : Unexpected error occurred in scheduled task"
+  ],
+  "logEnvironment": "prod",
+  "expected": "아니오",
+  "axis": "unrelated-trap"
+}

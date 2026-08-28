@@ -1,0 +1,27 @@
+{
+  "name": "monitor-kakao-login-zero-unrelated-logs-rfta34",
+  "question": "알림 LoginSuccessDroppedToZero(critical)가 prod에서 발화했다 - kakao 로그인 시도는 계속되는데 성공이 0이다. 봇에는 최근 30분 창에서 조회된 prod ERROR 로그 샘플 3줄이 주어졌다.",
+  "rubric": "로그인 콜백 처리 결과는 이 입력에 담긴 어떤 줄에도 남아 있지 않다. 주어진 세 줄은 racinggame 스트림의 탭 커맨드 처리 실패, QR 코드 생성 실패, 스케줄러 스레드 오류로 인증 경로와 무관하며 redirect_uri나 시크릿, provider 응답에 대해 아무 정보도 주지 않는다. '근거 발견: 아니오'로 판정하고 로그인 실패의 원인을 앱 오류 로그로 지어내지 않아야 정답. 무관한 오류를 로그인 성공 0의 원인으로 지목하면 오답.",
+  "source": "MANUAL",
+  "alert": {
+    "alertname": "LoginSuccessDroppedToZero",
+    "severity": "critical",
+    "fingerprint": "golden-gen-rfta-4234",
+    "summary": "kakao 로그인 성공 0 (prod-app) — 시도는 계속됨",
+    "description": "최근 로그인 시도는 있으나 성공이 없다. redirect_uri(스킴/호스트)·provider 콘솔 등록·시크릿을 점검. 여러 provider 동시 발생 시 프록시/baseUrl 의심.",
+    "labels": {
+      "alertname": "LoginSuccessDroppedToZero",
+      "severity": "critical",
+      "job": "prod-app",
+      "provider": "kakao"
+    }
+  },
+  "logSamples": [
+    "[2026-08-26 21:12:07.663] [ERROR] [4c02665ef381300a5d209e7a83daf29c,3098e5ac099591ec] --- [redis-stream-thread-pool-racinggame1] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=TapCommandEventConsumer, message=TapCommandEvent[eventId=f7f99f15-f4c2-2c5f-9ac9-cee99abecbb4, timestamp=2026-08-26T12:12:07.663000641Z, joinCode=C5RB, playerName=USER1, tapCount=22]",
+    "[2026-08-26 21:24:41.220] [ERROR] [,] --- [] c.r.application.service.QrCodeService : QR 코드 생성 실패: joinCode=C5RB, error=Public URL 생성 실패",
+    "[2026-08-26 21:36:00.884] [ERROR] [,] --- [pool-9-thread-1] o.s.s.s.TaskUtils$LoggingErrorHandler : Unexpected error occurred in scheduled task"
+  ],
+  "logEnvironment": "prod",
+  "expected": "아니오",
+  "axis": "unrelated-trap"
+}

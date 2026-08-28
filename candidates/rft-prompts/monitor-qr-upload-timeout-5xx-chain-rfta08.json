@@ -1,0 +1,30 @@
+{
+  "name": "monitor-qr-upload-timeout-5xx-chain-rfta08",
+  "question": "알림 Http5xxRatioHigh(critical)가 prod에서 발화했다 - 최근 5분 5xx 비율이 12.3%로 임계 5%를 넘었다. 봇에는 최근 30분 창에서 조회된 prod ERROR 로그 샘플 7줄이 주어졌다.",
+  "rubric": "주어진 로그는 하나의 인과 사슬을 시간 순서대로 담고 있다. 13:21부터 13:29까지 Oracle Object Storage QR 업로드가 SocketTimeoutException으로 세 번 실패했고, 그 직후 QR 코드 생성이 두 번 실패했으며, 같은 구간에 POST /rooms 요청 두 건이 QR 생성 실패를 이유로 500이 됐다. 방 생성 응답 경로가 외부 오브젝트 스토리지 업로드에 묶여 있어 스토리지 타임아웃이 그대로 5xx가 된다. '근거 발견: 예'로 판정하고 오브젝트 스토리지 업로드 타임아웃을 5xx의 근본 원인 가설로 제시하면 정답. '근거 발견: 아니오'로 판정하거나 DB, Redis를 원인으로 지목하면 오답.",
+  "source": "MANUAL",
+  "alert": {
+    "alertname": "Http5xxRatioHigh",
+    "severity": "critical",
+    "fingerprint": "golden-gen-rfta-4208",
+    "summary": "HTTP 5xx 비율 5% 초과 (prod-app)",
+    "description": "최근 5분 5xx 비율이 12.3%. 서버 측 광범위 실패 가능성.",
+    "labels": {
+      "alertname": "Http5xxRatioHigh",
+      "severity": "critical",
+      "job": "prod-app"
+    }
+  },
+  "logSamples": [
+    "[2026-08-26 13:21:04.552] [ERROR] [,] --- [] c.r.infra.OracleObjectStorageService : Oracle Object Storage QR 코드 업로드 실패: contents=qr-J4RD.png, error=java.net.SocketTimeoutException: Read timed out",
+    "[2026-08-26 13:23:38.107] [ERROR] [,] --- [] c.r.infra.OracleObjectStorageService : Oracle Object Storage QR 코드 업로드 실패: contents=qr-M2XP.png, error=java.net.SocketTimeoutException: Read timed out",
+    "[2026-08-26 13:24:02.884] [ERROR] [b831a7d9686c0a8b9898342e3b6584c0,091441905019a3a2] --- [] c.r.application.service.QrCodeService : QR 코드 생성 실패: joinCode=J4RD, error=업로드 응답 시간 초과",
+    "[2026-08-26 13:25:16.330] [ERROR] [0a74b1258a8df23860375ae7c5dc3283,8f3ddb9338860107] --- [http-nio-8080-exec-13] c.web.exception.RestExceptionHandler : method=POST uri=/rooms exception=QrCodeCreationException message=QR 코드 생성에 실패했습니다",
+    "[2026-08-26 13:27:41.769] [ERROR] [,] --- [] c.r.infra.OracleObjectStorageService : Oracle Object Storage QR 코드 업로드 실패: contents=qr-C9TB.png, error=java.net.SocketTimeoutException: Read timed out",
+    "[2026-08-26 13:28:15.402] [ERROR] [,] --- [] c.r.application.service.QrCodeService : QR 코드 생성 실패: joinCode=C9TB, error=업로드 응답 시간 초과",
+    "[2026-08-26 13:29:44.951] [ERROR] [51685ab5d9c26b38ff9de26362f44654,fdd0f95a37fc9e5a] --- [http-nio-8080-exec-26] c.web.exception.RestExceptionHandler : method=POST uri=/rooms exception=QrCodeCreationException message=QR 코드 생성에 실패했습니다"
+  ],
+  "logEnvironment": "prod",
+  "expected": "예",
+  "axis": "compound-cause"
+}

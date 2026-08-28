@@ -1,0 +1,30 @@
+{
+  "name": "monitor-nickname-random-budget-burn-slow-rfta12",
+  "question": "알림 ErrorBudgetBurnSlow(warning)가 prod에서 발화했다 - 5xx 비율이 긴 창과 30분 창 양쪽에서 3%를 넘겨 에러버짓이 누적 소진 중이다. 봇에는 최근 30분 창에서 조회된 prod ERROR 로그 샘플 7줄이 주어졌다.",
+  "rubric": "주어진 로그 중 다섯 줄은 GET /rooms/nickname/random 요청이 NicknameSupplyException과 랜덤 닉네임 후보 조회 실패로 30분 창 전체에 걸쳐 5분에서 7분 간격으로 꾸준히 500을 낸 기록이고, 나머지 두 줄은 blockstacking 게임 스케줄러 예외와 방 이벤트 자동 정리 실패로 5xx와 무관한 배경 잡음이다. 낮은 비율이 길게 유지되는 느린 소진의 형태와 닉네임 엔드포인트의 지속 실패가 맞물린다. '근거 발견: 예'로 판정하고 닉네임 랜덤 조회 경로의 지속 실패를 원인 가설로 제시하면 정답. '근거 발견: 아니오'로 판정하거나 배경 잡음인 게임 스케줄러 예외를 5xx의 원인으로 지목하면 오답.",
+  "source": "MANUAL",
+  "alert": {
+    "alertname": "ErrorBudgetBurnSlow",
+    "severity": "warning",
+    "fingerprint": "golden-gen-rfta-4212",
+    "summary": "에러버짓 느린 소진 (SLO 99.5%, burn-rate 6×)",
+    "description": "prod-app 5xx 비율이 6h·30m 양 창에서 3%를 초과. 누적 시 에러버짓 위협.",
+    "labels": {
+      "alertname": "ErrorBudgetBurnSlow",
+      "severity": "warning",
+      "job": "prod-app"
+    }
+  },
+  "logSamples": [
+    "[2026-08-26 05:02:41.118] [ERROR] [2cd18600440570ba430b1533dce84c71,9b937bcb151d37b5] --- [http-nio-8080-exec-05] c.web.exception.RestExceptionHandler : method=GET uri=/rooms/nickname/random exception=NicknameSupplyException message=랜덤 닉네임 후보 조회에 실패했습니다",
+    "[2026-08-26 05:06:12.774] [ERROR] [,] --- [blockstacking-task-1] c.g.s.GameTaskSchedulerFactory : [blockstacking] 스케줄 실행 중 예외가 발생했습니다.",
+    "[2026-08-26 05:08:55.302] [ERROR] [1e78905acd341b819fb55df4be8a3c76,1c829f8b160d7174] --- [http-nio-8080-exec-23] c.web.exception.RestExceptionHandler : method=GET uri=/rooms/nickname/random exception=NicknameSupplyException message=랜덤 닉네임 후보 조회에 실패했습니다",
+    "[2026-08-26 05:14:37.869] [ERROR] [38982b0dc0279ad3d6332c417a2733eb,873655bc32483718] --- [http-nio-8080-exec-11] c.web.exception.RestExceptionHandler : method=GET uri=/rooms/nickname/random exception=NicknameSupplyException message=랜덤 닉네임 후보 조회에 실패했습니다",
+    "[2026-08-26 05:18:44.205] [ERROR] [,] --- [pool-7-thread-2] c.r.i.messaging.RoomEventWaitManager : 방 이벤트 자동 정리 (실패): eventId=f2dd7263-52e4-1475-88f6-dc4bf8fceb9c",
+    "[2026-08-26 05:21:09.633] [ERROR] [a73e5d07eb3d0732b0e75e3288e8da75,00380c725f47e7db] --- [http-nio-8080-exec-18] c.web.exception.RestExceptionHandler : method=GET uri=/rooms/nickname/random exception=NicknameSupplyException message=랜덤 닉네임 후보 조회에 실패했습니다",
+    "[2026-08-26 05:27:52.470] [ERROR] [2f84440e53973b51d3e0dd51d3e95ee2,6f95c58b9a89fef3] --- [http-nio-8080-exec-02] c.web.exception.RestExceptionHandler : method=GET uri=/rooms/nickname/random exception=NicknameSupplyException message=랜덤 닉네임 후보 조회에 실패했습니다"
+  ],
+  "logEnvironment": "prod",
+  "expected": "예",
+  "axis": "partial-relevance"
+}

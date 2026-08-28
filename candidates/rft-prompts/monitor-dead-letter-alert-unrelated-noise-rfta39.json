@@ -1,0 +1,26 @@
+{
+  "name": "monitor-dead-letter-alert-unrelated-noise-rfta39",
+  "question": "알림 OutboxDeadLetterHigh(warning)가 prod에서 발화했다 - 재시도 초과로 DEAD_LETTER 전환된 outbox 이벤트가 27건이다. 봇에는 최근 30분 창에서 조회된 prod ERROR 로그 샘플 3줄이 주어졌다.",
+  "rubric": "주어진 세 줄에는 outbox 처리기의 DEAD_LETTER 전환 기록이 한 건도 없다. QR 코드 생성 실패, cardgame 게임 스케줄 예외, 눈치게임 press 처리 오류는 모두 outbox 발행 경로 밖의 사건이고 10분 이상 간격으로 흩어져 있어 27건이라는 규모와도 맞지 않는다. '근거 발견: 아니오'로 판정하고 어느 스트림 발행이 실패했는지 지어내지 않아야 정답. 무관한 게임 오류를 DEAD_LETTER 적체의 원인으로 지목하면 오답.",
+  "source": "MANUAL",
+  "alert": {
+    "alertname": "OutboxDeadLetterHigh",
+    "severity": "warning",
+    "fingerprint": "golden-gen-rfta-4239",
+    "summary": "Outbox DEAD_LETTER 적체 (> 10, prod-app)",
+    "description": "재시도 초과로 DEAD_LETTER 전환된 outbox 이벤트가 27건. 다운스트림 발행 경로 점검 필요.",
+    "labels": {
+      "alertname": "OutboxDeadLetterHigh",
+      "severity": "warning",
+      "job": "prod-app"
+    }
+  },
+  "logSamples": [
+    "[2026-08-24 04:12:33.663] [ERROR] [,] --- [] c.r.application.service.QrCodeService : QR 코드 생성 실패: joinCode=R8VC, error=java.net.SocketTimeoutException: Read timed out",
+    "[2026-08-24 04:24:07.220] [ERROR] [,] --- [cardgame-task-1] c.g.s.GameTaskSchedulerFactory : [cardgame] 스케줄 실행 중 예외가 발생했습니다.",
+    "[2026-08-24 04:37:41.885] [ERROR] [247eb5673674a3b68ecec8b942673f1c,723ef89526b872d6] --- [redis-stream-thread-pool-nunchi2] c.n.i.m.c.NunchiCommandEventConsumer : 눈치게임 press 처리 중 오류: joinCode=R8VC, playerName=USER4, eventId=6bc8dea7-54ee-091c-d5df-0d9abd902758"
+  ],
+  "logEnvironment": "prod",
+  "expected": "아니오",
+  "axis": "unrelated-trap"
+}

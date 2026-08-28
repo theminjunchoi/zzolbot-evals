@@ -1,0 +1,27 @@
+{
+  "name": "monitor-5xx-logs-outside-query-window-rfta36",
+  "question": "알림 Http5xxRatioHigh(critical)가 2026-08-27 18:40경 prod에서 발화했다 - 최근 5분 5xx 비율이 11.9%다. 봇에 주어진 ERROR 로그 샘플 4줄은 모두 같은 날 16:1x대 시각으로, 알림 시각 기준 최근 30분 조회 창보다 두 시간 이상 앞선 구간의 것이다(수집 지연으로 뒤늦게 인입된 로그).",
+  "rubric": "주어진 네 줄은 16:12부터 16:19까지의 방 생성과 조회 요청 실패인데, 알림은 18:40경 발화했고 봇의 조회 창은 최근 30분이므로 이 로그는 알림이 가리키는 구간의 사건이 아니다. 두 시간 전에 끝난 실패는 지금의 5xx 비율을 설명하지 못한다. '근거 발견: 아니오'로 판정하고 로그와 알림의 시각이 어긋난다는 점을 지적해야 정답. 창 밖 로그의 예외를 현재 5xx의 근본 원인으로 단정하면 오답.",
+  "source": "MANUAL",
+  "alert": {
+    "alertname": "Http5xxRatioHigh",
+    "severity": "critical",
+    "fingerprint": "golden-gen-rfta-4236",
+    "summary": "HTTP 5xx 비율 5% 초과 (prod-app)",
+    "description": "최근 5분 5xx 비율이 11.9%. 서버 측 광범위 실패 가능성.",
+    "labels": {
+      "alertname": "Http5xxRatioHigh",
+      "severity": "critical",
+      "job": "prod-app"
+    }
+  },
+  "logSamples": [
+    "[2026-08-27 16:12:41.118] [ERROR] [11c04243661a3031a52aed46cd84787c,7cee813230cdb8a3] --- [http-nio-8080-exec-09] c.web.exception.RestExceptionHandler : method=POST uri=/rooms exception=SocketTimeoutException message=Read timed out",
+    "[2026-08-27 16:14:07.663] [ERROR] [e3cf3290e57e3b75d9f242c9f5a9fea9,4cc8764521e1622e] --- [http-nio-8080-exec-17] c.web.exception.RestExceptionHandler : method=GET uri=/rooms/check-joinCode exception=SocketTimeoutException message=Read timed out",
+    "[2026-08-27 16:17:33.229] [ERROR] [4c332950310ce467e53172528ecd242d,a39ace49390391f9] --- [http-nio-8080-exec-04] c.web.exception.RestExceptionHandler : method=POST uri=/rooms exception=SocketTimeoutException message=Read timed out",
+    "[2026-08-27 16:19:52.885] [ERROR] [b378fc762ce542a9ccf288f99041a59a,db21c754085af7a1] --- [http-nio-8080-exec-26] c.web.exception.RestExceptionHandler : method=GET uri=/rooms/check-guestName exception=SocketTimeoutException message=Read timed out"
+  ],
+  "logEnvironment": "prod",
+  "expected": "아니오",
+  "axis": "stale-reingested"
+}

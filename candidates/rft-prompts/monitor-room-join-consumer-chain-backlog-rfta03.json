@@ -1,0 +1,29 @@
+{
+  "name": "monitor-room-join-consumer-chain-backlog-rfta03",
+  "question": "알림 RedisStreamBacklogHigh(warning)가 prod에서 발화했다 - room:join 스트림 길이가 2650으로 임계 1000을 넘었다. 봇에는 최근 30분 창에서 조회된 prod ERROR 로그 샘플 6줄이 주어졌다.",
+  "rubric": "주어진 로그는 20:41부터 20:58까지 room:join 스트림 한 경로에 집중되어 있다. RoomJoinConsumer가 RoomJoinEvent 처리에 세 번 실패했고, 같은 구간에 RoomService의 방 참가 비동기 처리 실패 두 건과 RoomEventWaitManager의 방 이벤트 자동 정리 실패 한 건이 이어졌다. 참가 이벤트가 소비 단계에서 계속 실패하고 대기 정리까지 밀리면 room:join 스트림에 미처리 메시지가 쌓인다. '근거 발견: 예'로 판정하고 방 참가 처리 경로의 연쇄 실패를 적체의 원인 가설로 제시하면 정답. '근거 발견: 아니오'로 판정하거나 로그에 없는 게임 스트림, 정산 스트림을 원인으로 지목하면 오답.",
+  "source": "MANUAL",
+  "alert": {
+    "alertname": "RedisStreamBacklogHigh",
+    "severity": "warning",
+    "fingerprint": "golden-gen-rfta-4203",
+    "summary": "Redis Stream 적체 (length > 1000, prod-app)",
+    "description": "스트림 길이가 2650. 컨슈머 처리 속도가 발행을 못 따라가고 있습니다.",
+    "labels": {
+      "alertname": "RedisStreamBacklogHigh",
+      "severity": "warning",
+      "job": "prod-app"
+    }
+  },
+  "logSamples": [
+    "[2026-08-25 20:41:12.508] [ERROR] [96060c876bf8c9bbaf0d9d8047f95a77,de73e5e8332317f8] --- [redis-stream-thread-pool-room:join1] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=RoomJoinConsumer, message=RoomJoinEvent[eventId=90b8a221-3545-1194-c9f8-eb60772b7873, timestamp=2026-08-25T11:41:12.508000944Z, joinCode=T4WQ, playerName=USER2]",
+    "[2026-08-25 20:44:36.771] [ERROR] [998a95371de91864904276659d027a48,991abddafe2636cf] --- [redis-stream-thread-pool-room:join1] c.r.application.service.RoomService : 방 참가 비동기 처리 실패: eventId=c2c5364e-e5fc-0891-63df-b25fb91e1603, joinCode=T4WQ, playerName=USER2",
+    "[2026-08-25 20:48:55.163] [ERROR] [207c576465424561991cdb1ce6a75cfc,9f56f9e35c3f86d1] --- [redis-stream-thread-pool-room:join2] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=RoomJoinConsumer, message=RoomJoinEvent[eventId=67381a0c-bf87-a4e9-7a66-660f36654977, timestamp=2026-08-25T11:48:55.163000017Z, joinCode=T4WQ, playerName=USER7]",
+    "[2026-08-25 20:51:19.024] [ERROR] [,] --- [pool-6-thread-1] c.r.i.messaging.RoomEventWaitManager : 방 이벤트 자동 정리 (실패): eventId=1116bb95-0d9a-6ed9-dcd4-8eade9fb168b",
+    "[2026-08-25 20:54:47.590] [ERROR] [b899babe85f40b5e2430a541cd06a252,9931ab964484b84f] --- [redis-stream-thread-pool-room:join1] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=RoomJoinConsumer, message=RoomJoinEvent[eventId=cec2ae37-b7e4-29c0-ed9e-be859e18dddd, timestamp=2026-08-25T11:54:47.590000498Z, joinCode=9BKD, playerName=USER1]",
+    "[2026-08-25 20:58:02.336] [ERROR] [ab926d152ad08c345468d6620fd3bf3b,1e7fbd8f32141e90] --- [redis-stream-thread-pool-room:join2] c.r.application.service.RoomService : 방 참가 비동기 처리 실패: eventId=f032f3eb-91dd-840c-f55b-95c867c3678b, joinCode=9BKD, playerName=USER1"
+  ],
+  "logEnvironment": "prod",
+  "expected": "예",
+  "axis": "compound-cause"
+}

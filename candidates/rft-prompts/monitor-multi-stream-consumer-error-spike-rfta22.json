@@ -1,0 +1,29 @@
+{
+  "name": "monitor-multi-stream-consumer-error-spike-rfta22",
+  "question": "알림 AppErrorLogSpike(warning)가 prod에서 발화했다 - 최근 5분 ERROR 로그가 38건으로 임계 30건을 넘었다. 봇에는 최근 30분 창에서 조회된 prod ERROR 로그 샘플 6줄이 주어졌다.",
+  "rubric": "주어진 로그 중 03:47부터 03:51까지 4분 구간에 밀집한 다섯 줄은 speedtouch, blockstacking, racinggame 세 게임 스트림의 컨슈머 실패와 두 스트림의 리스너 처리 오류로, 특정 게임이 아니라 스트림 소비 계층 전반이 동시에 무너진 형태다. 맨 앞의 QR 코드 생성 실패 한 줄은 20분 이상 앞선 배경 잡음이다. '근거 발견: 예'로 판정하고 밀집 구간을 근거로 Redis 스트림 소비 계층의 공통 장애를 급증의 원인 가설로 제시하면 정답. '근거 발견: 아니오'로 판정하거나 앞선 QR 실패를 급증의 원인으로 지목하면 오답.",
+  "source": "MANUAL",
+  "alert": {
+    "alertname": "AppErrorLogSpike",
+    "severity": "warning",
+    "fingerprint": "golden-gen-rfta-4222",
+    "summary": "ERROR 로그 급증(최근 5분, prod-app)",
+    "description": "ERROR 로그가 38건(임계 30/5m)입니다. zzol-bot이 근본원인을 분석합니다.",
+    "labels": {
+      "alertname": "AppErrorLogSpike",
+      "severity": "warning",
+      "job": "prod-app"
+    }
+  },
+  "logSamples": [
+    "[2026-08-27 03:25:14.882] [ERROR] [,] --- [] c.r.application.service.QrCodeService : QR 코드 생성 실패: joinCode=S6VD, error=java.net.SocketTimeoutException: Read timed out",
+    "[2026-08-27 03:47:03.219] [ERROR] [b00c62d60db2aa0b72ddd094fee4036c,cf44bc173a16611e] --- [redis-stream-thread-pool-speedtouch1] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=TouchProgressEventConsumer, message=TouchProgressEvent[eventId=2f7b36a8-f0fc-b7c5-1c7f-d590c55455c6, timestamp=2026-08-26T18:47:03.219000081Z, joinCode=S6VD, playerName=USER2, progress=41]",
+    "[2026-08-27 03:48:16.774] [ERROR] [879190793a5a9c8c76d819e192988f16,d5dcf96900cab83e] --- [redis-stream-thread-pool-blockstacking1] c.g.r.c.RedisStreamListenerStarter : Redis Stream 처리 중 오류가 발생했습니다.",
+    "[2026-08-27 03:49:31.402] [ERROR] [f84050ee32e9ba7b265c1ad8e0b2ab30,fc43128bb081b0a5] --- [redis-stream-thread-pool-blockstacking2] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=StopCommandEventConsumer, message=StopCommandEvent[eventId=28178341-1611-28fa-ebcf-46f8861440aa, timestamp=2026-08-26T18:49:31.402000115Z, joinCode=S6VD, playerName=USER5]",
+    "[2026-08-27 03:50:22.917] [ERROR] [1a4be19f585751edf4d46b40b5a14c55,455a3af6637eab28] --- [redis-stream-thread-pool-racinggame1] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=TapCommandEventConsumer, message=TapCommandEvent[eventId=2cfb29ad-c8c7-9109-97be-90535443f4ef, timestamp=2026-08-26T18:50:22.917000162Z, joinCode=W7GK, playerName=USER1, tapCount=18]",
+    "[2026-08-27 03:51:47.330] [ERROR] [aed5d3dd24c9730c9da8d4404efc4f27,448ef7ebecc8e01f] --- [redis-stream-thread-pool-racinggame2] c.g.r.c.RedisStreamListenerStarter : Redis Stream 처리 중 오류가 발생했습니다."
+  ],
+  "logEnvironment": "prod",
+  "expected": "예",
+  "axis": "partial-relevance"
+}
