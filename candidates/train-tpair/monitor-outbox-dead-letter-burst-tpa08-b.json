@@ -1,0 +1,31 @@
+{
+  "name": "monitor-outbox-dead-letter-burst-tpa08-b",
+  "question": "알림 AppErrorLogSpike(warning)가 prod에서 발화했다 - 최근 5분 ERROR 로그가 44건으로 임계 30을 넘었다. 봇에는 prod ERROR 로그 샘플 8줄이 주어졌고, 8줄의 시각은 약 5시간 25분에 걸쳐 흩어져 있다.",
+  "rubric": "같은 종류의 outbox DEAD_LETTER 전환이지만 약 5시간 25분에 걸쳐 산발적으로 발생해 최근 5분의 급증을 설명하지 못한다. '근거 발견: 아니오'로 판정해야 정답. 표본을 급증의 근거로 인정하면 오답.",
+  "source": "MANUAL",
+  "alert": {
+    "alertname": "AppErrorLogSpike",
+    "severity": "warning",
+    "fingerprint": "golden-gen-tpa-1081",
+    "summary": "ERROR 로그 급증(최근 5분, prod-app)",
+    "description": "ERROR 로그가 44건(임계 30/5m)입니다. zzol-bot이 근본원인을 분석합니다.",
+    "labels": {
+      "alertname": "AppErrorLogSpike",
+      "severity": "warning",
+      "job": "prod-app"
+    }
+  },
+  "logSamples": [
+    "[2026-08-28 17:41:24.877] [ERROR] [,] --- [pool-3-thread-1] c.global.outbox.OutboxEventProcessor : Outbox 이벤트 최대 재시도 초과, DEAD_LETTER 전환: id=91204, streamKey=laddergame",
+    "[2026-08-28 18:21:59.800] [ERROR] [,] --- [pool-3-thread-1] c.global.outbox.OutboxEventProcessor : Outbox 이벤트 최대 재시도 초과, DEAD_LETTER 전환: id=91207, streamKey=laddergame",
+    "[2026-08-28 19:06:25.232] [ERROR] [,] --- [pool-3-thread-2] c.global.outbox.OutboxEventProcessor : Outbox 이벤트 최대 재시도 초과, DEAD_LETTER 전환: id=91211, streamKey=racinggame",
+    "[2026-08-28 19:54:43.071] [ERROR] [,] --- [pool-3-thread-1] c.global.outbox.OutboxEventProcessor : Outbox 이벤트 최대 재시도 초과, DEAD_LETTER 전환: id=91215, streamKey=laddergame",
+    "[2026-08-28 20:44:16.362] [ERROR] [,] --- [pool-3-thread-2] c.global.outbox.OutboxEventProcessor : Outbox 이벤트 최대 재시도 초과, DEAD_LETTER 전환: id=91218, streamKey=settlement:result",
+    "[2026-08-28 21:32:17.009] [ERROR] [,] --- [pool-3-thread-1] c.global.outbox.OutboxEventProcessor : Outbox 이벤트 최대 재시도 초과, DEAD_LETTER 전환: id=91223, streamKey=laddergame",
+    "[2026-08-28 22:19:05.424] [ERROR] [,] --- [pool-3-thread-2] c.global.outbox.OutboxEventProcessor : Outbox 이벤트 최대 재시도 초과, DEAD_LETTER 전환: id=91229, streamKey=racinggame",
+    "[2026-08-28 23:06:38.245] [ERROR] [,] --- [pool-3-thread-1] c.global.outbox.OutboxEventProcessor : Outbox 이벤트 최대 재시도 초과, DEAD_LETTER 전환: id=91234, streamKey=laddergame"
+  ],
+  "logEnvironment": "prod",
+  "expected": "아니오",
+  "axis": "sparse-evidence"
+}

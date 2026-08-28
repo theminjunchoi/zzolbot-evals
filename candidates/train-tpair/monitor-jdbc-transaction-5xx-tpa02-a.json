@@ -1,0 +1,28 @@
+{
+  "name": "monitor-jdbc-transaction-5xx-tpa02-a",
+  "question": "알림 Http5xxRatioHigh(critical)가 prod에서 발화했다 - 최근 5분 5xx 비율이 9.3%로 임계 5%를 넘었다(5xx 38건). 봇에는 최근 30분 창에서 조회된 prod ERROR 로그 샘플 5줄이 주어졌고, 5줄 모두 4분 이내에 몰려 있다.",
+  "rubric": "동일한 JDBC 커넥션 획득 실패(CannotCreateTransactionException)로 인한 5xx가 알림 시각과 정합하는 좁은 시간창(약 4분)에 5개 엔드포인트에서 반복된 것으로 5xx 비율 급증의 직접 근거다. '근거 발견: 예'로 판정하고 DB 커넥션 풀 고갈 또는 DB 접속 불가로 트랜잭션 시작이 실패하고 있다고 지목하면 정답. '근거 발견: 아니오'로 판정하면 오답.",
+  "source": "MANUAL",
+  "alert": {
+    "alertname": "Http5xxRatioHigh",
+    "severity": "critical",
+    "fingerprint": "golden-gen-tpa-1021",
+    "summary": "HTTP 5xx 비율 5% 초과 (prod-app)",
+    "description": "최근 5분 5xx 비율이 9.3%. 서버 측 광범위 실패 가능성.",
+    "labels": {
+      "alertname": "Http5xxRatioHigh",
+      "severity": "critical",
+      "job": "prod-app"
+    }
+  },
+  "logSamples": [
+    "[2026-08-28 09:41:12.731] [ERROR] [d8689dbd777e683d5160a810ae458b9e,5346a19931c77fd9] --- [http-nio-8080-exec-11] c.web.exception.RestExceptionHandler : method=POST uri=/rooms exception=CannotCreateTransactionException message=Could not open JDBC Connection for transaction",
+    "[2026-08-28 09:41:39.176] [ERROR] [02c4e0422c266376a5408015228bfb3e,f3945f9989a2ec17] --- [http-nio-8080-exec-4] c.web.exception.RestExceptionHandler : method=GET uri=/rooms/check-joinCode exception=CannotCreateTransactionException message=Could not open JDBC Connection for transaction",
+    "[2026-08-28 09:42:26.606] [ERROR] [482a40383bb8ec581943d524db37461c,a143098bd6159d70] --- [http-nio-8080-exec-19] c.web.exception.RestExceptionHandler : method=GET uri=/rooms/M4TZ/settings exception=CannotCreateTransactionException message=Could not open JDBC Connection for transaction",
+    "[2026-08-28 09:43:37.207] [ERROR] [3d65ac5f173ea3b34d48cbe55e84c816,75c3946a43a72e9b] --- [http-nio-8080-exec-7] c.web.exception.RestExceptionHandler : method=GET uri=/rooms/check-guestName exception=CannotCreateTransactionException message=Could not open JDBC Connection for transaction",
+    "[2026-08-28 09:44:50.925] [ERROR] [199831554e4b1f8d2ef6721e2d30439d,0b677e4fd812b6b6] --- [http-nio-8080-exec-23] c.web.exception.RestExceptionHandler : method=GET uri=/rooms/nickname/random exception=CannotCreateTransactionException message=Could not open JDBC Connection for transaction"
+  ],
+  "logEnvironment": "prod",
+  "expected": "예",
+  "axis": "positive-dense"
+}

@@ -1,0 +1,28 @@
+{
+  "name": "monitor-settlement-stream-burst-tpb01-a",
+  "question": "알림 AppErrorLogSpike(warning)가 prod에서 발화했다 - 최근 5분 ERROR 로그가 임계 30건을 넘겼다. 봇에는 prod 앱 ERROR 로그 샘플 5줄(정산 결과 스트림 컨슈머의 ACK 보류와 pending 재처리 실패)이 주어졌다.",
+  "rubric": "주어진 ERROR 로그 5줄은 모두 정산 결과 스트림 컨슈머가 ACK를 보류하고 재전달을 대기한 실패와 sweeper의 pending 재처리 실패에 해당하며, 알림 시각과 정합하는 좁은 시간창(약 4분) 안에 5건이 몰려 반복됐으므로 ERROR 로그 급증의 직접 근거다. '근거 발견: 예'로 판정하고 정산 결과 스트림 소비 실패로 같은 recordId가 재전달 루프에 갇힌 것을 원인으로 지목하면 정답. '근거 발견: 아니오'로 판정하거나 표본 부족을 이유로 근거를 부정하면 오답.",
+  "source": "MANUAL",
+  "alert": {
+    "alertname": "AppErrorLogSpike",
+    "severity": "warning",
+    "fingerprint": "golden-gen-aes-3117",
+    "summary": "ERROR 로그 급증(최근 5분, prod-app)",
+    "description": "ERROR 로그가 34건(임계 30/5m)입니다. zzol-bot이 근본원인을 분석합니다.",
+    "labels": {
+      "alertname": "AppErrorLogSpike",
+      "severity": "warning",
+      "job": "prod-app"
+    }
+  },
+  "logSamples": [
+    "[2026-08-28 11:42:10.238] [ERROR] [f19ea88918534723be95f17d73604d81,f245d12f7ffe46f8] --- [redis-stream-thread-pool-settlement:result1] c.s.i.c.SettlementStreamConsumer : 정산 처리 실패 — ACK 보류, 재전달 대기: recordId=1756421903118-0",
+    "[2026-08-28 11:42:33.208] [ERROR] [c26354c65987a6f26d00f930b0f35146,19daebff91f66d07] --- [redis-stream-thread-pool-settlement:result2] c.s.i.c.SettlementStreamConsumer : 정산 스트림 처리 중 오류가 발생했습니다.",
+    "[2026-08-28 11:43:26.176] [ERROR] [397da307494d47d64500b9a668745158,cc1c3950e70a81b3] --- [redis-stream-thread-pool-settlement:result1] c.s.i.c.SettlementStreamConsumer : 정산 처리 실패 — ACK 보류, 재전달 대기: recordId=1756421918442-1",
+    "[2026-08-28 11:45:14.895] [ERROR] [,] --- [pool-3-thread-1] c.s.i.c.SettlementPendingSweeper : pending 정산 메시지 재처리 실패: recordId=1756421903118-0",
+    "[2026-08-28 11:46:18.368] [ERROR] [d2803a26ad944ee6c25183d29208027f,fb47fb8d59bd083e] --- [redis-stream-thread-pool-settlement:result2] c.s.i.c.SettlementStreamConsumer : 정산 처리 실패 — ACK 보류, 재전달 대기: recordId=1756421935077-0"
+  ],
+  "logEnvironment": "prod",
+  "expected": "예",
+  "axis": "positive-dense"
+}

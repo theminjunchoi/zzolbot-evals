@@ -1,0 +1,32 @@
+{
+  "name": "monitor-settings-npe-5xx-budget-burn-tpa10-b",
+  "question": "알림 ErrorBudgetBurnFast(critical)가 prod에서 발화했다 - 5xx 비율이 1시간과 5분 양쪽 창에서 7.2%를 넘겨 에러버짓이 빠르게 소진되고 있다(최근 5분 5xx 45건). 봇에는 prod ERROR 로그 샘플 9줄이 주어졌고, 9줄의 시각은 약 5시간 56분에 걸쳐 흩어져 있다.",
+  "rubric": "같은 종류의 NullPointerException 5xx지만 약 5시간 56분에 걸쳐 산발적으로 발생해 최근 5분의 5xx 급증을 설명하지 못한다. '근거 발견: 아니오'로 판정해야 정답. 표본을 급증의 근거로 인정하면 오답.",
+  "source": "MANUAL",
+  "alert": {
+    "alertname": "ErrorBudgetBurnFast",
+    "severity": "critical",
+    "fingerprint": "golden-gen-tpa-1101",
+    "summary": "에러버짓 빠른 소진 (SLO 99.5%, burn-rate 14.4×)",
+    "description": "prod-app 5xx 비율이 1h·5m 양 창에서 7.2%를 초과. 약 2일이면 월간 에러버짓 전부 소진.",
+    "labels": {
+      "alertname": "ErrorBudgetBurnFast",
+      "severity": "critical",
+      "job": "prod-app"
+    }
+  },
+  "logSamples": [
+    "[2026-08-28 14:03:14.036] [ERROR] [5435b7abfdddeb950ce0c374441c4870,4d125d052c07d2e1] --- [http-nio-8080-exec-16] c.web.exception.RestExceptionHandler : method=GET uri=/rooms/N2KB/settings exception=NullPointerException message=Cannot invoke RoomSettings.getMaxPlayerCount() because settings is null",
+    "[2026-08-28 14:36:54.790] [ERROR] [e0cb91300a8b0ee7180cb2b8517d8d67,7973760ae79807c9] --- [http-nio-8080-exec-1] c.web.exception.RestExceptionHandler : method=GET uri=/rooms/N2KB/probabilities exception=NullPointerException message=Cannot invoke RoomSettings.getMaxPlayerCount() because settings is null",
+    "[2026-08-28 15:20:57.054] [ERROR] [79f3676feb07b797ad6d8a397a608865,398850472992fca2] --- [http-nio-8080-exec-20] c.web.exception.RestExceptionHandler : method=GET uri=/rooms/D4HN/settings exception=NullPointerException message=Cannot invoke RoomSettings.getMaxPlayerCount() because settings is null",
+    "[2026-08-28 16:05:08.375] [ERROR] [3fb62032241f517f68e3c4cd0bc865d3,e43ecf09dba6b85e] --- [http-nio-8080-exec-6] c.web.exception.RestExceptionHandler : method=GET uri=/rooms/N2KB/settings exception=NullPointerException message=Cannot invoke RoomSettings.getMaxPlayerCount() because settings is null",
+    "[2026-08-28 16:51:55.344] [ERROR] [6e6e797d7053f9fb6a4f49ad500ca944,d1fccd2950108c3d] --- [http-nio-8080-exec-25] c.web.exception.RestExceptionHandler : method=GET uri=/rooms/D4HN/probabilities exception=NullPointerException message=Cannot invoke RoomSettings.getMaxPlayerCount() because settings is null",
+    "[2026-08-28 17:39:21.585] [ERROR] [7cf2b176698c5272cc9e4dd658c36d28,eb502d530e08b7da] --- [http-nio-8080-exec-11] c.web.exception.RestExceptionHandler : method=GET uri=/rooms/D4HN/settings exception=NullPointerException message=Cannot invoke RoomSettings.getMaxPlayerCount() because settings is null",
+    "[2026-08-28 18:25:53.509] [ERROR] [801ba9e84c2d768ea22b43feb976fefd,f04e0821ba783723] --- [http-nio-8080-exec-3] c.web.exception.RestExceptionHandler : method=GET uri=/rooms/N2KB/probabilities exception=NullPointerException message=Cannot invoke RoomSettings.getMaxPlayerCount() because settings is null",
+    "[2026-08-28 19:13:32.756] [ERROR] [bd76981099f9761d0ea8b6c4a77b642c,0a64ef718f66f316] --- [http-nio-8080-exec-19] c.web.exception.RestExceptionHandler : method=GET uri=/rooms/D4HN/settings exception=NullPointerException message=Cannot invoke RoomSettings.getMaxPlayerCount() because settings is null",
+    "[2026-08-28 19:59:35.144] [ERROR] [8fdc0446f2f068cef5c322d103479c62,a347b0f6c27239a5] --- [http-nio-8080-exec-8] c.web.exception.RestExceptionHandler : method=GET uri=/rooms/N2KB/settings exception=NullPointerException message=Cannot invoke RoomSettings.getMaxPlayerCount() because settings is null"
+  ],
+  "logEnvironment": "prod",
+  "expected": "아니오",
+  "axis": "sparse-evidence"
+}

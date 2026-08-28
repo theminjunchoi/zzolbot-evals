@@ -1,0 +1,31 @@
+{
+  "name": "monitor-redis-command-timeout-5xx-tpa07-b",
+  "question": "알림 Http5xxRatioHigh(critical)가 prod에서 발화했다 - 최근 5분 5xx 비율이 11.5%로 임계 5%를 넘었다(5xx 43건). 봇에는 prod ERROR 로그 샘플 8줄이 주어졌고, 8줄의 시각은 약 5시간 4분에 걸쳐 흩어져 있다.",
+  "rubric": "같은 종류의 Redis 명령 타임아웃 5xx지만 약 5시간 4분에 걸쳐 산발적으로 발생해 최근 5분의 5xx 비율 급증을 설명하지 못한다. '근거 발견: 아니오'로 판정해야 정답. 표본을 급증의 근거로 인정하면 오답.",
+  "source": "MANUAL",
+  "alert": {
+    "alertname": "Http5xxRatioHigh",
+    "severity": "critical",
+    "fingerprint": "golden-gen-tpa-1071",
+    "summary": "HTTP 5xx 비율 5% 초과 (prod-app)",
+    "description": "최근 5분 5xx 비율이 11.5%. 서버 측 광범위 실패 가능성.",
+    "labels": {
+      "alertname": "Http5xxRatioHigh",
+      "severity": "critical",
+      "job": "prod-app"
+    }
+  },
+  "logSamples": [
+    "[2026-08-28 13:21:02.642] [ERROR] [4897281d997c8ca21d475925c368e9b7,9847c6124114f6cb] --- [http-nio-8080-exec-8] c.web.exception.RestExceptionHandler : method=GET uri=/rooms/check-joinCode exception=RedisCommandTimeoutException message=Command timed out after 3 second(s)",
+    "[2026-08-28 13:54:22.582] [ERROR] [0319f125d33180e82e4c0cd8eab5679b,fc46d19f69267e72] --- [http-nio-8080-exec-15] c.web.exception.RestExceptionHandler : method=POST uri=/rooms exception=RedisCommandTimeoutException message=Command timed out after 3 second(s)",
+    "[2026-08-28 14:34:33.593] [ERROR] [b6b1f302d952aa59ed74d14308047f0a,acdd35f6b1f9c1be] --- [http-nio-8080-exec-2] c.web.exception.RestExceptionHandler : method=GET uri=/rooms/J3HP/probabilities exception=RedisCommandTimeoutException message=Command timed out after 3 second(s)",
+    "[2026-08-28 15:17:21.628] [ERROR] [7ef5ded0b243d8aa409bd1257448e194,f0c1872644df0632] --- [http-nio-8080-exec-22] c.web.exception.RestExceptionHandler : method=GET uri=/rooms/check-guestName exception=RedisCommandTimeoutException message=Command timed out after 3 second(s)",
+    "[2026-08-28 16:01:06.876] [ERROR] [6d6540d42a70d71c3e26bf6c3704ac26,93f2f1fa5c9e2001] --- [http-nio-8080-exec-10] c.web.exception.RestExceptionHandler : method=PATCH uri=/rooms/J3HP/settings exception=RedisCommandTimeoutException message=Command timed out after 3 second(s)",
+    "[2026-08-28 16:45:31.679] [ERROR] [7a6831b0c55512d095485d847a99aa7a,1448a2327ce7a05b] --- [http-nio-8080-exec-5] c.web.exception.RestExceptionHandler : method=GET uri=/rooms/check-joinCode exception=RedisCommandTimeoutException message=Command timed out after 3 second(s)",
+    "[2026-08-28 17:31:58.276] [ERROR] [e6535339c702280874c77cf10cdca014,a30dc5cdda1a6507] --- [http-nio-8080-exec-18] c.web.exception.RestExceptionHandler : method=POST uri=/rooms exception=RedisCommandTimeoutException message=Command timed out after 3 second(s)",
+    "[2026-08-28 18:25:11.173] [ERROR] [e989e085241e9b4c3f1741a54f315a76,5ff245dec63ad480] --- [http-nio-8080-exec-13] c.web.exception.RestExceptionHandler : method=GET uri=/rooms/nickname/random exception=RedisCommandTimeoutException message=Command timed out after 3 second(s)"
+  ],
+  "logEnvironment": "prod",
+  "expected": "아니오",
+  "axis": "sparse-evidence"
+}

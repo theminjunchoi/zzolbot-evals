@@ -1,0 +1,30 @@
+{
+  "name": "monitor-settlement-ack-hold-burst-tpa06-b",
+  "question": "알림 AppErrorLogSpike(warning)가 prod에서 발화했다 - 최근 5분 ERROR 로그가 37건으로 임계 30을 넘었다. 봇에는 prod ERROR 로그 샘플 7줄이 주어졌고, 7줄의 시각은 약 4시간 58분에 걸쳐 흩어져 있다.",
+  "rubric": "같은 종류의 정산 처리 실패지만 약 4시간 58분에 걸쳐 산발적으로 발생해 최근 5분의 급증을 설명하지 못한다. '근거 발견: 아니오'로 판정해야 정답. 표본을 급증의 근거로 인정하면 오답.",
+  "source": "MANUAL",
+  "alert": {
+    "alertname": "AppErrorLogSpike",
+    "severity": "warning",
+    "fingerprint": "golden-gen-tpa-1061",
+    "summary": "ERROR 로그 급증(최근 5분, prod-app)",
+    "description": "ERROR 로그가 37건(임계 30/5m)입니다. zzol-bot이 근본원인을 분석합니다.",
+    "labels": {
+      "alertname": "AppErrorLogSpike",
+      "severity": "warning",
+      "job": "prod-app"
+    }
+  },
+  "logSamples": [
+    "[2026-08-28 02:16:09.488] [ERROR] [dcb14d098a36101db38afa3e79300081,28913017297f7dad] --- [redis-stream-thread-pool-settlement:result1] c.s.i.c.SettlementStreamConsumer : 정산 처리 실패 — ACK 보류, 재전달 대기: recordId=1756369615103-0",
+    "[2026-08-28 03:02:13.247] [ERROR] [c0e7274e00e154a700aeb111bc3e77a2,12381f9360755d8a] --- [redis-stream-thread-pool-settlement:result2] c.s.i.c.SettlementStreamConsumer : 정산 처리 실패 — ACK 보류, 재전달 대기: recordId=1756369637418-0",
+    "[2026-08-28 03:53:11.807] [ERROR] [f81c59e3698ac4a2be1392f100a146ed,3a7f45f7d7c241b4] --- [redis-stream-thread-pool-settlement:result1] c.s.i.c.SettlementStreamConsumer : 정산 처리 실패 — ACK 보류, 재전달 대기: recordId=1756369664927-1",
+    "[2026-08-28 04:36:00.795] [ERROR] [21772da47a22b4f0f3e45e033aec6541,8ad012f15ac408e0] --- [redis-stream-thread-pool-settlement:result3] c.s.i.c.SettlementStreamConsumer : 정산 처리 실패 — ACK 보류, 재전달 대기: recordId=1756369702355-0",
+    "[2026-08-28 05:30:05.682] [ERROR] [3d2035e2c944dda8210dda744ffec0f5,ab929448e732fd0b] --- [redis-stream-thread-pool-settlement:result2] c.s.i.c.SettlementStreamConsumer : 정산 처리 실패 — ACK 보류, 재전달 대기: recordId=1756369741880-0",
+    "[2026-08-28 06:23:14.944] [ERROR] [1ca8a1d9be9101daedff9fb11b8d6afd,48bb7d00a0186723] --- [redis-stream-thread-pool-settlement:result1] c.s.i.c.SettlementStreamConsumer : 정산 처리 실패 — ACK 보류, 재전달 대기: recordId=1756369778264-2",
+    "[2026-08-28 07:13:58.240] [ERROR] [7348afbb19434be6627fba82c980e722,2555d64f247b0209] --- [redis-stream-thread-pool-settlement:result2] c.s.i.c.SettlementStreamConsumer : 정산 처리 실패 — ACK 보류, 재전달 대기: recordId=1756369812609-0"
+  ],
+  "logEnvironment": "prod",
+  "expected": "아니오",
+  "axis": "sparse-evidence"
+}

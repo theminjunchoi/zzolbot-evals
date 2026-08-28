@@ -1,0 +1,28 @@
+{
+  "name": "monitor-rooms-persistence-5xx-tpb02-a",
+  "question": "알림 Http5xxRatioHigh(critical)가 prod에서 발화했다 - 최근 5분 5xx 비율이 임계 5%를 넘겼다. 봇에는 prod 앱 ERROR 로그 샘플 5줄(방 생성 제약 위반과 방 상태 미초기화로 5xx가 된 HTTP 요청)이 주어졌다.",
+  "rubric": "주어진 ERROR 로그 5줄은 모두 joinCode 유니크 제약 위반으로 방 생성이 실패하고 그 방을 조회하는 요청이 상태 미초기화로 5xx가 된 실패에 해당하며, 알림 시각과 정합하는 좁은 시간창(약 4분) 안에 5건이 몰려 반복됐으므로 5xx 급증의 직접 근거다. '근거 발견: 예'로 판정하고 중복 joinCode 발급으로 방 저장이 깨지면서 생성과 조회 양쪽이 5xx가 된 것을 원인으로 지목하면 정답. '근거 발견: 아니오'로 판정하거나 표본 부족을 이유로 근거를 부정하면 오답.",
+  "source": "MANUAL",
+  "alert": {
+    "alertname": "Http5xxRatioHigh",
+    "severity": "critical",
+    "fingerprint": "golden-gen-h5x-3204",
+    "summary": "HTTP 5xx 비율 5% 초과 (prod-app)",
+    "description": "최근 5분 5xx 비율이 9.7%. 서버 측 광범위 실패 가능성.",
+    "labels": {
+      "alertname": "Http5xxRatioHigh",
+      "severity": "critical",
+      "job": "prod-app"
+    }
+  },
+  "logSamples": [
+    "[2026-08-28 15:03:41.557] [ERROR] [6dec8eacdf74388309c7cfb71fcc7b7a,e256c9fdf1a802ba] --- [http-nio-8080-exec-14] c.web.exception.RestExceptionHandler : method=POST uri=/rooms exception=DataIntegrityViolationException message=could not execute statement; SQL [n/a]; constraint [uk_room_join_code]",
+    "[2026-08-28 15:04:24.697] [ERROR] [f7a0e9bc405d5d3be9a95083f9e6ac16,f6f5543857c06cf8] --- [http-nio-8080-exec-6] c.web.exception.RestExceptionHandler : method=GET uri=/rooms/K7QD/settings exception=IllegalStateException message=Room state is not initialized",
+    "[2026-08-28 15:05:36.188] [ERROR] [f6e428cea58855d34c07abe10ab10fa7,629bb4d253c0525b] --- [http-nio-8080-exec-21] c.web.exception.RestExceptionHandler : method=POST uri=/rooms exception=DataIntegrityViolationException message=could not execute statement; SQL [n/a]; constraint [uk_room_join_code]",
+    "[2026-08-28 15:05:52.460] [ERROR] [e657cc46446b6606f6ba06520cbdd151,842180ebe19233da] --- [http-nio-8080-exec-9] c.web.exception.RestExceptionHandler : method=GET uri=/rooms/K7QD/probabilities exception=IllegalStateException message=Room state is not initialized",
+    "[2026-08-28 15:08:00.058] [ERROR] [1fa6df26db9b25b32804736ae95e15ae,727b89112f0abce6] --- [http-nio-8080-exec-33] c.web.exception.RestExceptionHandler : method=POST uri=/rooms exception=DataIntegrityViolationException message=could not execute statement; SQL [n/a]; constraint [uk_room_join_code]"
+  ],
+  "logEnvironment": "prod",
+  "expected": "예",
+  "axis": "positive-dense"
+}

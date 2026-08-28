@@ -1,0 +1,31 @@
+{
+  "name": "monitor-laddergame-draw-command-tpb07-a",
+  "question": "알림 AppErrorLogSpike(warning)가 prod에서 발화했다 - 최근 5분 ERROR 로그가 임계 30건을 넘겼다. 봇에는 prod 앱 ERROR 로그 샘플 8줄(사다리게임 draw 커맨드 소비 실패, 게임 스케줄 예외, Outbox DEAD_LETTER 전환)이 주어졌다.",
+  "rubric": "주어진 ERROR 로그 8줄은 모두 사다리게임 draw 커맨드 이벤트 소비 실패와 laddergame 스케줄 실행 예외, 그리고 laddergame 스트림의 Outbox DEAD_LETTER 전환에 해당하며, 알림 시각과 정합하는 좁은 시간창(약 4분) 안에 8건이 몰려 반복됐으므로 ERROR 로그 급증의 직접 근거다. '근거 발견: 예'로 판정하고 사다리게임 스트림의 소비와 발행이 동시에 막혀 커맨드 처리, 스케줄, Outbox 재시도가 함께 무너진 것을 원인으로 지목하면 정답. '근거 발견: 아니오'로 판정하거나 표본 부족을 이유로 근거를 부정하면 오답.",
+  "source": "MANUAL",
+  "alert": {
+    "alertname": "AppErrorLogSpike",
+    "severity": "warning",
+    "fingerprint": "golden-gen-aes-3752",
+    "summary": "ERROR 로그 급증(최근 5분, prod-app)",
+    "description": "ERROR 로그가 44건(임계 30/5m)입니다. zzol-bot이 근본원인을 분석합니다.",
+    "labels": {
+      "alertname": "AppErrorLogSpike",
+      "severity": "warning",
+      "job": "prod-app"
+    }
+  },
+  "logSamples": [
+    "[2026-08-28 12:35:00.243] [ERROR] [7277c26ad80b8b48cf1a9ef26dd095bc,2d8add607c8e2833] --- [redis-stream-thread-pool-laddergame1] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=LadderDrawCommandEventConsumer, message=LadderDrawCommandEvent[eventId=3f7a1c85-4b09-4d62-8e17-05ca9b3d7e41, timestamp=2026-08-28T12:35:00.712450918Z, joinCode=P2CK, playerName=PLAYER_1]",
+    "[2026-08-28 12:35:22.533] [ERROR] [628965dc48f05311b45ec3692b44b15d,196ca3ad6d9df37b] --- [redis-stream-thread-pool-laddergame2] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=LadderDrawCommandEventConsumer, message=LadderDrawCommandEvent[eventId=a4e28d17-6c53-4f80-b219-8de07f4a5c36, timestamp=2026-08-28T12:35:47.336821405Z, joinCode=P2CK, playerName=PLAYER_3]",
+    "[2026-08-28 12:35:35.705] [ERROR] [,] --- [laddergame-task-1] c.g.s.GameTaskSchedulerFactory : [laddergame] 스케줄 실행 중 예외가 발생했습니다.",
+    "[2026-08-28 12:36:53.697] [ERROR] [47e47360cdfe9e3ef85f43bd91a2f06f,2b655645978ce111] --- [redis-stream-thread-pool-laddergame1] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=LadderDrawCommandEventConsumer, message=LadderDrawCommandEvent[eventId=c9b03e46-1a78-4d95-a6f3-72e5108bd4c7, timestamp=2026-08-28T12:36:29.884073215Z, joinCode=P2CK, playerName=PLAYER_4]",
+    "[2026-08-28 12:36:56.098] [ERROR] [,] --- [pool-1-thread-1] c.global.outbox.OutboxEventProcessor : Outbox 이벤트 최대 재시도 초과, DEAD_LETTER 전환: id=20419, streamKey=laddergame",
+    "[2026-08-28 12:37:48.696] [ERROR] [d3bbcdb59ae4acf2257aae3d1deee7af,6b0c6d5fca0c4458] --- [redis-stream-thread-pool-laddergame3] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=LadderDrawCommandEventConsumer, message=LadderDrawCommandEvent[eventId=51d7af92-8e06-4b31-9c74-3a08fe6d2b15, timestamp=2026-08-28T12:37:11.209764530Z, joinCode=J9WD, playerName=PLAYER_2]",
+    "[2026-08-28 12:38:49.940] [ERROR] [,] --- [laddergame-task-2] c.g.s.GameTaskSchedulerFactory : [laddergame] 스케줄 실행 중 예외가 발생했습니다.",
+    "[2026-08-28 12:39:12.052] [ERROR] [,] --- [pool-1-thread-1] c.global.outbox.OutboxEventProcessor : Outbox 이벤트 최대 재시도 초과, DEAD_LETTER 전환: id=20428, streamKey=laddergame"
+  ],
+  "logEnvironment": "prod",
+  "expected": "예",
+  "axis": "positive-dense"
+}

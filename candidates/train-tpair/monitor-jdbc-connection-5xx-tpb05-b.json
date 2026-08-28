@@ -1,0 +1,30 @@
+{
+  "name": "monitor-jdbc-connection-5xx-tpb05-b",
+  "question": "알림 ErrorBudgetBurnFast(critical)가 prod에서 발화했다 - 1h와 5m 양 창에서 5xx 비율이 7.2%를 넘겨 에러버짓이 빠르게 소진되고 있다. 봇에는 prod 앱 ERROR 로그 샘플 7줄(JDBC 커넥션 획득 실패로 5xx가 된 HTTP 요청)이 주어졌다.",
+  "rubric": "주어진 ERROR 로그 7줄은 JDBC 커넥션을 얻지 못해 방 생성과 조회 엔드포인트가 일제히 5xx로 떨어진 요청 실패에 해당해 종류는 같지만, 약 2시간 40분에 걸쳐 7건이 산발적으로 흩어져 있어 최근 5분의 5xx 급증을 설명하지 못한다. '근거 발견: 아니오'로 판정하고 시간 분포가 알림 창과 맞지 않음을 지적해야 정답. '근거 발견: 예'로 판정하거나 이 표본을 급증의 근거로 인정하면 오답.",
+  "source": "MANUAL",
+  "alert": {
+    "alertname": "ErrorBudgetBurnFast",
+    "severity": "critical",
+    "fingerprint": "golden-gen-ebf-3531",
+    "summary": "에러버짓 빠른 소진 (SLO 99.5%, burn-rate 14.4×)",
+    "description": "prod-app 5xx 비율이 1h·5m 양 창에서 7.2%를 초과. 약 2일이면 월간 에러버짓 전부 소진.",
+    "labels": {
+      "alertname": "ErrorBudgetBurnFast",
+      "severity": "critical",
+      "job": "prod-app"
+    }
+  },
+  "logSamples": [
+    "[2026-08-28 17:22:41.582] [ERROR] [bc4af04372ebdef7ce0373c708b9c2fc,73a214682c0d4419] --- [http-nio-8080-exec-11] c.web.exception.RestExceptionHandler : method=GET uri=/rooms/nickname/random exception=JDBCConnectionException message=Unable to acquire JDBC Connection",
+    "[2026-08-28 17:54:19.321] [ERROR] [6be7b0f3bbca8a979be8eacf80a183a4,e79501e75ea7aa25] --- [http-nio-8080-exec-27] c.web.exception.RestExceptionHandler : method=POST uri=/rooms exception=JDBCConnectionException message=Unable to acquire JDBC Connection",
+    "[2026-08-28 17:54:50.481] [ERROR] [a80fd1aad33f958e7d65b110fa47b1ab,8dbfb6aa90973c55] --- [http-nio-8080-exec-4] c.web.exception.RestExceptionHandler : method=GET uri=/rooms/check-joinCode exception=JDBCConnectionException message=Unable to acquire JDBC Connection",
+    "[2026-08-28 18:18:10.939] [ERROR] [7386cff204ff9eadc16e6732d372e394,d975e59eca8dde13] --- [http-nio-8080-exec-19] c.web.exception.RestExceptionHandler : method=GET uri=/rooms/B9TN/settings exception=JDBCConnectionException message=Unable to acquire JDBC Connection",
+    "[2026-08-28 19:25:37.753] [ERROR] [5e1d4c67da97686f08495def0b246e12,4cba0fc5de59c03b] --- [http-nio-8080-exec-8] c.web.exception.RestExceptionHandler : method=POST uri=/rooms exception=JDBCConnectionException message=Unable to acquire JDBC Connection",
+    "[2026-08-28 19:29:46.838] [ERROR] [4381069c34efe76736dd9c8ba0244a67,7e7f9058cc48017a] --- [http-nio-8080-exec-30] c.web.exception.RestExceptionHandler : method=GET uri=/rooms/check-guestName exception=JDBCConnectionException message=Unable to acquire JDBC Connection",
+    "[2026-08-28 20:02:41.486] [ERROR] [7666c8cf540d0e9c94818cd243e07800,70ff56df99142a76] --- [http-nio-8080-exec-16] c.web.exception.RestExceptionHandler : method=GET uri=/rooms/B9TN/probabilities exception=JDBCConnectionException message=Unable to acquire JDBC Connection"
+  ],
+  "logEnvironment": "prod",
+  "expected": "아니오",
+  "axis": "sparse-evidence"
+}

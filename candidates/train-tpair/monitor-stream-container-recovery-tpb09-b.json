@@ -1,0 +1,32 @@
+{
+  "name": "monitor-stream-container-recovery-tpb09-b",
+  "question": "알림 AppErrorLogSpike(warning)가 prod에서 발화했다 - 최근 5분 ERROR 로그가 임계 30건을 넘겼다. 봇에는 prod 앱 ERROR 로그 샘플 9줄(Redis Stream container 상태 확인과 복구 실패)이 주어졌다.",
+  "rubric": "주어진 ERROR 로그 9줄은 Redis Stream container 상태 확인 예외와 복구 예외, 그리고 복구 포기 후 HealthIndicator DOWN 보고에 해당해 종류는 같지만, 약 3시간 10분에 걸쳐 9건이 산발적으로 흩어져 있어 최근 5분의 ERROR 로그 급증을 설명하지 못한다. '근거 발견: 아니오'로 판정하고 시간 분포가 알림 창과 맞지 않음을 지적해야 정답. '근거 발견: 예'로 판정하거나 이 표본을 급증의 근거로 인정하면 오답.",
+  "source": "MANUAL",
+  "alert": {
+    "alertname": "AppErrorLogSpike",
+    "severity": "warning",
+    "fingerprint": "golden-gen-aes-3974",
+    "summary": "ERROR 로그 급증(최근 5분, prod-app)",
+    "description": "ERROR 로그가 39건(임계 30/5m)입니다. zzol-bot이 근본원인을 분석합니다.",
+    "labels": {
+      "alertname": "AppErrorLogSpike",
+      "severity": "warning",
+      "job": "prod-app"
+    }
+  },
+  "logSamples": [
+    "[2026-08-28 06:18:47.054] [ERROR] [,] --- [pool-5-thread-1] c.g.h.RedisStreamContainerRecovery : Redis Stream container 상태 확인 중 예외: stream=nunchi",
+    "[2026-08-28 06:38:03.868] [ERROR] [,] --- [pool-5-thread-1] c.g.h.RedisStreamContainerRecovery : Redis Stream container 복구 중 예외 발생: stream=nunchi",
+    "[2026-08-28 08:01:18.724] [ERROR] [,] --- [pool-5-thread-1] c.g.h.RedisStreamContainerRecovery : Redis Stream container 상태 확인 중 예외: stream=laddergame",
+    "[2026-08-28 08:06:51.060] [ERROR] [,] --- [pool-5-thread-1] c.g.h.RedisStreamContainerRecovery : Redis Stream container 복구 중 예외 발생: stream=laddergame",
+    "[2026-08-28 08:20:30.249] [ERROR] [,] --- [pool-5-thread-1] c.g.h.RedisStreamContainerRecovery : Redis Stream container 복구 포기: stream=nunchi. HealthIndicator에 DOWN 보고",
+    "[2026-08-28 08:40:36.706] [ERROR] [,] --- [pool-5-thread-1] c.g.h.RedisStreamContainerRecovery : Redis Stream container 상태 확인 중 예외: stream=settlement:result",
+    "[2026-08-28 09:00:08.649] [ERROR] [,] --- [pool-5-thread-1] c.g.h.RedisStreamContainerRecovery : Redis Stream container 복구 중 예외 발생: stream=settlement:result",
+    "[2026-08-28 09:06:41.872] [ERROR] [,] --- [pool-5-thread-1] c.g.h.RedisStreamContainerRecovery : Redis Stream container 복구 포기: stream=laddergame. HealthIndicator에 DOWN 보고",
+    "[2026-08-28 09:28:47.331] [ERROR] [,] --- [pool-5-thread-1] c.g.h.RedisStreamContainerRecovery : Redis Stream container 복구 포기: stream=settlement:result. HealthIndicator에 DOWN 보고"
+  ],
+  "logEnvironment": "prod",
+  "expected": "아니오",
+  "axis": "sparse-evidence"
+}
