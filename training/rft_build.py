@@ -62,7 +62,9 @@ def main() -> int:
                 {"role": "user", "content": build_prompt(scenario)},
                 {"role": "assistant", "content": to_target_json(analysis)},
             ],
-            "_from_greedy": best is row["greedy"],
+            # 객체 동일성(is)으로 비교하면 안 된다. 샘플이 그리디와 같은 점수로 비기면
+            # max가 앞선 샘플을 돌려주므로 "샘플링이 이겼다"로 잘못 센다(실제로 겪었다).
+            "_beats_greedy": best["total"] > row["greedy"]["total"],
         })
         stats["채택"] += 1
 
@@ -70,7 +72,7 @@ def main() -> int:
         print("채택된 샘플이 없다.", file=sys.stderr)
         return 1
 
-    from_greedy = sum(1 for s in samples if s.pop("_from_greedy"))
+    beats_greedy = sum(1 for s in samples if s.pop("_beats_greedy"))
     rng = random.Random(args.seed)
     rng.shuffle(samples)
     split = max(1, int(len(samples) * args.valid_ratio))
@@ -83,8 +85,8 @@ def main() -> int:
                 f.write(json.dumps(row, ensure_ascii=False) + "\n")
 
     print(f"채택 {stats['채택']}건 → train {len(train)} / valid {len(valid)}")
-    print(f"  그중 그리디가 최고였던 것: {from_greedy}건 (자기증류)")
-    print(f"  샘플링이 그리디를 이긴 것: {stats['채택'] - from_greedy}건 (RFT의 실제 기여)")
+    print(f"  샘플링이 그리디를 이긴 것: {beats_greedy}건 (RFT의 실제 기여)")
+    print(f"  그리디와 같거나 못한 것: {stats['채택'] - beats_greedy}건 (자기증류)")
     for reason, count in stats.most_common():
         if reason != "채택":
             print(f"  제외 [{reason}]: {count}건")
