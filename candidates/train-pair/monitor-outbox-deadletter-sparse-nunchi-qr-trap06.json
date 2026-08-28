@@ -1,0 +1,25 @@
+{
+  "name": "monitor-outbox-deadletter-sparse-nunchi-qr-trap06",
+  "question": "알림 OutboxDeadLetterHigh(warning)가 prod에서 발화했다 - DEAD_LETTER로 전환된 outbox 이벤트가 26건이다. 봇에는 최근 30분 창에서 조회된 prod 앱 ERROR 로그 샘플 2줄이 주어졌고, 두 줄의 시각은 25분 떨어져 있다.",
+  "rubric": "DEAD_LETTER 26건이라면 OutboxEventProcessor의 전환 로그가 그만큼 남아야 하는데 주어진 2줄에는 outbox 로거가 한 줄도 없고, 눈치게임 press 처리 오류 1건과 QR 코드 생성 실패 1건이 25분 간격으로 흩어져 있을 뿐이다. '근거 발견: 아니오'로 판정하고 표본 부족을 인정하면 정답. 눈치게임 오류나 QR 실패를 outbox 발행 실패의 원인으로 지목하면 오답.",
+  "source": "MANUAL",
+  "alert": {
+    "alertname": "OutboxDeadLetterHigh",
+    "severity": "warning",
+    "fingerprint": "golden-gen-sparsetrap-06",
+    "summary": "Outbox DEAD_LETTER 적체 (> 10, prod-app)",
+    "description": "재시도 초과로 DEAD_LETTER 전환된 outbox 이벤트가 26건. 다운스트림 발행 경로 점검 필요.",
+    "labels": {
+      "alertname": "OutboxDeadLetterHigh",
+      "severity": "warning",
+      "job": "prod-app"
+    }
+  },
+  "logSamples": [
+    "[2026-08-28 07:22:09.845] [ERROR] [a9c0e57d31b84f26905d7a1c4be36f80,2f81c6a94d70b5e3] --- [redis-stream-thread-pool-nunchi1] c.n.i.m.c.NunchiCommandEventConsumer : 눈치게임 press 처리 중 오류: joinCode=Q4LT, playerName=밤샘개발자, eventId=b8140e37-6ca9-4d52-9f01-3ae57c26d904",
+    "[2026-08-28 07:47:31.290] [ERROR] [,] --- [] c.r.application.service.QrCodeService : QR 코드 생성 실패: joinCode=Q4LT, error=IOException"
+  ],
+  "logEnvironment": "prod",
+  "expected": "아니오",
+  "axis": "sparse-evidence"
+}

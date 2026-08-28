@@ -1,0 +1,27 @@
+{
+ "name": "monitor-nickname-npe-5xx-paira08-a",
+ "question": "알림 ErrorBudgetBurnFast(critical)가 prod에서 발화했다 - prod-app 5xx 비율이 1시간과 5분 양 창에서 SLO 소진 속도 14.4배를 넘겼다. 봇에는 최근 30분 ERROR 로그 샘플 4줄이 주어졌다.",
+ "rubric": "주어진 ERROR 로그는 11:05부터 11:08까지 세 줄이 같은 NullPointerException(nickname is null)으로 /rooms/nickname/random과 POST /rooms에서 반복 발생하고, 한 줄만 다른 IllegalArgumentException이며, 모두 서버 오류 응답으로 5xx 비율을 밀어 올리는 요청 실패다. '근거 발견: 예'로 판정하고 닉네임이 null인 경로의 NullPointerException 반복을 5xx 소진의 주된 원인으로 짚으면 정답. '근거 발견: 아니오'로 판정하거나 산발적인 IllegalArgumentException 한 줄을 주원인으로 지목해 반복 패턴을 놓치면 오답.",
+ "source": "MANUAL",
+ "alert": {
+  "alertname": "ErrorBudgetBurnFast",
+  "severity": "critical",
+  "fingerprint": "golden-gen-pa-115",
+  "summary": "에러버짓 빠른 소진 (SLO 99.5%, burn-rate 14.4×)",
+  "description": "prod-app 5xx 비율이 1h·5m 양 창에서 7.2%를 초과. 약 2일이면 월간 에러버짓 전부 소진.",
+  "labels": {
+   "alertname": "ErrorBudgetBurnFast",
+   "severity": "critical",
+   "job": "prod-app"
+  }
+ },
+ "logSamples": [
+  "[2026-08-28 11:05:44.129] [ERROR] [d1f47b0a95c3e28d604f7a1b3c8e5920,4b7e1c93a0d582f6] --- [http-nio-8080-exec-31] c.web.exception.RestExceptionHandler : method=GET uri=/rooms/nickname/random exception=NullPointerException message=Cannot invoke String.length() because nickname is null",
+  "[2026-08-28 11:06:12.673] [ERROR] [92a0c5e73b1d48f6a70e2c941b5d38af,e05f3b7a1c964d28] --- [http-nio-8080-exec-8] c.web.exception.RestExceptionHandler : method=POST uri=/rooms exception=NullPointerException message=Cannot invoke String.length() because nickname is null",
+  "[2026-08-28 11:07:35.401] [ERROR] [6f3b18e0d752a94c1e8b0d63f5a2079c,17c8d940b6e3f52a] --- [http-nio-8080-exec-24] c.web.exception.RestExceptionHandler : method=GET uri=/rooms/W9HT/probabilities exception=IllegalArgumentException message=Player not found in room W9HT",
+  "[2026-08-28 11:08:50.916] [ERROR] [50c9e2a4187b3df60c95a1e83b47d2f1,ba62f0d5c3971e84] --- [http-nio-8080-exec-11] c.web.exception.RestExceptionHandler : method=POST uri=/rooms exception=NullPointerException message=Cannot invoke String.length() because nickname is null"
+ ],
+ "logEnvironment": "prod",
+ "expected": "예",
+ "axis": "partial-relevance"
+}

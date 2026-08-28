@@ -1,0 +1,26 @@
+{
+ "name": "monitor-outbox-dead-letter-vs-disk-pairb01-b",
+ "question": "알림 DiskUsageHigh(warning)가 prod에서 발화했다 - 노드 디스크 사용률이 85%를 넘었다. 봇에는 최근 30분 ERROR 로그 샘플 3줄(outbox 이벤트 DEAD_LETTER 전환 기록)이 주어졌다.",
+ "rubric": "주어진 ERROR 로그 3줄은 OutboxEventProcessor가 이벤트를 DEAD_LETTER로 전환한 애플리케이션 레벨 기록일 뿐, 노드의 디스크 사용량, 파일시스템, 로그 적재량에 대한 정보를 담고 있지 않다. '근거 발견: 아니오'로 판정하고 이 로그로는 디스크 사용률 상승을 설명할 수 없으며 노드 디스크 메트릭과 대용량 파일 확인이 필요하다고 말하면 정답. '근거 발견: 예'로 판정하거나 outbox DEAD_LETTER 적체를 디스크 포화의 원인으로 지어내면 오답.",
+ "source": "MANUAL",
+ "alert": {
+  "alertname": "DiskUsageHigh",
+  "severity": "warning",
+  "fingerprint": "golden-gen-disk-4102",
+  "summary": "디스크 사용률 > 85%",
+  "description": "디스크 사용률이 88.6%. 로그 정리 또는 디스크 확장 필요.",
+  "labels": {
+   "alertname": "DiskUsageHigh",
+   "severity": "warning",
+   "job": "node"
+  }
+ },
+ "logSamples": [
+  "[2026-08-27 03:12:44.118] [ERROR] [,] --- [pool-3-thread-2] c.global.outbox.OutboxEventProcessor : Outbox 이벤트 최대 재시도 초과, DEAD_LETTER 전환: id=8241, streamKey=laddergame",
+  "[2026-08-27 03:13:09.532] [ERROR] [,] --- [pool-3-thread-2] c.global.outbox.OutboxEventProcessor : Outbox 이벤트 최대 재시도 초과, DEAD_LETTER 전환: id=8247, streamKey=laddergame",
+  "[2026-08-27 03:13:35.907] [ERROR] [,] --- [pool-3-thread-1] c.global.outbox.OutboxEventProcessor : Outbox 이벤트 최대 재시도 초과, DEAD_LETTER 전환: id=8253, streamKey=room:join"
+ ],
+ "logEnvironment": "prod",
+ "expected": "아니오",
+ "axis": "unrelated-trap"
+}

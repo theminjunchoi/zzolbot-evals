@@ -1,0 +1,26 @@
+{
+ "name": "monitor-stream-container-vs-cpu-pairb05-b",
+ "question": "알림 CpuUsageHigh(critical)가 prod에서 발화했다 - 노드 CPU 사용률이 5분 이상 90%를 넘겨 유지됐다. 봇에는 최근 30분 ERROR 로그 샘플 3줄(nunchi 스트림 컨테이너 상태 확인과 복구 실패)이 주어졌다.",
+ "rubric": "주어진 ERROR 로그 3줄은 nunchi 스트림 리스너 컨테이너의 상태 확인과 복구 실패 기록이며, CPU 점유, 스레드 폭주, 부하 증가를 보여주는 값은 담겨 있지 않다. 오히려 컨테이너가 멈춘 상태라 소비 작업 자체가 진행되지 않는다. '근거 발견: 아니오'로 판정하고 이 로그로는 CPU 포화를 설명할 수 없으며 노드와 JVM의 CPU 사용 메트릭, 스레드 덤프를 확인해야 한다고 말하면 정답. '근거 발견: 예'로 판정하거나 복구 재시도가 CPU를 태웠다고 지어내면 오답.",
+ "source": "MANUAL",
+ "alert": {
+  "alertname": "CpuUsageHigh",
+  "severity": "critical",
+  "fingerprint": "golden-gen-cpu-4110",
+  "summary": "CPU 사용률 > 90% (5분 지속)",
+  "description": "CPU 사용률이 94.2%.",
+  "labels": {
+   "alertname": "CpuUsageHigh",
+   "severity": "critical",
+   "job": "node"
+  }
+ },
+ "logSamples": [
+  "[2026-08-27 21:07:12.905] [ERROR] [,] --- [pool-2-thread-1] c.g.h.RedisStreamContainerRecovery : Redis Stream container 상태 확인 중 예외: stream=nunchi",
+  "[2026-08-27 21:08:12.947] [ERROR] [,] --- [pool-2-thread-1] c.g.h.RedisStreamContainerRecovery : Redis Stream container 복구 중 예외 발생: stream=nunchi",
+  "[2026-08-27 21:09:13.008] [ERROR] [,] --- [pool-2-thread-1] c.g.h.RedisStreamContainerRecovery : Redis Stream container 복구 포기: stream=nunchi. HealthIndicator에 DOWN 보고"
+ ],
+ "logEnvironment": "prod",
+ "expected": "아니오",
+ "axis": "unrelated-trap"
+}

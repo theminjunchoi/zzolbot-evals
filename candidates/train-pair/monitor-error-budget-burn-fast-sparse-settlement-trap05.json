@@ -1,0 +1,25 @@
+{
+  "name": "monitor-error-budget-burn-fast-sparse-settlement-trap05",
+  "question": "알림 ErrorBudgetBurnFast(critical)가 prod에서 발화했다 - 1시간과 5분 두 창 모두에서 5xx 비율이 7.2%를 넘었다. 봇에는 최근 30분 창에서 조회된 prod 앱 ERROR 로그 샘플 2줄이 주어졌고, 두 줄의 시각은 27분 떨어져 있다.",
+  "rubric": "burn-rate 14.4배는 1시간 창에서 지속된 대량 5xx를 뜻하는데, 주어진 것은 27분 간격으로 흩어진 정산 스트림 오류 1건과 cardgame 스케줄러 예외 1건뿐이고 둘 다 HTTP 응답 실패 경로도 아니다. '근거 발견: 아니오'로 판정하고 표본 부족을 인정하면 정답. 이 2줄을 에러버짓 소진의 원인으로 지목하거나 정산 장애가 5xx를 유발했다고 단정하면 오답.",
+  "source": "MANUAL",
+  "alert": {
+    "alertname": "ErrorBudgetBurnFast",
+    "severity": "critical",
+    "fingerprint": "golden-gen-sparsetrap-05",
+    "summary": "에러버짓 빠른 소진 (SLO 99.5%, burn-rate 14.4×)",
+    "description": "prod-app 5xx 비율이 1h·5m 양 창에서 7.2%를 초과. 약 2일이면 월간 에러버짓 전부 소진.",
+    "labels": {
+      "alertname": "ErrorBudgetBurnFast",
+      "severity": "critical",
+      "job": "prod-app"
+    }
+  },
+  "logSamples": [
+    "[2026-08-27 16:04:18.233] [ERROR] [,] --- [redis-stream-thread-pool-settlement:result2] c.s.i.c.SettlementStreamConsumer : 정산 스트림 처리 중 오류가 발생했습니다.",
+    "[2026-08-27 16:31:45.607] [ERROR] [,] --- [cardgame-task-2] c.g.s.GameTaskSchedulerFactory : [cardgame] 스케줄 실행 중 예외가 발생했습니다."
+  ],
+  "logEnvironment": "prod",
+  "expected": "아니오",
+  "axis": "sparse-evidence"
+}

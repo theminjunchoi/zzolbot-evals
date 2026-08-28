@@ -1,0 +1,26 @@
+{
+  "name": "monitor-disk-usage-high-node-app-errors-trap14",
+  "question": "알림 DiskUsageHigh(warning)가 prod에서 발화했다 - 노드 디스크 사용률이 91%다. 봇에는 최근 30분 창에서 조회된 prod 앱 ERROR 로그 샘플 3줄이 주어졌다.",
+  "rubric": "알림 대상은 노드 익스포터가 재는 호스트 파일시스템 사용률이고, 주어진 로그는 정산 스트림 오류, speedtouch 탭 이벤트 처리 실패, outbox DEAD_LETTER 전환으로 모두 앱 도메인 에러다. 디스크 쓰기 실패나 No space left on device 같은 용량 관련 흔적이 한 줄도 없어 사용률 상승을 설명하지 못한다. '근거 발견: 아니오'로 판정하고 원인 가설을 내지 않아야 정답. 앱 에러를 디스크 사용률 상승의 원인으로 지목하면 오답.",
+  "source": "MANUAL",
+  "alert": {
+    "alertname": "DiskUsageHigh",
+    "severity": "warning",
+    "fingerprint": "golden-gen-layertrap-14",
+    "summary": "디스크 사용률 > 85%",
+    "description": "디스크 사용률이 91%. 로그 정리 또는 디스크 확장 필요.",
+    "labels": {
+      "alertname": "DiskUsageHigh",
+      "severity": "warning",
+      "job": "node"
+    }
+  },
+  "logSamples": [
+    "[2026-08-28 04:11:29.336] [ERROR] [,] --- [redis-stream-thread-pool-settlement:result3] c.s.i.c.SettlementStreamConsumer : 정산 스트림 처리 중 오류가 발생했습니다.",
+    "[2026-08-28 04:23:44.902] [ERROR] [e8130c7a95d24bf6a0c5e71d38b94f27,4a71c0e93d58b2f6] --- [redis-stream-thread-pool-speedtouch1] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=TapCommandEventConsumer, message=TapCommandEvent[joinCode=Z6VH, playerName=주말출근중, tapCount=17]",
+    "[2026-08-28 04:36:17.558] [ERROR] [,] --- [pool-11-thread-4] c.global.outbox.OutboxEventProcessor : Outbox 이벤트 최대 재시도 초과, DEAD_LETTER 전환: id=11208, streamKey=speedtouch"
+  ],
+  "logEnvironment": "prod",
+  "expected": "아니오",
+  "axis": "unrelated-trap"
+}

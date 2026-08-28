@@ -1,0 +1,26 @@
+{
+  "name": "monitor-stream-container-recovery-paira06-a",
+  "question": "알림 RedisStreamBacklogHigh(warning)가 prod에서 발화했다 - 스트림 길이가 임계 1000을 넘어 적체됐다. 봇에는 최근 30분 ERROR 로그 샘플 3줄이 주어졌다.",
+  "rubric": "주어진 ERROR 로그는 09:02부터 09:05까지 laddergame 스트림의 컨테이너 상태 확인이 예외로 실패하고, 복구 시도도 예외로 끝난 뒤, 끝내 복구를 포기하고 HealthIndicator에 DOWN을 보고한 진행을 보여준다. 컨슈머 컨테이너가 죽은 채 복구되지 못하면 발행분이 소비되지 않아 스트림 길이가 늘어난다. '근거 발견: 예'로 판정하고 laddergame 스트림 컨슈머 컨테이너 정지와 복구 실패를 적체의 원인으로 짚으면 정답. '근거 발견: 아니오'로 판정하거나 단순한 발행량 급증을 원인으로 단정해 컨테이너 정지를 무시하면 오답.",
+  "source": "MANUAL",
+  "alert": {
+    "alertname": "RedisStreamBacklogHigh",
+    "severity": "warning",
+    "fingerprint": "golden-gen-pa-111",
+    "summary": "Redis Stream 적체 (length > 1000, prod-app)",
+    "description": "스트림 길이가 4820. 컨슈머 처리 속도가 발행을 못 따라가고 있습니다.",
+    "labels": {
+      "alertname": "RedisStreamBacklogHigh",
+      "severity": "warning",
+      "job": "prod-app"
+    }
+  },
+  "logSamples": [
+    "[2026-08-28 09:02:18.774] [ERROR] [,] --- [pool-2-thread-3] c.g.h.RedisStreamContainerRecovery : Redis Stream container 상태 확인 중 예외: stream=laddergame",
+    "[2026-08-28 09:03:22.196] [ERROR] [,] --- [pool-2-thread-3] c.g.h.RedisStreamContainerRecovery : Redis Stream container 복구 중 예외 발생: stream=laddergame",
+    "[2026-08-28 09:05:40.813] [ERROR] [,] --- [pool-2-thread-3] c.g.h.RedisStreamContainerRecovery : Redis Stream container 복구 포기: stream=laddergame. HealthIndicator에 DOWN 보고"
+  ],
+  "logEnvironment": "prod",
+  "expected": "예",
+  "axis": "positive-dense"
+}

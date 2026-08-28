@@ -1,0 +1,26 @@
+{
+ "name": "monitor-oracle-storage-qr-paira04-b",
+ "question": "알림 CpuUsageHigh(critical)가 prod에서 발화했다 - CPU 사용률이 90%를 5분 넘게 유지했다. 봇에는 최근 30분 ERROR 로그 샘플 3줄이 주어졌다.",
+ "rubric": "주어진 ERROR 로그는 외부 Object Storage 연결 타임아웃과 그로 인한 QR 코드 생성 차단 세 줄뿐이며, 모두 원격 호출 대기(I/O 블로킹)로 CPU 포화와는 반대 성격이고 CPU 부하를 보여주는 줄은 없다. '근거 발견: 아니오'로 판정하고 외부 스토리지 연결 실패가 노드 CPU 사용률을 설명하지 못한다고 밝히면 정답. '근거 발견: 예'로 판정하거나 재시도 부하를 CPU 급등의 근거로 단정하면 오답.",
+ "source": "MANUAL",
+ "alert": {
+  "alertname": "CpuUsageHigh",
+  "severity": "critical",
+  "fingerprint": "golden-gen-pa-108",
+  "summary": "CPU 사용률 > 90% (5분 지속)",
+  "description": "CPU 사용률이 96.2%.",
+  "labels": {
+   "alertname": "CpuUsageHigh",
+   "severity": "critical",
+   "job": "node"
+  }
+ },
+ "logSamples": [
+  "[2026-08-28 07:31:05.612] [ERROR] [,] --- [] c.r.infra.OracleObjectStorageService : Oracle Object Storage QR 코드 업로드 실패: contents=zzol-qr-M3VP.png, error=SdkClientException: Unable to execute HTTP request: Connect timed out",
+  "[2026-08-28 07:31:24.087] [ERROR] [,] --- [] c.r.infra.OracleObjectStorageService : Oracle Object Storage Public URL 생성 실패: storageKey=qr/2026/08/28/M3VP.png, error=SdkClientException: Unable to execute HTTP request: Connect timed out",
+  "[2026-08-28 07:31:46.503] [ERROR] [,] --- [] c.r.application.service.QrCodeService : QR 코드 생성 실패: joinCode=M3VP, error=CallNotPermittedException: CircuitBreaker 'oracleStorage' is OPEN"
+ ],
+ "logEnvironment": "prod",
+ "expected": "아니오",
+ "axis": "unrelated-trap"
+}

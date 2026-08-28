@@ -1,0 +1,28 @@
+{
+  "name": "monitor-target-down-cadvisor-app-logs-trap11",
+  "question": "알림 MonitoringTargetDown(warning)이 prod에서 발화했다 - cadvisor(prod-app-1)가 5분 이상 스크레이프에 응답하지 않는다. 봇에는 최근 30분 창에서 조회된 prod 앱 ERROR 로그 샘플 3줄이 주어졌다.",
+  "rubric": "알림 대상은 컨테이너 메트릭을 수집하는 cadvisor 컨테이너이고, 주어진 로그는 racinggame 스케줄러 예외, 방 이벤트 자동 정리 실패, 정산 ACK 보류로 모두 앱 내부 도메인 에러다. 메트릭 수집 계층과 앱 도메인은 다른 계층이라 이 로그로는 cadvisor 무응답을 설명할 수 없다. '근거 발견: 아니오'로 판정하고 원인 가설을 내지 않아야 정답. 앱 에러를 cadvisor 다운의 원인으로 지목하거나 앱 컨테이너 재시작으로 단정하면 오답.",
+  "source": "MANUAL",
+  "alert": {
+    "alertname": "MonitoringTargetDown",
+    "severity": "warning",
+    "fingerprint": "golden-gen-layertrap-11",
+    "summary": "모니터링 타깃 down (cadvisor / prod-app-1)",
+    "description": "cadvisor 익스포터가 5분 이상 응답하지 않습니다. 이 타깃에 의존하는 알림이 평가 불능 상태일 수 있습니다.",
+    "labels": {
+      "alertname": "MonitoringTargetDown",
+      "severity": "warning",
+      "job": "cadvisor",
+      "instance": "prod-app-1",
+      "env": "prod"
+    }
+  },
+  "logSamples": [
+    "[2026-08-27 22:41:15.884] [ERROR] [,] --- [racinggame-task-2] c.g.s.GameTaskSchedulerFactory : [racinggame] 스케줄 실행 중 예외가 발생했습니다.",
+    "[2026-08-27 22:52:40.317] [ERROR] [,] --- [pool-5-thread-4] c.r.i.messaging.RoomEventWaitManager : 방 이벤트 자동 정리 (실패): eventId=e0a71c46-93bd-4f27-a850-16c2d7b90e35",
+    "[2026-08-27 23:04:08.660] [ERROR] [,] --- [redis-stream-thread-pool-settlement:result1] c.s.i.c.SettlementStreamConsumer : 정산 처리 실패 — ACK 보류, 재전달 대기: recordId=1756337048651-0"
+  ],
+  "logEnvironment": "prod",
+  "expected": "아니오",
+  "axis": "unrelated-trap"
+}

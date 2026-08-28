@@ -1,0 +1,27 @@
+{
+ "name": "monitor-hikari-pool-timeout-paira03-b",
+ "question": "알림 IpBanRateSpike(warning)가 prod에서 발화했다 - 신규 IP BAN 발생률이 급증했다. 봇에는 최근 30분 ERROR 로그 샘플 3줄이 주어졌다.",
+ "rubric": "주어진 ERROR 로그는 HikariCP 커넥션 획득 타임아웃으로 실패한 HTTP 요청 세 줄뿐이고, IP 차단 등록이나 악성 경로 접근 감지를 보여주는 줄은 없다. '근거 발견: 아니오'로 판정하고 DB 커넥션 풀 고갈은 IP 차단 발생률과 인과가 없음을 밝히면 정답. '근거 발견: 예'로 판정하거나 요청 실패를 공격 트래픽의 증거로 해석해 BAN 급증의 근거로 삼으면 오답.",
+ "source": "MANUAL",
+ "alert": {
+  "alertname": "IpBanRateSpike",
+  "severity": "warning",
+  "fingerprint": "golden-gen-pa-106",
+  "summary": "신규 IP BAN 급증 (prod-app)",
+  "description": "신규 BAN이 3.4 /s. 차단된 IP 대역과 접근 경로를 확인.",
+  "labels": {
+   "alertname": "IpBanRateSpike",
+   "severity": "warning",
+   "job": "prod-app",
+   "incident_group": "ip-blocking"
+  }
+ },
+ "logSamples": [
+  "[2026-08-28 06:03:11.244] [ERROR] [4e91b7d0c38a562f1d0b94e7a35c08f6,7c50a3e91d82f4e6] --- [http-nio-8080-exec-7] c.web.exception.RestExceptionHandler : method=POST uri=/rooms exception=CannotGetJdbcConnectionException message=HikariPool-1 - Connection is not available, request timed out after 30000ms",
+  "[2026-08-28 06:03:29.708] [ERROR] [b73f0a25e9c14d86af205c7b39e10d4a,0f6b291da845c73e] --- [http-nio-8080-exec-22] c.web.exception.RestExceptionHandler : method=GET uri=/rooms/check-guestName exception=CannotGetJdbcConnectionException message=HikariPool-1 - Connection is not available, request timed out after 30000ms",
+  "[2026-08-28 06:04:02.135] [ERROR] [8c2d64a70b91fe35c47a0d82b6135e9f,d38c07f52a91b6e4] --- [http-nio-8080-exec-15] c.web.exception.RestExceptionHandler : method=GET uri=/rooms/nickname/random exception=CannotGetJdbcConnectionException message=HikariPool-1 - Connection is not available, request timed out after 30000ms"
+ ],
+ "logEnvironment": "prod",
+ "expected": "아니오",
+ "axis": "unrelated-trap"
+}

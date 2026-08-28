@@ -1,0 +1,28 @@
+{
+ "name": "monitor-5xx-lock-timeout-vs-alloy-pairb03-b",
+ "question": "알림 AlloyDown(warning)가 prod에서 발화했다 - prod Alloy 로그 수집기가 5분 이상 메트릭을 내지 않는다. 봇에는 최근 30분 ERROR 로그 샘플 4줄(DB 락 대기 타임아웃과 쿼리 타임아웃으로 실패한 HTTP 요청)이 주어졌다.",
+ "rubric": "주어진 ERROR 로그 4줄은 애플리케이션의 DB 락 대기와 쿼리 타임아웃으로 인한 HTTP 5xx 기록이며, Alloy 컨테이너 상태나 로그 수집 파이프라인(Loki 인입)에 대한 정보는 전혀 없다. '근거 발견: 아니오'로 판정하고 이 로그는 애플리케이션 DB 문제를 보여줄 뿐 로그 수집기 다운의 근거가 아니며 Alloy 컨테이너와 호스트 상태를 직접 확인해야 한다고 말하면 정답. '근거 발견: 예'로 판정하거나 DB 타임아웃이 Alloy를 죽였다고 연결하면 오답.",
+ "source": "MANUAL",
+ "alert": {
+  "alertname": "AlloyDown",
+  "severity": "warning",
+  "fingerprint": "golden-gen-alloy-4106",
+  "summary": "Alloy 로그 수집기 down (prod)",
+  "description": "prod Alloy가 5분 이상 메트릭을 내지 않습니다. 컨테이너 다운 또는 로그가 Loki로 인입되지 않는 상태일 수 있습니다.",
+  "labels": {
+   "alertname": "AlloyDown",
+   "severity": "warning",
+   "job": "alloy",
+   "env": "prod"
+  }
+ },
+ "logSamples": [
+  "[2026-08-27 09:21:03.774] [ERROR] [0759c29738b3ab4bf3ab0cdaee89ce61,cede83e3c5e1235e] --- [http-nio-8080-exec-17] c.web.exception.RestExceptionHandler : method=POST uri=/rooms exception=CannotAcquireLockException message=Lock wait timeout exceeded; try restarting transaction",
+  "[2026-08-27 09:21:41.026] [ERROR] [62f688f7459032807e4537e8e6444a72,fe47d3465f61f868] --- [http-nio-8080-exec-22] c.web.exception.RestExceptionHandler : method=GET uri=/rooms/check-joinCode exception=QueryTimeoutException message=Statement cancelled due to timeout or client request",
+  "[2026-08-27 09:22:18.593] [ERROR] [943242e2eb30c8c71e1e9f57911ca28a,88646472f33fa076] --- [http-nio-8080-exec-08] c.web.exception.RestExceptionHandler : method=POST uri=/rooms exception=CannotAcquireLockException message=Lock wait timeout exceeded; try restarting transaction",
+  "[2026-08-27 09:22:55.140] [ERROR] [95541c8bee659e1dc27259a1162bf460,d2abde1237a02e7d] --- [http-nio-8080-exec-31] c.web.exception.RestExceptionHandler : method=GET uri=/rooms/nickname/random exception=QueryTimeoutException message=Statement cancelled due to timeout or client request"
+ ],
+ "logEnvironment": "prod",
+ "expected": "아니오",
+ "axis": "unrelated-trap"
+}

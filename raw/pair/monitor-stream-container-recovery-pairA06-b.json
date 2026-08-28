@@ -1,0 +1,26 @@
+{
+ "name": "monitor-stream-container-recovery-paira06-b",
+ "question": "알림 JvmHeapUsageHigh(critical)가 prod에서 발화했다 - JVM 힙 사용률이 임계 85%를 넘었다. 봇에는 최근 30분 ERROR 로그 샘플 3줄이 주어졌다.",
+ "rubric": "주어진 ERROR 로그는 laddergame 스트림 컨테이너의 상태 확인, 복구 실패, 복구 포기 세 줄뿐이고, OutOfMemoryError나 GC 관련 기록 등 힙 압박을 보여주는 줄은 없다. '근거 발견: 아니오'로 판정하고 스트림 컨테이너 복구 실패만으로는 힙 사용률 상승을 설명할 수 없다고 밝히면 정답. '근거 발견: 예'로 판정하거나 미소비 메시지 적재를 곧바로 힙 포화의 근거로 단정하면 오답.",
+ "source": "MANUAL",
+ "alert": {
+  "alertname": "JvmHeapUsageHigh",
+  "severity": "critical",
+  "fingerprint": "golden-gen-pa-112",
+  "summary": "JVM 힙 사용률 > 85% (prod-app)",
+  "description": "힙 사용률이 93%. GC 오버헤드 증가 및 OOM 위험.",
+  "labels": {
+   "alertname": "JvmHeapUsageHigh",
+   "severity": "critical",
+   "job": "prod-app"
+  }
+ },
+ "logSamples": [
+  "[2026-08-28 09:02:18.774] [ERROR] [,] --- [pool-2-thread-3] c.g.h.RedisStreamContainerRecovery : Redis Stream container 상태 확인 중 예외: stream=laddergame",
+  "[2026-08-28 09:03:22.196] [ERROR] [,] --- [pool-2-thread-3] c.g.h.RedisStreamContainerRecovery : Redis Stream container 복구 중 예외 발생: stream=laddergame",
+  "[2026-08-28 09:05:40.813] [ERROR] [,] --- [pool-2-thread-3] c.g.h.RedisStreamContainerRecovery : Redis Stream container 복구 포기: stream=laddergame. HealthIndicator에 DOWN 보고"
+ ],
+ "logEnvironment": "prod",
+ "expected": "아니오",
+ "axis": "near-miss-component"
+}

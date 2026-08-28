@@ -1,0 +1,27 @@
+{
+  "name": "monitor-ws-probe-failed-edge-storage-scheduler-trap13",
+  "question": "알림 WsHandshakeProbeFailed(critical)가 prod에서 발화했다 - 엣지(nginx:443)에서 WebSocket 업그레이드 프로브가 실패했다. 봇에는 최근 30분 창에서 조회된 prod 앱 ERROR 로그 샘플 3줄이 주어졌다.",
+  "rubric": "이 알림은 합성 프로브가 엣지 프록시(nginx) 계층에서 101 업그레이드를 받지 못한 것으로, 점검 대상은 nginx의 Upgrade/Connection 헤더 전달 설정이나 TLS 단계다. 주어진 로그는 스토리지 URL 생성 실패, nunchi 스케줄러 예외, 정산 pending 재처리 실패로 앱 도메인 에러이며 엣지 프록시 계층과 무관하다. '근거 발견: 아니오'로 판정하고 원인 가설을 내지 않아야 정답. 앱 에러를 핸드셰이크 실패의 원인으로 지목하거나 앱 다운으로 단정하면 오답.",
+  "source": "MANUAL",
+  "alert": {
+    "alertname": "WsHandshakeProbeFailed",
+    "severity": "critical",
+    "fingerprint": "golden-gen-layertrap-13",
+    "summary": "WS 핸드셰이크 합성 프로브 실패 (edge=prod)",
+    "description": "엣지(nginx:443)에서 WS 업그레이드(101)가 실패. nginx Upgrade/Connection 헤더 소실 의심. probe_failed_due_to_regex=1이면 TCP/TLS는 됐으나 101 미수신(=헤더 소실로 200 등 반환), 0이면 TCP/TLS 단계 실패(nginx 다운·인증서).",
+    "labels": {
+      "alertname": "WsHandshakeProbeFailed",
+      "severity": "critical",
+      "job": "blackbox-ws",
+      "edge": "prod"
+    }
+  },
+  "logSamples": [
+    "[2026-08-27 18:22:39.501] [ERROR] [,] --- [] c.r.infra.OracleObjectStorageService : Oracle Object Storage Public URL 생성 실패: storageKey=qr/2026/08/27/B7CM.png, error=Connection reset",
+    "[2026-08-27 18:35:06.947] [ERROR] [,] --- [nunchi-task-2] c.g.s.GameTaskSchedulerFactory : [nunchi] 스케줄 실행 중 예외가 발생했습니다.",
+    "[2026-08-27 18:47:52.318] [ERROR] [,] --- [pool-6-thread-1] c.s.i.c.SettlementPendingSweeper : pending 정산 메시지 재처리 실패: recordId=1756309672310-0"
+  ],
+  "logEnvironment": "prod",
+  "expected": "아니오",
+  "axis": "unrelated-trap"
+}

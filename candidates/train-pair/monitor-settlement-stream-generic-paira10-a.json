@@ -1,0 +1,26 @@
+{
+  "name": "monitor-settlement-stream-generic-paira10-a",
+  "question": "알림 AppErrorLogSpike(warning)가 prod에서 발화했다 - 최근 5분 ERROR 로그가 임계 30건을 넘겼다. 봇에는 최근 30분 ERROR 로그 샘플 3줄이 주어졌다.",
+  "rubric": "주어진 ERROR 로그는 13:33~13:34의 약 75초 안에 정산 스트림 처리 오류, 카드게임 선택 스트림 리스너 오류, 스케줄 태스크의 처리되지 않은 예외가 서로 다른 세 실행 경로에서 동시에 발생했음을 보여주며, 이 줄들이 급증한 ERROR 로그의 표본이다. '근거 발견: 예'로 판정하되 세 경로에 공통된 하위 계층(Redis 연결 또는 공유 인프라) 문제 가능성을 가설로 제시하고, 샘플 3줄로는 단정할 수 없어 추가 확인이 필요하다고 밝히면 정답. '근거 발견: 아니오'로 판정하거나 근거 없이 특정 게임 로직 버그로 원인을 확정하면 오답.",
+  "source": "MANUAL",
+  "alert": {
+    "alertname": "AppErrorLogSpike",
+    "severity": "warning",
+    "fingerprint": "golden-gen-pa-119",
+    "summary": "ERROR 로그 급증(최근 5분, prod-app)",
+    "description": "ERROR 로그가 38건(임계 30/5m)입니다. zzol-bot이 근본원인을 분석합니다.",
+    "labels": {
+      "alertname": "AppErrorLogSpike",
+      "severity": "warning",
+      "job": "prod-app"
+    }
+  },
+  "logSamples": [
+    "[2026-08-28 13:33:12.640] [ERROR] [,] --- [redis-stream-thread-pool-settlement:result2] c.s.i.c.SettlementStreamConsumer : 정산 스트림 처리 중 오류가 발생했습니다.",
+    "[2026-08-28 13:33:48.115] [ERROR] [,] --- [redis-stream-thread-pool-cardgame:select1] c.g.r.c.RedisStreamListenerStarter : Redis Stream 처리 중 오류가 발생했습니다.",
+    "[2026-08-28 13:34:27.502] [ERROR] [,] --- [pool-6-thread-2] o.s.s.s.TaskUtils$LoggingErrorHandler : Unexpected error occurred in scheduled task"
+  ],
+  "logEnvironment": "prod",
+  "expected": "예",
+  "axis": "positive-dense"
+}

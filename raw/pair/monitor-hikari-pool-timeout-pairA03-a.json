@@ -1,0 +1,26 @@
+{
+ "name": "monitor-hikari-pool-timeout-paira03-a",
+ "question": "알림 DbConnectionPoolHigh(warning)가 prod에서 발화했다 - HikariCP 활성 연결이 임계 8개를 넘어 최대치에 붙어 있다. 봇에는 최근 30분 ERROR 로그 샘플 3줄이 주어졌다.",
+ "rubric": "주어진 ERROR 로그는 06:03~06:04 사이 세 개의 HTTP 요청(/rooms, /rooms/check-guestName, /rooms/nickname/random)이 모두 CannotGetJdbcConnectionException으로 실패하며 'HikariPool-1 - Connection is not available, request timed out after 30000ms'를 남긴 것으로, 커넥션 풀 고갈이 요청 단에서 관측된 형태다. '근거 발견: 예'로 판정하고 풀 고갈(슬로우 쿼리 또는 커넥션 누수로 반납이 지연됨)을 원인으로 짚으면 정답. '근거 발견: 아니오'로 판정하거나 개별 엔드포인트의 로직 결함을 원인으로 지목하면 오답.",
+ "source": "MANUAL",
+ "alert": {
+  "alertname": "DbConnectionPoolHigh",
+  "severity": "warning",
+  "fingerprint": "golden-gen-pa-105",
+  "summary": "DB 커넥션 풀 활성 > 8 (prod-app)",
+  "description": "활성 연결 10개 (최대 10). 슬로우 쿼리 또는 커넥션 누수 확인 필요.",
+  "labels": {
+   "alertname": "DbConnectionPoolHigh",
+   "severity": "warning",
+   "job": "prod-app"
+  }
+ },
+ "logSamples": [
+  "[2026-08-28 06:03:11.244] [ERROR] [4e91b7d0c38a562f1d0b94e7a35c08f6,7c50a3e91d82f4e6] --- [http-nio-8080-exec-7] c.web.exception.RestExceptionHandler : method=POST uri=/rooms exception=CannotGetJdbcConnectionException message=HikariPool-1 - Connection is not available, request timed out after 30000ms",
+  "[2026-08-28 06:03:29.708] [ERROR] [b73f0a25e9c14d86af205c7b39e10d4a,0f6b291da845c73e] --- [http-nio-8080-exec-22] c.web.exception.RestExceptionHandler : method=GET uri=/rooms/check-guestName exception=CannotGetJdbcConnectionException message=HikariPool-1 - Connection is not available, request timed out after 30000ms",
+  "[2026-08-28 06:04:02.135] [ERROR] [8c2d64a70b91fe35c47a0d82b6135e9f,d38c07f52a91b6e4] --- [http-nio-8080-exec-15] c.web.exception.RestExceptionHandler : method=GET uri=/rooms/nickname/random exception=CannotGetJdbcConnectionException message=HikariPool-1 - Connection is not available, request timed out after 30000ms"
+ ],
+ "logEnvironment": "prod",
+ "expected": "예",
+ "axis": "positive-dense"
+}

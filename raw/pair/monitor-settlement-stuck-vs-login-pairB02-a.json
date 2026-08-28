@@ -1,0 +1,26 @@
+{
+ "name": "monitor-settlement-stuck-vs-login-pairb02-a",
+ "question": "알림 RedisStreamBacklogHigh(warning)가 prod에서 발화했다 - 스트림 길이가 임계 1000을 넘겨 적체됐다. 봇에는 최근 30분 ERROR 로그 샘플 3줄(정산 스트림 컨슈머 처리 실패와 pending 재처리 실패)이 주어졌다.",
+ "rubric": "주어진 ERROR 로그 3줄은 04:02~04:05에 SettlementStreamConsumer가 recordId=1756258931044-0 처리에 실패해 ACK를 보류하고, 정산 스트림 처리 중 오류가 이어졌으며, SettlementPendingSweeper의 pending 재처리마저 같은 recordId에서 실패한 기록이다. '근거 발견: 예'로 판정하고 정산 스트림 컨슈머가 특정 메시지 처리에 반복 실패해 ACK되지 않은 메시지가 쌓이면서 스트림 길이가 늘었다는 가설을 제시하면 정답. '근거 발견: 아니오'로 판정하거나 컨슈머 처리 실패를 적체와 무관하다고 말하면 오답.",
+ "source": "MANUAL",
+ "alert": {
+  "alertname": "RedisStreamBacklogHigh",
+  "severity": "warning",
+  "fingerprint": "golden-gen-rsb-4103",
+  "summary": "Redis Stream 적체 (length > 1000, prod-app)",
+  "description": "스트림 길이가 2841. 컨슈머 처리 속도가 발행을 못 따라가고 있습니다.",
+  "labels": {
+   "alertname": "RedisStreamBacklogHigh",
+   "severity": "warning",
+   "job": "prod-app"
+  }
+ },
+ "logSamples": [
+  "[2026-08-27 04:02:11.334] [ERROR] [3520291054676fa25dd86c83ea7bae6c,ee8e61fe465fb044] --- [redis-stream-thread-pool-settlement:result1] c.s.i.c.SettlementStreamConsumer : 정산 처리 실패 — ACK 보류, 재전달 대기: recordId=1756258931044-0",
+  "[2026-08-27 04:03:47.882] [ERROR] [9338a524c4943140ab2a790d7564e42a,cfd660f6a09c9082] --- [redis-stream-thread-pool-settlement:result2] c.s.i.c.SettlementStreamConsumer : 정산 스트림 처리 중 오류가 발생했습니다.",
+  "[2026-08-27 04:05:19.470] [ERROR] [,] --- [pool-5-thread-3] c.s.i.c.SettlementPendingSweeper : pending 정산 메시지 재처리 실패: recordId=1756258931044-0"
+ ],
+ "logEnvironment": "prod",
+ "expected": "예",
+ "axis": "positive-dense"
+}

@@ -1,0 +1,28 @@
+{
+ "name": "monitor-cardgame-select-vs-ws-probe-pairb06-b",
+ "question": "알림 WsHandshakeProbeFailed(critical)가 prod에서 발화했다 - 엣지(nginx:443) 합성 프로브의 WS 업그레이드가 실패했다. 봇에는 최근 30분 ERROR 로그 샘플 4줄(카드게임 카드 선택 이벤트 처리 실패)이 주어졌다.",
+ "rubric": "주어진 ERROR 로그 4줄은 이미 연결이 성립한 뒤 동작하는 Redis Stream 컨슈머의 카드 선택 이벤트 처리 실패 기록으로, 엣지 nginx의 WS 업그레이드(101) 응답이나 프로브 요청에 대한 흔적이 전혀 없다. '근거 발견: 아니오'로 판정하고 핸드셰이크 단계는 애플리케이션 컨슈머보다 앞단이므로 이 로그는 근거가 되지 않으며 nginx Upgrade/Connection 헤더 설정과 probe_failed_due_to_regex 값을 확인해야 한다고 말하면 정답. '근거 발견: 예'로 판정하거나 카드 선택 처리 실패가 핸드셰이크를 막았다고 연결하면 오답.",
+ "source": "MANUAL",
+ "alert": {
+  "alertname": "WsHandshakeProbeFailed",
+  "severity": "critical",
+  "fingerprint": "golden-gen-wsp-4112",
+  "summary": "WS 핸드셰이크 합성 프로브 실패 (edge=prod)",
+  "description": "엣지(nginx:443)에서 WS 업그레이드(101)가 실패. nginx Upgrade/Connection 헤더 소실 의심. probe_failed_due_to_regex=1이면 TCP/TLS는 됐으나 101 미수신(=헤더 소실로 200 등 반환), 0이면 TCP/TLS 단계 실패(nginx 다운·인증서).",
+  "labels": {
+   "alertname": "WsHandshakeProbeFailed",
+   "severity": "critical",
+   "job": "blackbox-ws",
+   "edge": "prod"
+  }
+ },
+ "logSamples": [
+  "[2026-08-27 20:14:22.418] [ERROR] [9e1dc85b1ba75a45ae88c36590d00190,cac707876e482926] --- [redis-stream-thread-pool-cardgame:select1] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=SelectCardCommandEventConsumer, message=SelectCardCommandEvent[eventId=400e1dbd-afd5-fbca-3e90-df755faf4f25, joinCode=QW3T, playerName=PLAYER_2, cardIndex=4]",
+  "[2026-08-27 20:14:48.226] [ERROR] [bb67156cf536cb3fb60262434b52a655,2a375c35a89647ed] --- [redis-stream-thread-pool-cardgame:select2] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=SelectCardCommandEventConsumer, message=SelectCardCommandEvent[eventId=197ff288-a800-921e-c26e-8f4dafcb31a2, joinCode=QW3T, playerName=PLAYER_5, cardIndex=1]",
+  "[2026-08-27 20:15:11.703] [ERROR] [e30d6e63a0109e1bc82b75d305651330,50113f127b4974e4] --- [redis-stream-thread-pool-cardgame:select1] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=SelectCardCommandEventConsumer, message=SelectCardCommandEvent[eventId=07a6aa0c-bf52-3abe-9d10-d53d4fb4cfa2, joinCode=QW3T, playerName=PLAYER_1, cardIndex=7]",
+  "[2026-08-27 20:15:39.361] [ERROR] [927bcc3de4563b879c9e906516b91dff,ce2596c32cf5e04b] --- [redis-stream-thread-pool-cardgame:select2] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=SelectCardCommandEventConsumer, message=SelectCardCommandEvent[eventId=e02e0975-0c49-9c78-0590-44ac09af57ab, joinCode=QW3T, playerName=PLAYER_3, cardIndex=2]"
+ ],
+ "logEnvironment": "prod",
+ "expected": "아니오",
+ "axis": "unrelated-trap"
+}

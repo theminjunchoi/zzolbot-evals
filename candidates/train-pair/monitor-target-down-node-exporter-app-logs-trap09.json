@@ -1,0 +1,28 @@
+{
+  "name": "monitor-target-down-node-exporter-app-logs-trap09",
+  "question": "알림 MonitoringTargetDown(warning)이 prod에서 발화했다 - node-exporter(prod-app-1)가 5분 이상 스크레이프에 응답하지 않는다. 봇에는 최근 30분 창에서 조회된 prod 앱 ERROR 로그 샘플 3줄이 주어졌다.",
+  "rubric": "알림 대상은 애플리케이션이 아니라 호스트 메트릭을 노출하는 별도 컨테이너(node-exporter)이고, 주어진 로그는 정산 재처리 실패, 카드 선택 이벤트 처리 실패, QR 생성 실패 같은 앱 도메인 에러다. 앱이 계속 로그를 남긴다는 사실 자체가 앱 프로세스는 살아 있다는 뜻이며, 앱 도메인 에러는 익스포터 컨테이너의 스크레이프 실패를 설명하지 못한다. '근거 발견: 아니오'로 판정하고 원인 가설을 내지 않아야 정답. 앱 에러를 익스포터 다운의 원인으로 지목하거나 호스트 전체 다운으로 단정하면 오답.",
+  "source": "MANUAL",
+  "alert": {
+    "alertname": "MonitoringTargetDown",
+    "severity": "warning",
+    "fingerprint": "golden-gen-layertrap-09",
+    "summary": "모니터링 타깃 down (node-exporter / prod-app-1)",
+    "description": "node-exporter 익스포터가 5분 이상 응답하지 않습니다. 이 타깃에 의존하는 알림이 평가 불능 상태일 수 있습니다.",
+    "labels": {
+      "alertname": "MonitoringTargetDown",
+      "severity": "warning",
+      "job": "node-exporter",
+      "instance": "prod-app-1",
+      "env": "prod"
+    }
+  },
+  "logSamples": [
+    "[2026-08-27 05:12:44.019] [ERROR] [,] --- [pool-8-thread-1] c.s.i.c.SettlementPendingSweeper : pending 정산 메시지 재처리 실패: recordId=1756255964012-0",
+    "[2026-08-27 05:26:10.583] [ERROR] [c41e8a05d97b2f36b0a5c72d18e94f60,5b93a0c71d46e2f8] --- [redis-stream-thread-pool-cardgame:select1] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=SelectCardCommandEventConsumer, message=SelectCardCommandEvent[joinCode=V9XB, playerName=오늘도커피, cardIndex=3]",
+    "[2026-08-27 05:38:52.744] [ERROR] [,] --- [] c.r.application.service.QrCodeService : QR 코드 생성 실패: joinCode=V9XB, error=TimeoutException"
+  ],
+  "logEnvironment": "prod",
+  "expected": "아니오",
+  "axis": "unrelated-trap"
+}

@@ -1,0 +1,28 @@
+{
+ "name": "monitor-nunchi-press-error-paira07-b",
+ "question": "알림 MonitoringTargetDown(warning)가 prod에서 발화했다 - node-exporter 타깃이 5분 이상 스크레이프에 응답하지 않는다. 봇에는 최근 30분 ERROR 로그 샘플 3줄이 주어졌다.",
+ "rubric": "주어진 ERROR 로그는 눈치게임 press 처리 실패 두 줄과 nunchi 게임 스케줄러 예외 한 줄로 모두 애플리케이션 게임 도메인의 오류이며, node-exporter 프로세스나 스크레이프 경로를 보여주는 줄은 없다. '근거 발견: 아니오'로 판정하고 게임 로직 오류가 익스포터 타깃 down을 설명하지 못한다고 밝히면 정답. '근거 발견: 예'로 판정하거나 게임 처리 실패를 익스포터 응답 없음의 원인으로 연결하면 오답.",
+ "source": "MANUAL",
+ "alert": {
+  "alertname": "MonitoringTargetDown",
+  "severity": "warning",
+  "fingerprint": "golden-gen-pa-114",
+  "summary": "모니터링 타깃 down (node-exporter / prod)",
+  "description": "node-exporter 익스포터가 5분 이상 응답하지 않습니다. 이 타깃에 의존하는 알림이 평가 불능 상태일 수 있습니다.",
+  "labels": {
+   "alertname": "MonitoringTargetDown",
+   "severity": "warning",
+   "job": "node",
+   "instance": "10.0.1.14:9100",
+   "env": "prod"
+  }
+ },
+ "logSamples": [
+  "[2026-08-28 10:41:09.522] [ERROR] [,] --- [redis-stream-thread-pool-nunchi2] c.n.i.m.c.NunchiCommandEventConsumer : 눈치게임 press 처리 중 오류: joinCode=T4WB, playerName=민준, eventId=4f2c1a08-7d31-4b2e-9c55-0a6e83bd1f70",
+  "[2026-08-28 10:41:27.940] [ERROR] [,] --- [redis-stream-thread-pool-nunchi2] c.n.i.m.c.NunchiCommandEventConsumer : 눈치게임 press 처리 중 오류: joinCode=T4WB, playerName=지원, eventId=b8d5e6c1-2f47-40a9-8e13-77c0ab5d9e24",
+  "[2026-08-28 10:42:03.318] [ERROR] [,] --- [nunchi-task-1] c.g.s.GameTaskSchedulerFactory : [nunchi] 스케줄 실행 중 예외가 발생했습니다."
+ ],
+ "logEnvironment": "prod",
+ "expected": "아니오",
+ "axis": "unrelated-trap"
+}

@@ -1,0 +1,25 @@
+{
+  "name": "monitor-ws-connection-failures-sparse-room-async-trap03",
+  "question": "알림 WsConnectionFailuresHigh(warning)가 prod에서 발화했다 - 최근 5분 WebSocket 연결 실패가 37건이다. 봇에는 최근 30분 창에서 조회된 prod 앱 ERROR 로그 샘플 2줄이 주어졌고, 두 줄의 시각은 26분 떨어져 있다.",
+  "rubric": "주어진 2줄은 방 참가 비동기 처리 실패 1건과 Redis Stream container 상태 확인 예외 1건으로, 둘 다 STOMP 연결 수립 단계와 무관하고 26분 간격으로 흩어져 있어 5분에 37건이라는 실패 누적을 설명하지 못한다. '근거 발견: 아니오'로 판정하고 표본 부족을 인정하면 정답. 방 참가 실패를 WebSocket 연결 실패 급증의 원인으로 단정하면 오답.",
+  "source": "MANUAL",
+  "alert": {
+    "alertname": "WsConnectionFailuresHigh",
+    "severity": "warning",
+    "fingerprint": "golden-gen-sparsetrap-03",
+    "summary": "WebSocket 연결 실패 급증 (prod-app)",
+    "description": "최근 5분 WS 연결 실패가 37건 (임계 10). STOMP 연결 단계 실패 누적.",
+    "labels": {
+      "alertname": "WsConnectionFailuresHigh",
+      "severity": "warning",
+      "job": "prod-app"
+    }
+  },
+  "logSamples": [
+    "[2026-08-28 02:41:07.556] [ERROR] [b30d9c1e57a4f8026d1a4b7c9e05f38a,4c17b9e0d2a63f85] --- [redis-stream-thread-pool-room:join1] c.r.application.service.RoomService : 방 참가 비동기 처리 실패: eventId=7f2c4b91-08de-4a35-9c61-2d84a0f5e713, joinCode=M8ZP, playerName=코딩하는곰",
+    "[2026-08-28 03:07:33.912] [ERROR] [,] --- [pool-3-thread-1] c.g.h.RedisStreamContainerRecovery : Redis Stream container 상태 확인 중 예외: stream=laddergame"
+  ],
+  "logEnvironment": "prod",
+  "expected": "아니오",
+  "axis": "sparse-evidence"
+}

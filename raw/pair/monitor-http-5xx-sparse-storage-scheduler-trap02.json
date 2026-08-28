@@ -1,0 +1,25 @@
+{
+  "name": "monitor-http-5xx-sparse-storage-scheduler-trap02",
+  "question": "알림 Http5xxRatioHigh(critical)가 prod에서 발화했다 - 최근 5분 5xx 비율이 6.4%다. 봇에는 최근 30분 창에서 조회된 prod 앱 ERROR 로그 샘플 2줄이 주어졌고, 두 줄의 시각은 24분 떨어져 있다.",
+  "rubric": "주어진 2줄은 HTTP 요청 경로가 아닌 스토리지 Public URL 생성 실패 1건과 blindtimer 게임 스케줄러 예외 1건이며, 24분 간격으로 흩어져 있어 5분 창의 5xx 비율 급증과 시간적으로도 정합하지 않는다. HTTP 응답을 5xx로 만든 예외 핸들러 로그가 한 줄도 없으므로 '근거 발견: 아니오'로 판정하고 표본 부족을 인정해야 정답. 산발적인 두 에러를 5xx 급증의 원인으로 지목하면 오답.",
+  "source": "MANUAL",
+  "alert": {
+    "alertname": "Http5xxRatioHigh",
+    "severity": "critical",
+    "fingerprint": "golden-gen-sparsetrap-02",
+    "summary": "HTTP 5xx 비율 5% 초과 (prod-app)",
+    "description": "최근 5분 5xx 비율이 6.4%. 서버 측 광범위 실패 가능성.",
+    "labels": {
+      "alertname": "Http5xxRatioHigh",
+      "severity": "critical",
+      "job": "prod-app"
+    }
+  },
+  "logSamples": [
+    "[2026-08-27 21:03:12.905] [ERROR] [,] --- [] c.r.infra.OracleObjectStorageService : Oracle Object Storage Public URL 생성 실패: storageKey=qr/2026/08/27/T3RV.png, error=SocketTimeoutException",
+    "[2026-08-27 21:27:49.164] [ERROR] [,] --- [blindtimer-task-3] c.g.s.GameTaskSchedulerFactory : [blindtimer] 스케줄 실행 중 예외가 발생했습니다."
+  ],
+  "logEnvironment": "prod",
+  "expected": "아니오",
+  "axis": "sparse-evidence"
+}

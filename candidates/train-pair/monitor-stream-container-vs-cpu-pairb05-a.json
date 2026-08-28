@@ -1,0 +1,26 @@
+{
+  "name": "monitor-stream-container-vs-cpu-pairb05-a",
+  "question": "알림 RedisStreamE2eLatencyHigh(warning)가 prod에서 발화했다 - 스트림 처리 p95 지연이 500ms를 넘었다. 봇에는 최근 30분 ERROR 로그 샘플 3줄(nunchi 스트림 컨테이너 상태 확인과 복구 실패)이 주어졌다.",
+  "rubric": "주어진 ERROR 로그 3줄은 21:07부터 1분 간격으로 RedisStreamContainerRecovery가 stream=nunchi 컨테이너 상태 확인에 실패하고, 복구를 시도하다 예외가 나고, 끝내 복구를 포기해 HealthIndicator에 DOWN을 보고한 기록이다. '근거 발견: 예'로 판정하고 nunchi 스트림 리스너 컨테이너가 죽은 채 복구되지 않아 메시지가 제때 소비되지 못하면서 E2E 지연이 늘었다는 가설을 제시하면 정답. '근거 발견: 아니오'로 판정하거나 컨테이너 복구 실패를 지연과 무관하다고 말하면 오답.",
+  "source": "MANUAL",
+  "alert": {
+    "alertname": "RedisStreamE2eLatencyHigh",
+    "severity": "warning",
+    "fingerprint": "golden-gen-rse-4109",
+    "summary": "Redis Stream E2E 지연 p95 > 500ms (prod-app)",
+    "description": "스트림 처리 p95 지연이 1.84s. 컨슈머 처리 적체 또는 다운스트림(App Service) 지연 가능성.",
+    "labels": {
+      "alertname": "RedisStreamE2eLatencyHigh",
+      "severity": "warning",
+      "job": "prod-app"
+    }
+  },
+  "logSamples": [
+    "[2026-08-27 21:07:12.905] [ERROR] [,] --- [pool-2-thread-1] c.g.h.RedisStreamContainerRecovery : Redis Stream container 상태 확인 중 예외: stream=nunchi",
+    "[2026-08-27 21:08:12.947] [ERROR] [,] --- [pool-2-thread-1] c.g.h.RedisStreamContainerRecovery : Redis Stream container 복구 중 예외 발생: stream=nunchi",
+    "[2026-08-27 21:09:13.008] [ERROR] [,] --- [pool-2-thread-1] c.g.h.RedisStreamContainerRecovery : Redis Stream container 복구 포기: stream=nunchi. HealthIndicator에 DOWN 보고"
+  ],
+  "logEnvironment": "prod",
+  "expected": "예",
+  "axis": "positive-dense"
+}

@@ -1,0 +1,25 @@
+{
+  "name": "monitor-ws-inbound-latency-sparse-outbox-storage-trap08",
+  "question": "알림 WsInboundLatencyHigh(critical)가 prod에서 발화했다 - WebSocket inbound 처리 p99가 0.83s다. 봇에는 최근 30분 창에서 조회된 prod 앱 ERROR 로그 샘플 2줄이 주어졌고, 두 줄의 시각은 24분 떨어져 있다.",
+  "rubric": "p99 지연은 다수 메시지의 처리 시간 분포에서 나오는 값인데, 주어진 것은 outbox DEAD_LETTER 전환 1건과 스토리지 Public URL 생성 실패 1건이 24분 간격으로 흩어진 것뿐이라 inbound 처리 경로의 지연을 보여주는 표본이 아니다. '근거 발견: 아니오'로 판정하고 표본 부족을 인정하면 정답. 이 2줄을 WS 처리 지연의 원인으로 지목하면 오답.",
+  "source": "MANUAL",
+  "alert": {
+    "alertname": "WsInboundLatencyHigh",
+    "severity": "critical",
+    "fingerprint": "golden-gen-sparsetrap-08",
+    "summary": "WebSocket 메시지 처리 p99 > 500ms (prod-app)",
+    "description": "WS inbound p99 처리 시간이 0.83s. 서비스 품질 저하 체감 수준.",
+    "labels": {
+      "alertname": "WsInboundLatencyHigh",
+      "severity": "critical",
+      "job": "prod-app"
+    }
+  },
+  "logSamples": [
+    "[2026-08-28 19:15:03.472] [ERROR] [,] --- [pool-2-thread-5] c.global.outbox.OutboxEventProcessor : Outbox 이벤트 최대 재시도 초과, DEAD_LETTER 전환: id=10473, streamKey=blockstacking",
+    "[2026-08-28 19:39:26.815] [ERROR] [,] --- [] c.r.infra.OracleObjectStorageService : Oracle Object Storage Public URL 생성 실패: storageKey=qr/2026/08/28/H6KD.png, error=Read timed out"
+  ],
+  "logEnvironment": "prod",
+  "expected": "아니오",
+  "axis": "sparse-evidence"
+}

@@ -1,0 +1,27 @@
+{
+  "name": "monitor-target-down-redis-exporter-app-logs-trap10",
+  "question": "알림 MonitoringTargetDown(warning)이 prod에서 발화했다 - redis-exporter(prod-redis)가 5분 이상 스크레이프에 응답하지 않는다. 봇에는 최근 30분 창에서 조회된 prod 앱 ERROR 로그 샘플 2줄이 주어졌다.",
+  "rubric": "알림 대상은 Redis 서버가 아니라 Redis 메트릭을 수집하는 익스포터 컨테이너이며, 주어진 로그는 스토리지 업로드 실패와 방 확률 조회 요청 실패로 Redis와 무관한 앱 도메인 에러다. Redis 자체가 죽었다면 스트림 컨슈머 에러가 쏟아졌을 텐데 그런 로그가 한 줄도 없다. '근거 발견: 아니오'로 판정하고 원인 가설을 내지 않아야 정답. 앱 에러를 익스포터 다운의 원인으로 지목하거나 Redis 장애로 단정하면 오답.",
+  "source": "MANUAL",
+  "alert": {
+    "alertname": "MonitoringTargetDown",
+    "severity": "warning",
+    "fingerprint": "golden-gen-layertrap-10",
+    "summary": "모니터링 타깃 down (redis-exporter / prod-redis)",
+    "description": "redis-exporter 익스포터가 5분 이상 응답하지 않습니다. 이 타깃에 의존하는 알림이 평가 불능 상태일 수 있습니다.",
+    "labels": {
+      "alertname": "MonitoringTargetDown",
+      "severity": "warning",
+      "job": "redis-exporter",
+      "instance": "prod-redis",
+      "env": "prod"
+    }
+  },
+  "logSamples": [
+    "[2026-08-28 14:03:37.226] [ERROR] [,] --- [] c.r.infra.OracleObjectStorageService : Oracle Object Storage QR 코드 업로드 실패: contents=https://www.zzol.site/join/R5TN, error=Read timed out",
+    "[2026-08-28 14:21:59.703] [ERROR] [7b04c9a15e83f2b6a1d7c40e29b85f31,3c50e9a14d78b2f6] --- [http-nio-8080-exec-09] c.web.exception.RestExceptionHandler : method=GET uri=/rooms/R5TN/probabilities exception=NoSuchElementException message=방을 찾을 수 없습니다."
+  ],
+  "logEnvironment": "prod",
+  "expected": "아니오",
+  "axis": "unrelated-trap"
+}

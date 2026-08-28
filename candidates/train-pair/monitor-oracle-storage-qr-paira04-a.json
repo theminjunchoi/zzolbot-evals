@@ -1,0 +1,28 @@
+{
+  "name": "monitor-oracle-storage-qr-paira04-a",
+  "question": "알림 CircuitBreakerOpen(critical)가 prod에서 발화했다 - oracleStorage 서킷브레이커가 OPEN으로 전환됐다. 봇에는 최근 30분 ERROR 로그 샘플 3줄이 주어졌다.",
+  "rubric": "주어진 ERROR 로그는 07:31에 Oracle Object Storage 업로드와 Public URL 생성이 연속으로 Connect timed out으로 실패한 뒤, 곧이어 QR 코드 생성이 CallNotPermittedException(CircuitBreaker 'oracleStorage' is OPEN)으로 차단된 순서를 보여준다. '근거 발견: 예'로 판정하고 Oracle Object Storage 연결 타임아웃 누적이 oracleStorage 서킷브레이커를 OPEN으로 전환시켰다고 짚으면 정답. '근거 발견: 아니오'로 판정하거나 QR 코드 생성 로직 자체의 결함을 원인으로 지목해 근본과 파급을 뒤집으면 오답.",
+  "source": "MANUAL",
+  "alert": {
+    "alertname": "CircuitBreakerOpen",
+    "severity": "critical",
+    "fingerprint": "golden-gen-pa-107",
+    "summary": "서킷브레이커 OPEN (oracleStorage / prod-app)",
+    "description": "서킷브레이커가 OPEN 상태입니다. 외부 서비스(OracleObjectStorage) 장애 확인 필요.",
+    "labels": {
+      "alertname": "CircuitBreakerOpen",
+      "severity": "critical",
+      "job": "prod-app",
+      "name": "oracleStorage",
+      "state": "open"
+    }
+  },
+  "logSamples": [
+    "[2026-08-28 07:31:05.612] [ERROR] [,] --- [] c.r.infra.OracleObjectStorageService : Oracle Object Storage QR 코드 업로드 실패: contents=zzol-qr-M3VP.png, error=SdkClientException: Unable to execute HTTP request: Connect timed out",
+    "[2026-08-28 07:31:24.087] [ERROR] [,] --- [] c.r.infra.OracleObjectStorageService : Oracle Object Storage Public URL 생성 실패: storageKey=qr/2026/08/28/M3VP.png, error=SdkClientException: Unable to execute HTTP request: Connect timed out",
+    "[2026-08-28 07:31:46.503] [ERROR] [,] --- [] c.r.application.service.QrCodeService : QR 코드 생성 실패: joinCode=M3VP, error=CallNotPermittedException: CircuitBreaker 'oracleStorage' is OPEN"
+  ],
+  "logEnvironment": "prod",
+  "expected": "예",
+  "axis": "compound-cause"
+}

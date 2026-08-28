@@ -1,0 +1,26 @@
+{
+  "name": "monitor-settlement-stream-generic-paira10-b",
+  "question": "알림 WsInboundLatencyHigh(critical)가 prod에서 발화했다 - WebSocket inbound 메시지 처리 p99가 임계 500ms를 넘겼다. 봇에는 최근 30분 ERROR 로그 샘플 3줄이 주어졌다.",
+  "rubric": "주어진 ERROR 로그는 정산 스트림 컨슈머, 카드게임 선택 스트림 리스너, 스케줄 태스크의 오류 세 줄로 모두 WebSocket inbound 채널 바깥(스트림 컨슈머 풀과 스케줄러 풀)에서 발생했고, clientInboundChannel의 메시지 처리 시간을 보여주는 줄은 없다. '근거 발견: 아니오'로 판정하고 이 로그가 WS inbound 처리 지연을 설명하지 못한다는 점을 밝히면 정답. '근거 발견: 예'로 판정하거나 스트림 처리 오류를 곧바로 WS 메시지 지연의 원인으로 단정하면 오답.",
+  "source": "MANUAL",
+  "alert": {
+    "alertname": "WsInboundLatencyHigh",
+    "severity": "critical",
+    "fingerprint": "golden-gen-pa-120",
+    "summary": "WebSocket 메시지 처리 p99 > 500ms (prod-app)",
+    "description": "WS inbound p99 처리 시간이 1.8s. 서비스 품질 저하 체감 수준.",
+    "labels": {
+      "alertname": "WsInboundLatencyHigh",
+      "severity": "critical",
+      "job": "prod-app"
+    }
+  },
+  "logSamples": [
+    "[2026-08-28 13:33:12.640] [ERROR] [,] --- [redis-stream-thread-pool-settlement:result2] c.s.i.c.SettlementStreamConsumer : 정산 스트림 처리 중 오류가 발생했습니다.",
+    "[2026-08-28 13:33:48.115] [ERROR] [,] --- [redis-stream-thread-pool-cardgame:select1] c.g.r.c.RedisStreamListenerStarter : Redis Stream 처리 중 오류가 발생했습니다.",
+    "[2026-08-28 13:34:27.502] [ERROR] [,] --- [pool-6-thread-2] o.s.s.s.TaskUtils$LoggingErrorHandler : Unexpected error occurred in scheduled task"
+  ],
+  "logEnvironment": "prod",
+  "expected": "아니오",
+  "axis": "near-miss-component"
+}

@@ -1,0 +1,27 @@
+{
+  "name": "monitor-alloy-down-app-domain-errors-trap12",
+  "question": "알림 AlloyDown(warning)이 prod에서 발화했다 - 로그 수집기 Alloy가 5분 이상 메트릭을 내지 않는다. 봇에는 최근 30분 창에서 조회된 prod 앱 ERROR 로그 샘플 3줄이 주어졌다.",
+  "rubric": "알림 대상은 애플리케이션이 아니라 로그 수집 파이프라인의 Alloy 컨테이너이고, 주어진 로그는 방 참가 이벤트 처리 실패, outbox DEAD_LETTER 전환, QR 생성 실패로 모두 앱 도메인 에러다. 앱 로그가 조회된다는 사실은 오히려 수집 경로가 최근까지 동작했다는 정황일 뿐 수집기 컨테이너 상태의 근거가 아니다. '근거 발견: 아니오'로 판정하고 원인 가설을 내지 않아야 정답. 앱 에러를 Alloy 다운의 원인으로 지목하거나 앱 장애가 로그 수집을 멈췄다고 단정하면 오답.",
+  "source": "MANUAL",
+  "alert": {
+    "alertname": "AlloyDown",
+    "severity": "warning",
+    "fingerprint": "golden-gen-layertrap-12",
+    "summary": "Alloy 로그 수집기 down (prod)",
+    "description": "prod Alloy가 5분 이상 메트릭을 내지 않습니다. 컨테이너 다운 또는 로그가 Loki로 인입되지 않는 상태일 수 있습니다.",
+    "labels": {
+      "alertname": "AlloyDown",
+      "severity": "warning",
+      "job": "alloy",
+      "env": "prod"
+    }
+  },
+  "logSamples": [
+    "[2026-08-28 08:31:22.140] [ERROR] [f2b58d0c47a91e36085c2b7d9a4e13f6,6d29b4c81e07a5f3] --- [redis-stream-thread-pool-room:join1] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=RoomJoinConsumer, message=RoomJoinEvent[eventId=1c76b3ad-2f40-4e59-8b27-9d031ae64c85, joinCode=J3WQ, playerName=늦잠꾸러기]",
+    "[2026-08-28 08:44:57.028] [ERROR] [,] --- [pool-10-thread-2] c.global.outbox.OutboxEventProcessor : Outbox 이벤트 최대 재시도 초과, DEAD_LETTER 전환: id=9126, streamKey=room:join",
+    "[2026-08-28 08:56:11.475] [ERROR] [,] --- [] c.r.application.service.QrCodeService : QR 코드 생성 실패: joinCode=J3WQ, error=TimeoutException"
+  ],
+  "logEnvironment": "prod",
+  "expected": "아니오",
+  "axis": "unrelated-trap"
+}

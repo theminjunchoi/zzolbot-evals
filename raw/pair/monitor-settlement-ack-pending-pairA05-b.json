@@ -1,0 +1,27 @@
+{
+ "name": "monitor-settlement-ack-pending-paira05-b",
+ "question": "알림 WsHandshakeProbeFailed(critical)가 prod에서 발화했다 - 엣지(nginx:443)에서 WS 업그레이드 합성 프로브가 실패했다. 봇에는 최근 30분 ERROR 로그 샘플 3줄이 주어졌다.",
+ "rubric": "주어진 ERROR 로그는 정산 스트림 컨슈머의 ACK 보류와 PendingSweeper 재처리 실패 세 줄뿐이고, 엣지 nginx의 WS 업그레이드나 TLS 핸드셰이크를 보여주는 줄은 없다. '근거 발견: 아니오'로 판정하고 애플리케이션 정산 스트림 처리 실패는 엣지 계층의 핸드셰이크 프로브 실패를 설명하지 못한다고 밝히면 정답. '근거 발견: 예'로 판정하거나 정산 처리 실패를 WS 프로브 실패의 원인으로 연결하면 오답.",
+ "source": "MANUAL",
+ "alert": {
+  "alertname": "WsHandshakeProbeFailed",
+  "severity": "critical",
+  "fingerprint": "golden-gen-pa-110",
+  "summary": "WS 핸드셰이크 합성 프로브 실패 (edge=prod)",
+  "description": "엣지(nginx:443)에서 WS 업그레이드(101)가 실패. nginx Upgrade/Connection 헤더 소실 의심. probe_failed_due_to_regex=1이면 TCP/TLS는 됐으나 101 미수신(=헤더 소실로 200 등 반환), 0이면 TCP/TLS 단계 실패(nginx 다운·인증서).",
+  "labels": {
+   "alertname": "WsHandshakeProbeFailed",
+   "severity": "critical",
+   "job": "blackbox-ws",
+   "edge": "prod"
+  }
+ },
+ "logSamples": [
+  "[2026-08-28 08:14:02.331] [ERROR] [,] --- [redis-stream-thread-pool-settlement:result1] c.s.i.c.SettlementStreamConsumer : 정산 처리 실패 — ACK 보류, 재전달 대기: recordId=1756368842331-0",
+  "[2026-08-28 08:14:35.907] [ERROR] [,] --- [redis-stream-thread-pool-settlement:result1] c.s.i.c.SettlementStreamConsumer : 정산 처리 실패 — ACK 보류, 재전달 대기: recordId=1756368875907-0",
+  "[2026-08-28 08:15:10.482] [ERROR] [,] --- [pool-4-thread-2] c.s.i.c.SettlementPendingSweeper : pending 정산 메시지 재처리 실패: recordId=1756368842331-0"
+ ],
+ "logEnvironment": "prod",
+ "expected": "아니오",
+ "axis": "unrelated-trap"
+}

@@ -1,0 +1,27 @@
+{
+  "name": "monitor-heap-oom-vs-ws-failures-pairb10-b",
+  "question": "알림 WsConnectionFailuresHigh(warning)가 prod에서 발화했다 - 최근 5분 WS 연결 실패가 임계 10건을 넘었다. 봇에는 최근 30분 ERROR 로그 샘플 4줄(게임 스케줄 실행 예외와 OutOfMemoryError로 실패한 HTTP 요청)이 주어졌다.",
+  "rubric": "주어진 ERROR 로그 4줄은 게임 스케줄러 예외와 REST 엔드포인트(/rooms/PXMH/probabilities, POST /rooms)의 OutOfMemoryError 실패로, STOMP CONNECT 단계나 WebSocket 세션 수립 실패에 대한 기록은 한 줄도 없다. '근거 발견: 아니오'로 판정하고 이 로그는 HTTP와 스케줄러 경로의 실패만 보여줄 뿐 WS 연결 단계 실패의 직접 근거가 아니며 STOMP 연결 실패 로그와 핸드셰이크 경로를 따로 확인해야 한다고 말하면 정답. '근거 발견: 예'로 판정하고 이 로그를 WS 연결 실패의 근거로 삼으면 오답.",
+  "source": "MANUAL",
+  "alert": {
+    "alertname": "WsConnectionFailuresHigh",
+    "severity": "warning",
+    "fingerprint": "golden-gen-wcf-4120",
+    "summary": "WebSocket 연결 실패 급증 (prod-app)",
+    "description": "최근 5분 WS 연결 실패가 24건 (임계 10). STOMP 연결 단계 실패 누적.",
+    "labels": {
+      "alertname": "WsConnectionFailuresHigh",
+      "severity": "warning",
+      "job": "prod-app"
+    }
+  },
+  "logSamples": [
+    "[2026-08-27 18:52:31.442] [ERROR] [,] --- [nunchi-task-3] c.g.s.GameTaskSchedulerFactory : [nunchi] 스케줄 실행 중 예외가 발생했습니다.",
+    "[2026-08-27 18:53:04.918] [ERROR] [,] --- [pool-1-thread-4] o.s.s.s.TaskUtils$LoggingErrorHandler : Unexpected error occurred in scheduled task",
+    "[2026-08-27 18:53:47.265] [ERROR] [1304ad9b29feeea334893f3175597b68,31a3d61052186c28] --- [http-nio-8080-exec-31] c.web.exception.RestExceptionHandler : method=GET uri=/rooms/PXMH/probabilities exception=OutOfMemoryError message=Java heap space",
+    "[2026-08-27 18:54:20.803] [ERROR] [c2ac6e4ac0061913cebfb9bad09711b5,2c85e064af47afe5] --- [http-nio-8080-exec-12] c.web.exception.RestExceptionHandler : method=POST uri=/rooms exception=OutOfMemoryError message=Java heap space"
+  ],
+  "logEnvironment": "prod",
+  "expected": "아니오",
+  "axis": "unrelated-trap"
+}

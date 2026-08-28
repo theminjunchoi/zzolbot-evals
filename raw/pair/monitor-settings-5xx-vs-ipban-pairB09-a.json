@@ -1,0 +1,26 @@
+{
+ "name": "monitor-settings-5xx-vs-ipban-pairb09-a",
+ "question": "알림 ErrorBudgetBurnSlow(warning)가 prod에서 발화했다 - 5xx 비율이 6시간과 30분 양쪽 창에서 3%를 넘겨 에러버짓이 누적 소진되고 있다. 봇에는 최근 30분 ERROR 로그 샘플 3줄(방 설정 확정 이후 상태 위반으로 실패한 요청)이 주어졌다.",
+ "rubric": "주어진 ERROR 로그 3줄은 06:12부터 30분에 걸쳐 7분 간격으로 POST /rooms와 PATCH /rooms/T5NB/settings, /rooms/K2WQ/settings가 모두 같은 IllegalStateException(Room settings already finalized)으로 5xx가 된 기록으로, 폭발적이지는 않지만 꾸준히 반복되는 실패다. '근거 발견: 예'로 판정하고 확정된 방 설정에 대한 재변경 요청이 예외로 처리되지 못하고 5xx가 되며 에러버짓을 천천히 태우고 있다는 가설을 제시하면 정답. '근거 발견: 아니오'로 판정하거나 로그가 5xx 누적과 무관하다고 말하면 오답.",
+ "source": "MANUAL",
+ "alert": {
+  "alertname": "ErrorBudgetBurnSlow",
+  "severity": "warning",
+  "fingerprint": "golden-gen-ebs-4117",
+  "summary": "에러버짓 느린 소진 (SLO 99.5%, burn-rate 6×)",
+  "description": "prod-app 5xx 비율이 6h·30m 양 창에서 3%를 초과. 누적 시 에러버짓 위협.",
+  "labels": {
+   "alertname": "ErrorBudgetBurnSlow",
+   "severity": "warning",
+   "job": "prod-app"
+  }
+ },
+ "logSamples": [
+  "[2026-08-27 06:12:41.507] [ERROR] [216c1aec6ba1d7523d094ff10805ffa8,78f9857411683a8d] --- [http-nio-8080-exec-13] c.web.exception.RestExceptionHandler : method=POST uri=/rooms exception=IllegalStateException message=Room settings already finalized",
+  "[2026-08-27 06:19:55.882] [ERROR] [4b6721eea9f75a75a3f7dcec8614730f,d450aff638d03f49] --- [http-nio-8080-exec-24] c.web.exception.RestExceptionHandler : method=PATCH uri=/rooms/T5NB/settings exception=IllegalStateException message=Room settings already finalized",
+  "[2026-08-27 06:27:13.049] [ERROR] [2959da9095c28ccc8e110d84751101e7,22bc63260673f754] --- [http-nio-8080-exec-06] c.web.exception.RestExceptionHandler : method=PATCH uri=/rooms/K2WQ/settings exception=IllegalStateException message=Room settings already finalized"
+ ],
+ "logEnvironment": "prod",
+ "expected": "예",
+ "axis": "positive-dense"
+}

@@ -1,0 +1,28 @@
+{
+ "name": "monitor-room-join-consumer-fail-paira09-b",
+ "question": "알림 LoginSuccessDroppedToZero(critical)가 prod에서 발화했다 - kakao 로그인 시도는 계속되는데 성공이 0이다. 봇에는 최근 30분 ERROR 로그 샘플 4줄이 주어졌다.",
+ "rubric": "주어진 ERROR 로그는 room:join 스트림의 방 참가 이벤트 처리 실패와 방 이벤트 자동 정리 실패 네 줄로, 이미 방에 참가하려는 요청 경로이며 OAuth 로그인 콜백이나 redirect_uri, provider 응답을 보여주는 줄은 없다. '근거 발견: 아니오'로 판정하고 방 참가 이벤트 처리 실패가 kakao 로그인 성공 0을 설명하지 못한다고 밝히면 정답. '근거 발견: 예'로 판정하거나 참가 실패를 로그인 실패의 증거로 연결하면 오답.",
+ "source": "MANUAL",
+ "alert": {
+  "alertname": "LoginSuccessDroppedToZero",
+  "severity": "critical",
+  "fingerprint": "golden-gen-pa-118",
+  "summary": "kakao 로그인 성공 0 (prod-app) — 시도는 계속됨",
+  "description": "최근 로그인 시도는 있으나 성공이 없다. redirect_uri(스킴/호스트)·provider 콘솔 등록·시크릿을 점검. 여러 provider 동시 발생 시 프록시/baseUrl 의심.",
+  "labels": {
+   "alertname": "LoginSuccessDroppedToZero",
+   "severity": "critical",
+   "job": "prod-app",
+   "provider": "kakao"
+  }
+ },
+ "logSamples": [
+  "[2026-08-28 12:22:07.845] [ERROR] [,] --- [redis-stream-thread-pool-room:join1] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=RoomJoinConsumer, message=RoomJoinEvent[eventId=2c7a91f4-30bd-4e15-9a7c-6d0f8b21e543, joinCode=B8LX, playerName=수현]",
+  "[2026-08-28 12:22:41.203] [ERROR] [,] --- [redis-stream-thread-pool-room:join2] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=RoomJoinConsumer, message=RoomJoinEvent[eventId=9e4b0c72-5af1-42d6-b083-1c65e79a2fb8, joinCode=Q3RM, playerName=태윤]",
+  "[2026-08-28 12:23:16.559] [ERROR] [,] --- [redis-stream-thread-pool-room:join1] c.r.application.service.RoomService : 방 참가 비동기 처리 실패: eventId=2c7a91f4-30bd-4e15-9a7c-6d0f8b21e543, joinCode=B8LX, playerName=수현",
+  "[2026-08-28 12:24:02.771] [ERROR] [,] --- [pool-5-thread-1] c.r.i.messaging.RoomEventWaitManager : 방 이벤트 자동 정리 (실패): eventId=9e4b0c72-5af1-42d6-b083-1c65e79a2fb8"
+ ],
+ "logEnvironment": "prod",
+ "expected": "아니오",
+ "axis": "near-miss-component"
+}

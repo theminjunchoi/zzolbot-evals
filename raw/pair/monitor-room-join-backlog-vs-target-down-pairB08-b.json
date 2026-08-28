@@ -1,0 +1,28 @@
+{
+ "name": "monitor-room-join-backlog-vs-target-down-pairb08-b",
+ "question": "알림 MonitoringTargetDown(warning)가 prod에서 발화했다 - node-exporter 타깃이 5분 이상 응답하지 않는다. 봇에는 최근 30분 ERROR 로그 샘플 3줄(방 참가 비동기 처리 실패와 방 이벤트 자동 정리 실패)이 주어졌다.",
+ "rubric": "주어진 ERROR 로그 3줄은 애플리케이션의 방 참가 이벤트 처리 실패 기록이며, 익스포터 프로세스나 스크랩 엔드포인트의 응답 여부와는 무관하다. 애플리케이션이 로그를 남기고 있다는 사실 자체가 앱이 살아 있음을 보여준다. '근거 발견: 아니오'로 판정하고 타깃 down은 익스포터와 스크랩 경로의 문제이므로 이 로그가 근거가 되지 않으며 해당 익스포터 컨테이너와 네트워크를 확인해야 한다고 말하면 정답. '근거 발견: 예'로 판정하거나 방 참가 실패가 타깃 down의 원인이라고 지어내면 오답.",
+ "source": "MANUAL",
+ "alert": {
+  "alertname": "MonitoringTargetDown",
+  "severity": "warning",
+  "fingerprint": "golden-gen-mtd-4116",
+  "summary": "모니터링 타깃 down (node-exporter / prod)",
+  "description": "node-exporter 익스포터가 5분 이상 응답하지 않습니다. 이 타깃에 의존하는 알림이 평가 불능 상태일 수 있습니다.",
+  "labels": {
+   "alertname": "MonitoringTargetDown",
+   "severity": "warning",
+   "job": "node",
+   "instance": "10.0.1.24:9100",
+   "env": "prod"
+  }
+ },
+ "logSamples": [
+  "[2026-08-27 11:03:27.612] [ERROR] [88d39e67e14542a8b7d59fd40f4e1f06,1bdb7f53a7cd47ef] --- [redis-stream-thread-pool-room:join2] c.r.application.service.RoomService : 방 참가 비동기 처리 실패: eventId=ca876089-f1fe-c51d-ee5c-2ffd7e62c2b8, joinCode=8HQP, playerName=PLAYER_4",
+  "[2026-08-27 11:04:02.985] [ERROR] [4ddc891b61ab3115a1e7ea8c3afa038c,a7fe7e010e3d0d0e] --- [redis-stream-thread-pool-room:join1] c.r.application.service.RoomService : 방 참가 비동기 처리 실패: eventId=d8940930-4ab2-6fdf-214f-f52d257f7ff4, joinCode=8HQP, playerName=PLAYER_6",
+  "[2026-08-27 11:05:44.230] [ERROR] [,] --- [pool-4-thread-2] c.r.i.messaging.RoomEventWaitManager : 방 이벤트 자동 정리 (실패): eventId=4d531a69-a83a-6ce9-0e66-72d843d3d29a"
+ ],
+ "logEnvironment": "prod",
+ "expected": "아니오",
+ "axis": "unrelated-trap"
+}

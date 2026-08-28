@@ -1,0 +1,26 @@
+{
+  "name": "monitor-outbox-dead-letter-vs-disk-pairb01-a",
+  "question": "알림 OutboxDeadLetterHigh(warning)가 prod에서 발화했다 - 재시도 초과로 DEAD_LETTER 전환된 outbox 이벤트가 임계 10건을 넘었다. 봇에는 최근 30분 ERROR 로그 샘플 3줄(outbox 이벤트 DEAD_LETTER 전환 기록)이 주어졌다.",
+  "rubric": "주어진 ERROR 로그 3줄은 03:12~03:13에 OutboxEventProcessor가 id=8241, 8247, 8253 이벤트를 최대 재시도 초과로 DEAD_LETTER 전환한 기록이며, streamKey는 laddergame과 room:join이다. '근거 발견: 예'로 판정하고 outbox 이벤트의 다운스트림 스트림 발행(laddergame, room:join)이 반복 실패해 DEAD_LETTER가 쌓였다는 가설을 제시하면 정답. '근거 발견: 아니오'로 판정하거나 로그를 알림과 무관하다고 말하면 오답.",
+  "source": "MANUAL",
+  "alert": {
+    "alertname": "OutboxDeadLetterHigh",
+    "severity": "warning",
+    "fingerprint": "golden-gen-odl-4101",
+    "summary": "Outbox DEAD_LETTER 적체 (> 10, prod-app)",
+    "description": "재시도 초과로 DEAD_LETTER 전환된 outbox 이벤트가 17건. 다운스트림 발행 경로 점검 필요.",
+    "labels": {
+      "alertname": "OutboxDeadLetterHigh",
+      "severity": "warning",
+      "job": "prod-app"
+    }
+  },
+  "logSamples": [
+    "[2026-08-27 03:12:44.118] [ERROR] [,] --- [pool-3-thread-2] c.global.outbox.OutboxEventProcessor : Outbox 이벤트 최대 재시도 초과, DEAD_LETTER 전환: id=8241, streamKey=laddergame",
+    "[2026-08-27 03:13:09.532] [ERROR] [,] --- [pool-3-thread-2] c.global.outbox.OutboxEventProcessor : Outbox 이벤트 최대 재시도 초과, DEAD_LETTER 전환: id=8247, streamKey=laddergame",
+    "[2026-08-27 03:13:35.907] [ERROR] [,] --- [pool-3-thread-1] c.global.outbox.OutboxEventProcessor : Outbox 이벤트 최대 재시도 초과, DEAD_LETTER 전환: id=8253, streamKey=room:join"
+  ],
+  "logEnvironment": "prod",
+  "expected": "예",
+  "axis": "positive-dense"
+}

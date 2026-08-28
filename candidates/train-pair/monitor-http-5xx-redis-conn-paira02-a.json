@@ -1,0 +1,27 @@
+{
+  "name": "monitor-http-5xx-redis-conn-paira02-a",
+  "question": "알림 Http5xxRatioHigh(critical)가 prod에서 발화했다 - 최근 5분 5xx 비율이 임계 5%를 넘겼다. 봇에는 최근 30분 ERROR 로그 샘플 4줄이 주어졌다.",
+  "rubric": "주어진 ERROR 로그는 05:21~05:22 사이 RestExceptionHandler가 /rooms/K7QD/settings, /rooms/check-joinCode, /rooms/K7QD/probabilities, /rooms 네 엔드포인트의 요청을 예외로 응답했고 그중 세 줄이 RedisConnectionFailureException으로 여러 엔드포인트에 걸쳐 있음을 보여준다. '근거 발견: 예'로 판정하고 Redis 연결 실패가 여러 엔드포인트의 5xx로 번진 것을 근본 원인으로 짚으면 정답. '근거 발견: 아니오'로 판정하거나 첫 줄의 IllegalStateException(게임 시작 후 설정 변경 시도)만을 5xx 급증의 원인으로 지목하면 오답.",
+  "source": "MANUAL",
+  "alert": {
+    "alertname": "Http5xxRatioHigh",
+    "severity": "critical",
+    "fingerprint": "golden-gen-pa-103",
+    "summary": "HTTP 5xx 비율 5% 초과 (prod-app)",
+    "description": "최근 5분 5xx 비율이 12.8%. 서버 측 광범위 실패 가능성.",
+    "labels": {
+      "alertname": "Http5xxRatioHigh",
+      "severity": "critical",
+      "job": "prod-app"
+    }
+  },
+  "logSamples": [
+    "[2026-08-28 05:21:14.037] [ERROR] [7b1c4f9a2e8d05c3a6f47b1e93d20c58,3a9e17c4b2d06f81] --- [http-nio-8080-exec-12] c.web.exception.RestExceptionHandler : method=PATCH uri=/rooms/K7QD/settings exception=IllegalStateException message=Room settings cannot be changed after game start",
+    "[2026-08-28 05:21:39.556] [ERROR] [c48f0b6d13a927e5f8c0b34d6a91e772,5d24a8f30c197be6] --- [http-nio-8080-exec-4] c.web.exception.RestExceptionHandler : method=GET uri=/rooms/check-joinCode exception=RedisConnectionFailureException message=Unable to connect to Redis",
+    "[2026-08-28 05:22:02.884] [ERROR] [19d7ac35f0be4821c96d5f38a70b2e4d,8e0c62b95a3f17d4] --- [http-nio-8080-exec-27] c.web.exception.RestExceptionHandler : method=GET uri=/rooms/K7QD/probabilities exception=RedisConnectionFailureException message=Unable to connect to Redis",
+    "[2026-08-28 05:22:31.190] [ERROR] [a05e83c17d2946fb0e8c1a5d73902f6b,26b4f9d081ec5a37] --- [http-nio-8080-exec-19] c.web.exception.RestExceptionHandler : method=POST uri=/rooms exception=RedisConnectionFailureException message=Unable to connect to Redis"
+  ],
+  "logEnvironment": "prod",
+  "expected": "예",
+  "axis": "compound-cause"
+}

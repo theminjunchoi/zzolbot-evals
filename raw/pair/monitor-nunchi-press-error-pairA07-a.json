@@ -1,0 +1,26 @@
+{
+ "name": "monitor-nunchi-press-error-paira07-a",
+ "question": "알림 AppErrorLogSpike(warning)가 prod에서 발화했다 - 최근 5분 ERROR 로그가 임계 30건을 넘겼다. 봇에는 최근 30분 ERROR 로그 샘플 3줄이 주어졌다.",
+ "rubric": "주어진 ERROR 로그는 10:41~10:42 사이 같은 방(joinCode=T4WB)의 눈치게임 press 처리가 서로 다른 플레이어에게서 연속 실패하고, 이어서 nunchi 게임 스케줄러 실행도 예외로 끝났음을 보여준다. 이 줄들이 곧 급증한 ERROR 로그의 표본이다. '근거 발견: 예'로 판정하고 눈치게임 진행 경로(press 커맨드 처리와 게임 스케줄러)의 반복 실패를 급증의 원인으로 짚으면 정답. '근거 발견: 아니오'로 판정하거나 주어진 로그와 무관한 다른 도메인을 원인으로 지어내면 오답.",
+ "source": "MANUAL",
+ "alert": {
+  "alertname": "AppErrorLogSpike",
+  "severity": "warning",
+  "fingerprint": "golden-gen-pa-113",
+  "summary": "ERROR 로그 급증(최근 5분, prod-app)",
+  "description": "ERROR 로그가 46건(임계 30/5m)입니다. zzol-bot이 근본원인을 분석합니다.",
+  "labels": {
+   "alertname": "AppErrorLogSpike",
+   "severity": "warning",
+   "job": "prod-app"
+  }
+ },
+ "logSamples": [
+  "[2026-08-28 10:41:09.522] [ERROR] [,] --- [redis-stream-thread-pool-nunchi2] c.n.i.m.c.NunchiCommandEventConsumer : 눈치게임 press 처리 중 오류: joinCode=T4WB, playerName=민준, eventId=4f2c1a08-7d31-4b2e-9c55-0a6e83bd1f70",
+  "[2026-08-28 10:41:27.940] [ERROR] [,] --- [redis-stream-thread-pool-nunchi2] c.n.i.m.c.NunchiCommandEventConsumer : 눈치게임 press 처리 중 오류: joinCode=T4WB, playerName=지원, eventId=b8d5e6c1-2f47-40a9-8e13-77c0ab5d9e24",
+  "[2026-08-28 10:42:03.318] [ERROR] [,] --- [nunchi-task-1] c.g.s.GameTaskSchedulerFactory : [nunchi] 스케줄 실행 중 예외가 발생했습니다."
+ ],
+ "logEnvironment": "prod",
+ "expected": "예",
+ "axis": "positive-dense"
+}

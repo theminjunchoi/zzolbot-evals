@@ -1,0 +1,25 @@
+{
+  "name": "monitor-redis-backlog-sparse-storage-http-trap04",
+  "question": "알림 RedisStreamBacklogHigh(warning)가 prod에서 발화했다 - 스트림 길이가 4210으로 임계(1000)를 크게 넘었다. 봇에는 최근 30분 창에서 조회된 prod 앱 ERROR 로그 샘플 2줄이 주어졌고, 두 줄의 시각은 21분 떨어져 있다.",
+  "rubric": "주어진 2줄은 QR 코드 업로드 실패 1건과 게스트 이름 중복 요청 실패 1건으로 스트림 컨슈머 경로의 로그가 아니며, 21분 간격이라 적체가 쌓이는 구간의 컨슈머 처리 실패를 보여주지 못한다. '근거 발견: 아니오'로 판정하고 표본 부족을 인정하면 정답. 무관한 두 에러를 컨슈머 적체의 원인으로 지목하거나 컨슈머 다운으로 단정하면 오답.",
+  "source": "MANUAL",
+  "alert": {
+    "alertname": "RedisStreamBacklogHigh",
+    "severity": "warning",
+    "fingerprint": "golden-gen-sparsetrap-04",
+    "summary": "Redis Stream 적체 (length > 1000, prod-app)",
+    "description": "스트림 길이가 4210. 컨슈머 처리 속도가 발행을 못 따라가고 있습니다.",
+    "labels": {
+      "alertname": "RedisStreamBacklogHigh",
+      "severity": "warning",
+      "job": "prod-app"
+    }
+  },
+  "logSamples": [
+    "[2026-08-28 11:18:26.401] [ERROR] [,] --- [] c.r.infra.OracleObjectStorageService : Oracle Object Storage QR 코드 업로드 실패: contents=https://www.zzol.site/join/W2FD, error=Connection reset",
+    "[2026-08-28 11:39:54.078] [ERROR] [d5a17c93e0b8f24617ac30d9b5e84f1c,8e62a1d70c95b3f4] --- [http-nio-8080-exec-14] c.web.exception.RestExceptionHandler : method=POST uri=/rooms/check-guestName exception=IllegalArgumentException message=중복된 게스트 이름입니다."
+  ],
+  "logEnvironment": "prod",
+  "expected": "아니오",
+  "axis": "sparse-evidence"
+}

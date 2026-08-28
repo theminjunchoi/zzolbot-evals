@@ -1,0 +1,27 @@
+{
+ "name": "monitor-5xx-lock-timeout-vs-alloy-pairb03-a",
+ "question": "알림 Http5xxRatioHigh(critical)가 prod에서 발화했다 - 최근 5분 5xx 비율이 임계 5%를 넘겼다. 봇에는 최근 30분 ERROR 로그 샘플 4줄(DB 락 대기 타임아웃과 쿼리 타임아웃으로 실패한 HTTP 요청)이 주어졌다.",
+ "rubric": "주어진 ERROR 로그 4줄은 09:21~09:22에 POST /rooms가 CannotAcquireLockException(Lock wait timeout)으로, GET /rooms/check-joinCode와 /rooms/nickname/random이 QueryTimeoutException으로 실패해 RestExceptionHandler가 5xx로 응답한 기록이다. '근거 발견: 예'로 판정하고 DB 락 경합과 쿼리 타임아웃이 여러 엔드포인트의 5xx로 이어졌다는 가설을 제시하면 정답. '근거 발견: 아니오'로 판정하거나 이 예외들이 5xx 비율과 무관하다고 말하면 오답.",
+ "source": "MANUAL",
+ "alert": {
+  "alertname": "Http5xxRatioHigh",
+  "severity": "critical",
+  "fingerprint": "golden-gen-h5x-4105",
+  "summary": "HTTP 5xx 비율 5% 초과 (prod-app)",
+  "description": "최근 5분 5xx 비율이 11.4%. 서버 측 광범위 실패 가능성.",
+  "labels": {
+   "alertname": "Http5xxRatioHigh",
+   "severity": "critical",
+   "job": "prod-app"
+  }
+ },
+ "logSamples": [
+  "[2026-08-27 09:21:03.774] [ERROR] [0759c29738b3ab4bf3ab0cdaee89ce61,cede83e3c5e1235e] --- [http-nio-8080-exec-17] c.web.exception.RestExceptionHandler : method=POST uri=/rooms exception=CannotAcquireLockException message=Lock wait timeout exceeded; try restarting transaction",
+  "[2026-08-27 09:21:41.026] [ERROR] [62f688f7459032807e4537e8e6444a72,fe47d3465f61f868] --- [http-nio-8080-exec-22] c.web.exception.RestExceptionHandler : method=GET uri=/rooms/check-joinCode exception=QueryTimeoutException message=Statement cancelled due to timeout or client request",
+  "[2026-08-27 09:22:18.593] [ERROR] [943242e2eb30c8c71e1e9f57911ca28a,88646472f33fa076] --- [http-nio-8080-exec-08] c.web.exception.RestExceptionHandler : method=POST uri=/rooms exception=CannotAcquireLockException message=Lock wait timeout exceeded; try restarting transaction",
+  "[2026-08-27 09:22:55.140] [ERROR] [95541c8bee659e1dc27259a1162bf460,d2abde1237a02e7d] --- [http-nio-8080-exec-31] c.web.exception.RestExceptionHandler : method=GET uri=/rooms/nickname/random exception=QueryTimeoutException message=Statement cancelled due to timeout or client request"
+ ],
+ "logEnvironment": "prod",
+ "expected": "예",
+ "axis": "positive-dense"
+}

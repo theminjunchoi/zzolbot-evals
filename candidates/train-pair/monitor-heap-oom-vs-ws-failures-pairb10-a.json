@@ -1,0 +1,27 @@
+{
+  "name": "monitor-heap-oom-vs-ws-failures-pairb10-a",
+  "question": "알림 JvmHeapUsageHigh(critical)가 prod에서 발화했다 - JVM 힙 사용률이 85%를 넘었다. 봇에는 최근 30분 ERROR 로그 샘플 4줄(게임 스케줄 실행 예외와 OutOfMemoryError로 실패한 HTTP 요청)이 주어졌다.",
+  "rubric": "주어진 ERROR 로그 4줄은 18:52 nunchi 게임 스케줄 실행 예외와 스케줄 작업의 처리되지 않은 오류에 이어, 18:53과 18:54에 GET /rooms/PXMH/probabilities와 POST /rooms가 OutOfMemoryError(Java heap space)로 실패한 기록으로, 힙 고갈이 스케줄러와 HTTP 요청 처리 양쪽에서 동시에 드러난다. '근거 발견: 예'로 판정하고 힙 고갈(OutOfMemoryError)이 근본 원인이며 게임 스케줄 예외와 요청 실패는 그 파급 증상이라는 가설을 제시하면 정답. '근거 발견: 아니오'로 판정하거나 nunchi 게임 로직 결함을 근본 원인으로 지목해 근본과 파급을 뒤집으면 오답.",
+  "source": "MANUAL",
+  "alert": {
+    "alertname": "JvmHeapUsageHigh",
+    "severity": "critical",
+    "fingerprint": "golden-gen-jhu-4119",
+    "summary": "JVM 힙 사용률 > 85% (prod-app)",
+    "description": "힙 사용률이 96.1%. GC 오버헤드 증가 및 OOM 위험.",
+    "labels": {
+      "alertname": "JvmHeapUsageHigh",
+      "severity": "critical",
+      "job": "prod-app"
+    }
+  },
+  "logSamples": [
+    "[2026-08-27 18:52:31.442] [ERROR] [,] --- [nunchi-task-3] c.g.s.GameTaskSchedulerFactory : [nunchi] 스케줄 실행 중 예외가 발생했습니다.",
+    "[2026-08-27 18:53:04.918] [ERROR] [,] --- [pool-1-thread-4] o.s.s.s.TaskUtils$LoggingErrorHandler : Unexpected error occurred in scheduled task",
+    "[2026-08-27 18:53:47.265] [ERROR] [1304ad9b29feeea334893f3175597b68,31a3d61052186c28] --- [http-nio-8080-exec-31] c.web.exception.RestExceptionHandler : method=GET uri=/rooms/PXMH/probabilities exception=OutOfMemoryError message=Java heap space",
+    "[2026-08-27 18:54:20.803] [ERROR] [c2ac6e4ac0061913cebfb9bad09711b5,2c85e064af47afe5] --- [http-nio-8080-exec-12] c.web.exception.RestExceptionHandler : method=POST uri=/rooms exception=OutOfMemoryError message=Java heap space"
+  ],
+  "logEnvironment": "prod",
+  "expected": "예",
+  "axis": "positive-dense"
+}

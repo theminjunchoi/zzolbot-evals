@@ -1,0 +1,28 @@
+{
+ "name": "monitor-nickname-npe-5xx-paira08-b",
+ "question": "알림 MassIpBlockingSpike(critical)가 prod에서 발화했다 - IP 차단 요청이 베이스라인 대비 급증했다. 봇에는 최근 30분 ERROR 로그 샘플 4줄이 주어졌다.",
+ "rubric": "주어진 ERROR 로그는 정상 엔드포인트(/rooms/nickname/random, /rooms, /rooms/W9HT/probabilities)에 대한 애플리케이션 예외 네 줄이며, 차단된 IP 접근이나 악성 경로 접근 감지, IP 차단 등록을 보여주는 줄은 하나도 없다. '근거 발견: 아니오'로 판정하고 이 로그로는 차단 요청 급증의 주체(차단된 IP와 경로)를 확인할 수 없다고 밝히면 정답. '근거 발견: 예'로 판정하거나 반복되는 NullPointerException을 공격 트래픽의 증거로 해석해 차단 급증의 근거로 삼으면 오답.",
+ "source": "MANUAL",
+ "alert": {
+  "alertname": "MassIpBlockingSpike",
+  "severity": "critical",
+  "fingerprint": "golden-gen-pa-116",
+  "summary": "IP 차단 요청 급증 (prod-app)",
+  "description": "차단 요청이 7.2 req/s. 베이스라인(약 0.5 req/s) 대비 급증. 차단된 IP와 요청 경로를 확인.",
+  "labels": {
+   "alertname": "MassIpBlockingSpike",
+   "severity": "critical",
+   "job": "prod-app",
+   "incident_group": "ip-blocking"
+  }
+ },
+ "logSamples": [
+  "[2026-08-28 11:05:44.129] [ERROR] [d1f47b0a95c3e28d604f7a1b3c8e5920,4b7e1c93a0d582f6] --- [http-nio-8080-exec-31] c.web.exception.RestExceptionHandler : method=GET uri=/rooms/nickname/random exception=NullPointerException message=Cannot invoke String.length() because nickname is null",
+  "[2026-08-28 11:06:12.673] [ERROR] [92a0c5e73b1d48f6a70e2c941b5d38af,e05f3b7a1c964d28] --- [http-nio-8080-exec-8] c.web.exception.RestExceptionHandler : method=POST uri=/rooms exception=NullPointerException message=Cannot invoke String.length() because nickname is null",
+  "[2026-08-28 11:07:35.401] [ERROR] [6f3b18e0d752a94c1e8b0d63f5a2079c,17c8d940b6e3f52a] --- [http-nio-8080-exec-24] c.web.exception.RestExceptionHandler : method=GET uri=/rooms/W9HT/probabilities exception=IllegalArgumentException message=Player not found in room W9HT",
+  "[2026-08-28 11:08:50.916] [ERROR] [50c9e2a4187b3df60c95a1e83b47d2f1,ba62f0d5c3971e84] --- [http-nio-8080-exec-11] c.web.exception.RestExceptionHandler : method=POST uri=/rooms exception=NullPointerException message=Cannot invoke String.length() because nickname is null"
+ ],
+ "logEnvironment": "prod",
+ "expected": "아니오",
+ "axis": "unrelated-trap"
+}

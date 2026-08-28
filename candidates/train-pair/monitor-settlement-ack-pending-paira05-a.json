@@ -1,0 +1,26 @@
+{
+  "name": "monitor-settlement-ack-pending-paira05-a",
+  "question": "알림 RedisStreamE2eLatencyHigh(warning)가 prod에서 발화했다 - 스트림 발행부터 처리까지 p95 지연이 임계 500ms를 넘겼다. 봇에는 최근 30분 ERROR 로그 샘플 3줄이 주어졌다.",
+  "rubric": "주어진 ERROR 로그는 08:14~08:15 사이 settlement:result 컨슈머가 recordId=1756368842331-0과 1756368875907-0의 정산 처리에 실패해 ACK를 보류하고 재전달을 기다렸으며, 그중 하나는 PendingSweeper의 재처리마저 실패했음을 보여준다. ACK 보류와 재전달, 재처리 실패는 그 메시지의 발행-완료 구간을 늘리므로 E2E 지연의 직접 근거다. '근거 발견: 예'로 판정하고 정산 처리 실패로 인한 ACK 보류와 재전달 반복을 지연 상승의 원인으로 짚으면 정답. '근거 발견: 아니오'로 판정하거나 로그가 지연과 무관하다고 하면 오답.",
+  "source": "MANUAL",
+  "alert": {
+    "alertname": "RedisStreamE2eLatencyHigh",
+    "severity": "warning",
+    "fingerprint": "golden-gen-pa-109",
+    "summary": "Redis Stream E2E 지연 p95 > 500ms (prod-app)",
+    "description": "스트림 처리 p95 지연이 3.6s. 컨슈머 처리 적체 또는 다운스트림(App Service) 지연 가능성.",
+    "labels": {
+      "alertname": "RedisStreamE2eLatencyHigh",
+      "severity": "warning",
+      "job": "prod-app"
+    }
+  },
+  "logSamples": [
+    "[2026-08-28 08:14:02.331] [ERROR] [,] --- [redis-stream-thread-pool-settlement:result1] c.s.i.c.SettlementStreamConsumer : 정산 처리 실패 — ACK 보류, 재전달 대기: recordId=1756368842331-0",
+    "[2026-08-28 08:14:35.907] [ERROR] [,] --- [redis-stream-thread-pool-settlement:result1] c.s.i.c.SettlementStreamConsumer : 정산 처리 실패 — ACK 보류, 재전달 대기: recordId=1756368875907-0",
+    "[2026-08-28 08:15:10.482] [ERROR] [,] --- [pool-4-thread-2] c.s.i.c.SettlementPendingSweeper : pending 정산 메시지 재처리 실패: recordId=1756368842331-0"
+  ],
+  "logEnvironment": "prod",
+  "expected": "예",
+  "axis": "positive-dense"
+}

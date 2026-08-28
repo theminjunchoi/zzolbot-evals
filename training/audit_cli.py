@@ -25,9 +25,15 @@ from harness.similarity import find_duplicates, normalize_message, signature
 
 def user_signature(user_prompt: str) -> tuple:
     """빌드된 학습 파일에는 시나리오가 아니라 프롬프트 문자열만 있다.
-    로그 줄만 뽑아 같은 방식으로 정규화해 비교한다."""
+    시나리오 시그니처와 같은 뼈대(알림 + 로그)를 프롬프트에서 복원해 비교한다.
+
+    로그만 보면 **대조 쌍이 전부 중복으로 잡힌다.** 쌍은 로그를 고정하고 알림만 바꾼
+    것이므로 로그가 같은 것이 정상이다. 알림을 넣지 않으면 정상 데이터를 문제로 신고한다.
+    """
     lines = [l[2:] for l in user_prompt.splitlines() if l.startswith("- [")]
-    return tuple(normalize_message(l) for l in lines)
+    alert = tuple(l for l in user_prompt.splitlines()
+                  if l.startswith(("알림명:", "요약:", "설명(")))
+    return (alert, tuple(normalize_message(l) for l in lines))
 
 
 def main() -> int:

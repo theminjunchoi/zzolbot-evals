@@ -1,0 +1,27 @@
+{
+ "name": "monitor-settlement-stuck-vs-login-pairb02-b",
+ "question": "알림 LoginSuccessDroppedToZero(critical)가 prod에서 발화했다 - 카카오 로그인 시도는 계속되는데 성공이 0이다. 봇에는 최근 30분 ERROR 로그 샘플 3줄(정산 스트림 컨슈머 처리 실패와 pending 재처리 실패)이 주어졌다.",
+ "rubric": "주어진 ERROR 로그 3줄은 정산 스트림 컨슈머와 pending 스위퍼의 실패 기록이며, OAuth 인증 흐름(redirect_uri, provider 응답, 토큰 교환)이나 로그인 요청 처리에 대한 기록은 한 줄도 없다. '근거 발견: 아니오'로 판정하고 정산 스트림 실패는 로그인 성공률과 별개 경로이므로 근거가 되지 않으며 provider 콘솔 설정과 redirect_uri 점검이 필요하다고 말하면 정답. '근거 발견: 예'로 판정하거나 정산 처리 실패 때문에 로그인이 실패했다고 연결하면 오답.",
+ "source": "MANUAL",
+ "alert": {
+  "alertname": "LoginSuccessDroppedToZero",
+  "severity": "critical",
+  "fingerprint": "golden-gen-lsz-4104",
+  "summary": "kakao 로그인 성공 0 (prod-app) — 시도는 계속됨",
+  "description": "최근 로그인 시도는 있으나 성공이 없다. redirect_uri(스킴/호스트)·provider 콘솔 등록·시크릿을 점검. 여러 provider 동시 발생 시 프록시/baseUrl 의심.",
+  "labels": {
+   "alertname": "LoginSuccessDroppedToZero",
+   "severity": "critical",
+   "job": "prod-app",
+   "provider": "kakao"
+  }
+ },
+ "logSamples": [
+  "[2026-08-27 04:02:11.334] [ERROR] [3520291054676fa25dd86c83ea7bae6c,ee8e61fe465fb044] --- [redis-stream-thread-pool-settlement:result1] c.s.i.c.SettlementStreamConsumer : 정산 처리 실패 — ACK 보류, 재전달 대기: recordId=1756258931044-0",
+  "[2026-08-27 04:03:47.882] [ERROR] [9338a524c4943140ab2a790d7564e42a,cfd660f6a09c9082] --- [redis-stream-thread-pool-settlement:result2] c.s.i.c.SettlementStreamConsumer : 정산 스트림 처리 중 오류가 발생했습니다.",
+  "[2026-08-27 04:05:19.470] [ERROR] [,] --- [pool-5-thread-3] c.s.i.c.SettlementPendingSweeper : pending 정산 메시지 재처리 실패: recordId=1756258931044-0"
+ ],
+ "logEnvironment": "prod",
+ "expected": "아니오",
+ "axis": "unrelated-trap"
+}

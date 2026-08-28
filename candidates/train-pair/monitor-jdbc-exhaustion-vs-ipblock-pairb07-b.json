@@ -1,0 +1,28 @@
+{
+  "name": "monitor-jdbc-exhaustion-vs-ipblock-pairb07-b",
+  "question": "알림 MassIpBlockingSpike(critical)가 prod에서 발화했다 - IP 차단 요청이 베이스라인 대비 급증했다. 봇에는 최근 30분 ERROR 로그 샘플 4줄(JDBC 커넥션 획득 실패로 인한 HTTP 5xx)이 주어졌다.",
+  "rubric": "주어진 ERROR 로그 4줄은 JDBC 커넥션 획득 실패로 인한 5xx 기록이며, 차단된 IP나 악성 경로 접근, IP 차단 등록 같은 ip-block 경로의 기록은 한 줄도 없다. '근거 발견: 아니오'로 판정하고 이 로그로는 차단 요청 급증을 설명할 수 없으며 차단된 IP 대역과 요청 경로, X-Forwarded-For 소실로 내부 IP가 BAN되는 패턴인지를 따로 확인해야 한다고 말하면 정답. '근거 발견: 예'로 판정하거나 DB 커넥션 실패가 IP 차단을 유발했다고 지어내면 오답.",
+  "source": "MANUAL",
+  "alert": {
+    "alertname": "MassIpBlockingSpike",
+    "severity": "critical",
+    "fingerprint": "golden-gen-mib-4114",
+    "summary": "IP 차단 요청 급증 (prod-app)",
+    "description": "차단 요청이 12.4 req/s. 베이스라인(약 0.5 req/s) 대비 급증. 차단된 IP와 요청 경로를 확인.",
+    "labels": {
+      "alertname": "MassIpBlockingSpike",
+      "severity": "critical",
+      "job": "prod-app",
+      "incident_group": "ip-blocking"
+    }
+  },
+  "logSamples": [
+    "[2026-08-27 15:31:02.884] [ERROR] [a13f0667dbce97591dd5bebcac0c4cfc,bfe4b16ce1709f8e] --- [http-nio-8080-exec-11] c.web.exception.RestExceptionHandler : method=GET uri=/rooms/M4TZ/probabilities exception=DataAccessResourceFailureException message=Unable to acquire JDBC Connection",
+    "[2026-08-27 15:31:24.339] [ERROR] [92481a13d4962f4b3de191648f4407b7,71a76e28d68fd466] --- [http-nio-8080-exec-05] c.web.exception.RestExceptionHandler : method=PATCH uri=/rooms/M4TZ/settings exception=DataAccessResourceFailureException message=Unable to acquire JDBC Connection",
+    "[2026-08-27 15:31:48.717] [ERROR] [2352ab33c0d059a552aabfc85d66d302,4f713465c43a7557] --- [http-nio-8080-exec-27] c.web.exception.RestExceptionHandler : method=POST uri=/rooms exception=DataAccessResourceFailureException message=Unable to acquire JDBC Connection",
+    "[2026-08-27 15:32:09.155] [ERROR] [7565966efbc7f4e6f65174bf8c7169b0,af6925e176d65a7c] --- [http-nio-8080-exec-19] c.web.exception.RestExceptionHandler : method=GET uri=/rooms/check-guestName exception=DataAccessResourceFailureException message=Unable to acquire JDBC Connection"
+  ],
+  "logEnvironment": "prod",
+  "expected": "아니오",
+  "axis": "unrelated-trap"
+}

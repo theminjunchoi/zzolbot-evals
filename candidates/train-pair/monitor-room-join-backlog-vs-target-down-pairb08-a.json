@@ -1,0 +1,26 @@
+{
+  "name": "monitor-room-join-backlog-vs-target-down-pairb08-a",
+  "question": "알림 RedisStreamBacklogHigh(warning)가 prod에서 발화했다 - 스트림 길이가 임계 1000을 넘겨 적체됐다. 봇에는 최근 30분 ERROR 로그 샘플 3줄(방 참가 비동기 처리 실패와 방 이벤트 자동 정리 실패)이 주어졌다.",
+  "rubric": "주어진 ERROR 로그 3줄은 11:03~11:04에 room:join 스트림 스레드에서 RoomService의 방 참가 비동기 처리가 같은 방(joinCode=8HQP)에 대해 연속 실패하고, 11:05에 RoomEventWaitManager의 방 이벤트 자동 정리까지 실패한 기록이다. '근거 발견: 예'로 판정하고 room:join 스트림 컨슈머가 참가 이벤트 처리에 반복 실패해 미처리 이벤트가 스트림에 쌓였다는 가설을 제시하면 정답. '근거 발견: 아니오'로 판정하거나 컨슈머 처리 실패를 적체와 무관하다고 말하면 오답.",
+  "source": "MANUAL",
+  "alert": {
+    "alertname": "RedisStreamBacklogHigh",
+    "severity": "warning",
+    "fingerprint": "golden-gen-rsb-4115",
+    "summary": "Redis Stream 적체 (length > 1000, prod-app)",
+    "description": "스트림 길이가 1633. 컨슈머 처리 속도가 발행을 못 따라가고 있습니다.",
+    "labels": {
+      "alertname": "RedisStreamBacklogHigh",
+      "severity": "warning",
+      "job": "prod-app"
+    }
+  },
+  "logSamples": [
+    "[2026-08-27 11:03:27.612] [ERROR] [88d39e67e14542a8b7d59fd40f4e1f06,1bdb7f53a7cd47ef] --- [redis-stream-thread-pool-room:join2] c.r.application.service.RoomService : 방 참가 비동기 처리 실패: eventId=ca876089-f1fe-c51d-ee5c-2ffd7e62c2b8, joinCode=8HQP, playerName=PLAYER_4",
+    "[2026-08-27 11:04:02.985] [ERROR] [4ddc891b61ab3115a1e7ea8c3afa038c,a7fe7e010e3d0d0e] --- [redis-stream-thread-pool-room:join1] c.r.application.service.RoomService : 방 참가 비동기 처리 실패: eventId=d8940930-4ab2-6fdf-214f-f52d257f7ff4, joinCode=8HQP, playerName=PLAYER_6",
+    "[2026-08-27 11:05:44.230] [ERROR] [,] --- [pool-4-thread-2] c.r.i.messaging.RoomEventWaitManager : 방 이벤트 자동 정리 (실패): eventId=4d531a69-a83a-6ce9-0e66-72d843d3d29a"
+  ],
+  "logEnvironment": "prod",
+  "expected": "예",
+  "axis": "positive-dense"
+}

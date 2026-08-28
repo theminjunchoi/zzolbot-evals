@@ -1,0 +1,28 @@
+{
+  "name": "monitor-http-5xx-redis-conn-paira02-b",
+  "question": "알림 AlloyDown(warning)가 prod에서 발화했다 - prod Alloy 로그 수집기가 5분 이상 메트릭을 내지 않는다. 봇에는 최근 30분 ERROR 로그 샘플 4줄이 주어졌다.",
+  "rubric": "주어진 ERROR 로그는 애플리케이션 HTTP 요청 처리 실패(RestExceptionHandler의 IllegalStateException 한 줄과 RedisConnectionFailureException 세 줄)뿐이고, Alloy 컨테이너 상태나 Loki 인입 경로를 보여주는 줄은 없다. '근거 발견: 아니오'로 판정하고 이 로그가 수집기 자체의 down을 설명하지 못한다는 점(오히려 로그가 계속 수집되고 있다는 점)을 밝히면 정답. '근거 발견: 예'로 판정하거나 Redis 연결 실패를 Alloy down의 원인으로 연결하면 오답.",
+  "source": "MANUAL",
+  "alert": {
+    "alertname": "AlloyDown",
+    "severity": "warning",
+    "fingerprint": "golden-gen-pa-104",
+    "summary": "Alloy 로그 수집기 down (prod)",
+    "description": "prod Alloy가 5분 이상 메트릭을 내지 않습니다. 컨테이너 다운 또는 로그가 Loki로 인입되지 않는 상태일 수 있습니다.",
+    "labels": {
+      "alertname": "AlloyDown",
+      "severity": "warning",
+      "job": "alloy",
+      "env": "prod"
+    }
+  },
+  "logSamples": [
+    "[2026-08-28 05:21:14.037] [ERROR] [7b1c4f9a2e8d05c3a6f47b1e93d20c58,3a9e17c4b2d06f81] --- [http-nio-8080-exec-12] c.web.exception.RestExceptionHandler : method=PATCH uri=/rooms/K7QD/settings exception=IllegalStateException message=Room settings cannot be changed after game start",
+    "[2026-08-28 05:21:39.556] [ERROR] [c48f0b6d13a927e5f8c0b34d6a91e772,5d24a8f30c197be6] --- [http-nio-8080-exec-4] c.web.exception.RestExceptionHandler : method=GET uri=/rooms/check-joinCode exception=RedisConnectionFailureException message=Unable to connect to Redis",
+    "[2026-08-28 05:22:02.884] [ERROR] [19d7ac35f0be4821c96d5f38a70b2e4d,8e0c62b95a3f17d4] --- [http-nio-8080-exec-27] c.web.exception.RestExceptionHandler : method=GET uri=/rooms/K7QD/probabilities exception=RedisConnectionFailureException message=Unable to connect to Redis",
+    "[2026-08-28 05:22:31.190] [ERROR] [a05e83c17d2946fb0e8c1a5d73902f6b,26b4f9d081ec5a37] --- [http-nio-8080-exec-19] c.web.exception.RestExceptionHandler : method=POST uri=/rooms exception=RedisConnectionFailureException message=Unable to connect to Redis"
+  ],
+  "logEnvironment": "prod",
+  "expected": "아니오",
+  "axis": "unrelated-trap"
+}

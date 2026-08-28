@@ -1,0 +1,25 @@
+{
+  "name": "monitor-app-error-spike-sparse-sweeper-minigame-trap01",
+  "question": "알림 AppErrorLogSpike(warning)가 prod에서 발화했다 - 최근 5분 ERROR 로그가 51건으로 임계(30건/5m)를 넘었다. 봇에는 최근 30분 창에서 조회된 prod 앱 ERROR 로그 샘플 2줄이 주어졌고, 두 줄의 시각은 23분 떨어져 있다.",
+  "rubric": "5분에 51건이라는 급증을 시각이 23분 벌어진 ERROR 2줄(정산 pending 재처리 실패 1건, 미니게임 시작 이벤트 처리 실패 1건)로는 설명할 수 없다. 표본 수도 시간 분포도 급증을 뒷받침하지 못하므로 '근거 발견: 아니오'로 판정하고 표본 부족을 인정하면 정답. 두 줄 중 하나를 급증의 근본 원인으로 단정하거나 서로 무관한 두 줄을 하나의 연쇄로 엮으면 오답.",
+  "source": "MANUAL",
+  "alert": {
+    "alertname": "AppErrorLogSpike",
+    "severity": "warning",
+    "fingerprint": "golden-gen-sparsetrap-01",
+    "summary": "ERROR 로그 급증(최근 5분, prod-app)",
+    "description": "ERROR 로그가 51건(임계 30/5m)입니다. zzol-bot이 근본원인을 분석합니다.",
+    "labels": {
+      "alertname": "AppErrorLogSpike",
+      "severity": "warning",
+      "job": "prod-app"
+    }
+  },
+  "logSamples": [
+    "[2026-08-27 09:12:41.318] [ERROR] [,] --- [pool-7-thread-2] c.s.i.c.SettlementPendingSweeper : pending 정산 메시지 재처리 실패: recordId=1756268341207-0",
+    "[2026-08-27 09:35:58.742] [ERROR] [7c1f9a3e5b8d024611fa73c9e0d5842b,3a9e17c4d0b25f68] --- [redis-stream-thread-pool-minigame1] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=MiniGameStartConsumer, message=MiniGameStartEvent[joinCode=K7QW, gameType=speedtouch]"
+  ],
+  "logEnvironment": "prod",
+  "expected": "아니오",
+  "axis": "sparse-evidence"
+}
