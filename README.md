@@ -356,7 +356,7 @@ training/               학습 데이터 만들기
   length_guard.py         샘플이 길면 빌드를 멈춤 (버리지 않고)
   dpo.py                  DPO 손실 (mlx-lm에 없어 직접 구현)
 
-reports/                리포트 20편. 번호 순서가 곧 작업 순서
+reports/                리포트 19편. 번호 순서가 곧 작업 순서
   README.md               색인
   runs/                   실행 원본 (자동 생성)
 ```
