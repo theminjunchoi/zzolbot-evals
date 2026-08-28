@@ -1,0 +1,26 @@
+{
+ "name": "monitor-ws-connection-failures-post-connect-noise-rfta32",
+ "question": "알림 WsConnectionFailuresHigh(warning)가 prod에서 발화했다 - 최근 5분 WS 연결 실패가 34건으로 임계 10건을 넘었다. 봇에는 최근 30분 창에서 조회된 prod ERROR 로그 샘플 3줄이 주어졌다.",
+ "rubric": "알림이 세는 것은 STOMP CONNECT 단계에서 실패한 연결이고, 주어진 로그는 연결이 이미 성립한 뒤의 경로에서 난 오류다. 접속 종료 이벤트 소비 실패 두 건과 눈치게임 press 처리 오류 한 건은 세션이 맺어진 다음에야 발생할 수 있는 사건이라 연결 단계 실패의 근거가 되지 못한다. '근거 발견: 아니오'로 판정하고 연결 실패의 원인을 단정하지 않아야 정답. 접속 종료 이벤트 실패를 연결 실패 급증의 근거로 삼으면 오답.",
+ "source": "MANUAL",
+ "alert": {
+  "alertname": "WsConnectionFailuresHigh",
+  "severity": "warning",
+  "fingerprint": "golden-gen-rfta-4232",
+  "summary": "WebSocket 연결 실패 급증 (prod-app)",
+  "description": "최근 5분 WS 연결 실패가 34건 (임계 10). STOMP 연결 단계 실패 누적.",
+  "labels": {
+   "alertname": "WsConnectionFailuresHigh",
+   "severity": "warning",
+   "job": "prod-app"
+  }
+ },
+ "logSamples": [
+  "[2026-08-26 17:41:22.118] [ERROR] [29270d8e36ab669a6b92ede8d7523797,880989858c7968b3] --- [redis-stream-thread-pool-room1] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=PlayerDisconnectedConsumer, message=PlayerDisconnectedEvent[eventId=d160c967-3177-480a-0c35-ef4f11f07806, timestamp=2026-08-26T08:41:22.118000645Z, joinCode=J3WQ, playerName=USER6]",
+  "[2026-08-26 17:48:07.663] [ERROR] [820ac42be1f96b523e2a5fbd43e7cbd9,f0b4b2e4fa17ebba] --- [redis-stream-thread-pool-nunchi2] c.n.i.m.c.NunchiCommandEventConsumer : 눈치게임 press 처리 중 오류: joinCode=J3WQ, playerName=USER2, eventId=915df8c7-bf79-68c3-410d-ad55e2f60f7e",
+  "[2026-08-26 17:55:41.207] [ERROR] [1ca79f90db22a3bcc90039bce715b55d,27ce13ac0d84aef8] --- [redis-stream-thread-pool-room2] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=PlayerDisconnectedConsumer, message=PlayerDisconnectedEvent[eventId=afe7ee0b-44d1-d8c1-9cd9-04dd64dcadac, timestamp=2026-08-26T08:55:41.207000824Z, joinCode=J3WQ, playerName=USER4]"
+ ],
+ "logEnvironment": "prod",
+ "expected": "아니오",
+ "axis": "near-miss-component"
+}

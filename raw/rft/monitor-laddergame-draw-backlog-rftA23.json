@@ -1,0 +1,28 @@
+{
+ "name": "monitor-laddergame-draw-backlog-rfta23",
+ "question": "알림 RedisStreamBacklogHigh(warning)가 prod에서 발화했다 - laddergame 스트림 길이가 3400으로 임계 1000을 넘었다. 봇에는 최근 30분 창에서 조회된 prod ERROR 로그 샘플 5줄이 주어졌다.",
+ "rubric": "주어진 로그 전부가 laddergame 스트림 컨슈머 스레드에서 나온 것으로, 22:07부터 22:24까지 LadderDrawCommandEventConsumer의 사다리 뽑기 커맨드 처리 실패 네 건과 같은 스트림 리스너의 처리 오류 한 건이 이어졌다. 소비 측이 계속 실패하면 발행분이 소비되지 못해 스트림 길이가 늘어난다. '근거 발견: 예'로 판정하고 사다리 커맨드 컨슈머의 반복 실패를 적체의 원인 가설로 제시하면 정답. '근거 발견: 아니오'로 판정하거나 로그가 가리키지 않는 다른 스트림이나 발행량 급증을 원인으로 삼으면 오답.",
+ "source": "MANUAL",
+ "alert": {
+  "alertname": "RedisStreamBacklogHigh",
+  "severity": "warning",
+  "fingerprint": "golden-gen-rfta-4223",
+  "summary": "Redis Stream 적체 (length > 1000, prod-app)",
+  "description": "스트림 길이가 3400. 컨슈머 처리 속도가 발행을 못 따라가고 있습니다.",
+  "labels": {
+   "alertname": "RedisStreamBacklogHigh",
+   "severity": "warning",
+   "job": "prod-app"
+  }
+ },
+ "logSamples": [
+  "[2026-08-27 22:07:41.118] [ERROR] [804a70684099e08523e637d798618ac1,28d65245bb1caeaa] --- [redis-stream-thread-pool-laddergame1] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=LadderDrawCommandEventConsumer, message=LadderDrawCommandEvent[eventId=777acd4b-50e8-6bb5-7c53-f7e0bdbcad30, timestamp=2026-08-27T13:07:41.118000832Z, joinCode=Z3PM, playerName=USER2, lineIndex=3]",
+  "[2026-08-27 22:11:58.663] [ERROR] [d7362c8b6586205c5ac23b19a72cfd58,5d3eb24ecb4b1bd7] --- [redis-stream-thread-pool-laddergame2] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=LadderDrawCommandEventConsumer, message=LadderDrawCommandEvent[eventId=79f7bcff-d0af-90b9-92f4-dea19a0395ad, timestamp=2026-08-27T13:11:58.663000672Z, joinCode=Z3PM, playerName=USER4, lineIndex=1]",
+  "[2026-08-27 22:16:22.407] [ERROR] [c289c6349bbadf521eb3b03175d19a59,2a19755c05536883] --- [redis-stream-thread-pool-laddergame1] c.g.r.c.RedisStreamListenerStarter : Redis Stream 처리 중 오류가 발생했습니다.",
+  "[2026-08-27 22:20:09.885] [ERROR] [9e64ec16fe49063409d173c2dc533a94,b6ade1163418c350] --- [redis-stream-thread-pool-laddergame2] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=LadderDrawCommandEventConsumer, message=LadderDrawCommandEvent[eventId=420db299-b64d-e3ad-a3a2-55bb7651aeb6, timestamp=2026-08-27T13:20:09.885000673Z, joinCode=Z3PM, playerName=USER6, lineIndex=5]",
+  "[2026-08-27 22:24:37.220] [ERROR] [8eb12f2a54156180dc02546de016e836,968c3b6613774318] --- [redis-stream-thread-pool-laddergame1] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=LadderDrawCommandEventConsumer, message=LadderDrawCommandEvent[eventId=76494c89-2105-0617-0025-f7e70ea7b027, timestamp=2026-08-27T13:24:37.220000005Z, joinCode=Y8FN, playerName=USER1, lineIndex=2]"
+ ],
+ "logEnvironment": "prod",
+ "expected": "예",
+ "axis": "positive-dense"
+}

@@ -1,0 +1,26 @@
+{
+ "name": "monitor-ws-handshake-probe-edge-layer-rfta31",
+ "question": "알림 WsHandshakeProbeFailed(critical)가 prod에서 발화했다 - 엣지에서 쏜 WS 업그레이드 합성 프로브가 101을 받지 못했다. 봇에는 최근 30분 창에서 조회된 prod 앱 ERROR 로그 샘플 2줄이 주어졌다.",
+ "rubric": "이 프로브는 nginx 엣지에서 업그레이드 응답만 확인하는 합성 요청이라 앱에 도달하지 못한 실패는 앱 로그에 남지 않는다. 주어진 두 줄은 blockstacking 스트림 컨슈머 실패와 스케줄러 오류로 핸드셰이크 단계와 무관하고, nginx 설정이나 인증서 상태를 보여주지도 않는다. '근거 발견: 아니오'로 판정하고 엣지 설정 점검이 필요하다는 선을 넘어 앱 로그로 원인을 단정하지 않아야 정답. 앱 스트림 오류를 핸드셰이크 실패의 원인으로 지목하면 오답.",
+ "source": "MANUAL",
+ "alert": {
+  "alertname": "WsHandshakeProbeFailed",
+  "severity": "critical",
+  "fingerprint": "golden-gen-rfta-4231",
+  "summary": "WS 핸드셰이크 합성 프로브 실패 (edge=prod)",
+  "description": "엣지(nginx:443)에서 WS 업그레이드(101)가 실패. nginx Upgrade/Connection 헤더 소실 의심. probe_failed_due_to_regex=1이면 TCP/TLS는 됐으나 101 미수신(=헤더 소실로 200 등 반환), 0이면 TCP/TLS 단계 실패(nginx 다운·인증서).",
+  "labels": {
+   "alertname": "WsHandshakeProbeFailed",
+   "severity": "critical",
+   "job": "blackbox-ws",
+   "edge": "prod"
+  }
+ },
+ "logSamples": [
+  "[2026-08-26 14:05:18.663] [ERROR] [cb05b7c76ed3fd6f95ea020140be7f1c,a1eea5f00007020a] --- [redis-stream-thread-pool-blockstacking1] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=StopCommandEventConsumer, message=StopCommandEvent[eventId=03a8d6c3-80f2-6a53-6dae-05c4731f0cc2, timestamp=2026-08-26T05:05:18.663000315Z, joinCode=V9TL, playerName=USER2]",
+  "[2026-08-26 14:21:00.229] [ERROR] [,] --- [pool-8-thread-2] o.s.s.s.TaskUtils$LoggingErrorHandler : Unexpected error occurred in scheduled task"
+ ],
+ "logEnvironment": "prod",
+ "expected": "아니오",
+ "axis": "unrelated-trap"
+}

@@ -1,0 +1,28 @@
+{
+ "name": "monitor-cardgame-container-abandoned-backlog-rfta02",
+ "question": "알림 RedisStreamBacklogHigh(warning)가 prod에서 발화했다 - cardgame:select 스트림 길이가 1873으로 임계 1000을 넘었다. 봇에는 최근 30분 창에서 조회된 prod ERROR 로그 샘플 5줄이 주어졌다.",
+ "rubric": "주어진 로그는 14:12부터 14:26 사이에 RedisStreamContainerRecovery가 cardgame:select 스트림의 컨테이너 상태 확인에서 예외를 만나고, 복구를 두 번 시도했다가 모두 실패한 뒤 복구를 포기하고 HealthIndicator에 DOWN을 보고한 순서를 그대로 보여준다. 그 사이 같은 스트림의 리스너에서도 처리 오류가 났다. 컨테이너가 죽은 채 복구되지 않으면 소비가 멈추므로 발행분이 그대로 쌓인다. '근거 발견: 예'로 판정하고 컨테이너 복구 실패로 인한 소비 중단을 적체의 원인 가설로 제시하면 정답. '근거 발견: 아니오'로 판정하거나 컨슈머 로직 버그, 트래픽 급증처럼 로그에 없는 원인을 지목하면 오답.",
+ "source": "MANUAL",
+ "alert": {
+  "alertname": "RedisStreamBacklogHigh",
+  "severity": "warning",
+  "fingerprint": "golden-gen-rfta-4202",
+  "summary": "Redis Stream 적체 (length > 1000, prod-app)",
+  "description": "스트림 길이가 1873. 컨슈머 처리 속도가 발행을 못 따라가고 있습니다.",
+  "labels": {
+   "alertname": "RedisStreamBacklogHigh",
+   "severity": "warning",
+   "job": "prod-app"
+  }
+ },
+ "logSamples": [
+  "[2026-08-24 14:12:08.331] [ERROR] [,] --- [pool-4-thread-2] c.g.h.RedisStreamContainerRecovery : Redis Stream container 상태 확인 중 예외: stream=cardgame:select",
+  "[2026-08-24 14:15:44.902] [ERROR] [5a19f12579ae601beba47186a337e668,13bcda24379ccb63] --- [redis-stream-thread-pool-cardgame:select1] c.g.r.c.RedisStreamListenerStarter : Redis Stream 처리 중 오류가 발생했습니다.",
+  "[2026-08-24 14:18:08.415] [ERROR] [,] --- [pool-4-thread-2] c.g.h.RedisStreamContainerRecovery : Redis Stream container 복구 중 예외 발생: stream=cardgame:select",
+  "[2026-08-24 14:22:08.677] [ERROR] [,] --- [pool-4-thread-2] c.g.h.RedisStreamContainerRecovery : Redis Stream container 복구 중 예외 발생: stream=cardgame:select",
+  "[2026-08-24 14:26:08.940] [ERROR] [,] --- [pool-4-thread-2] c.g.h.RedisStreamContainerRecovery : Redis Stream container 복구 포기: stream=cardgame:select. HealthIndicator에 DOWN 보고"
+ ],
+ "logEnvironment": "prod",
+ "expected": "예",
+ "axis": "compound-cause"
+}

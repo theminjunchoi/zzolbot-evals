@@ -1,0 +1,29 @@
+{
+ "name": "monitor-db-connection-refused-total-5xx-rfta24",
+ "question": "알림 Http5xxRatioHigh(critical)가 prod에서 발화했다 - 최근 5분 5xx 비율이 26.1%로 임계 5%를 넘었다. 봇에는 최근 30분 창에서 조회된 prod ERROR 로그 샘플 6줄이 주어졌다.",
+ "rubric": "주어진 로그 여섯 줄은 01:12부터 01:16까지 4분 사이에 몰려 있고, 방 생성과 조회, 설정 변경까지 서로 다른 다섯 엔드포인트가 전부 DataAccessResourceFailureException과 Connection refused로 실패했다. DB 접속 자체가 거부되는 상태이므로 DB를 쓰는 모든 요청이 500이 되고, 이는 26.1%라는 높은 5xx 비율과 일치한다. '근거 발견: 예'로 판정하고 DB 접속 불가를 5xx 급증의 근본 원인 가설로 제시하면 정답. '근거 발견: 아니오'로 판정하거나 특정 엔드포인트의 로직 문제로 좁혀 단정하면 오답.",
+ "source": "MANUAL",
+ "alert": {
+  "alertname": "Http5xxRatioHigh",
+  "severity": "critical",
+  "fingerprint": "golden-gen-rfta-4224",
+  "summary": "HTTP 5xx 비율 5% 초과 (prod-app)",
+  "description": "최근 5분 5xx 비율이 26.1%. 서버 측 광범위 실패 가능성.",
+  "labels": {
+   "alertname": "Http5xxRatioHigh",
+   "severity": "critical",
+   "job": "prod-app"
+  }
+ },
+ "logSamples": [
+  "[2026-08-24 01:12:07.443] [ERROR] [c320ca5bb338cfa1ab09cff3ccfcf780,a975113197f5aadd] --- [http-nio-8080-exec-02] c.web.exception.RestExceptionHandler : method=POST uri=/rooms exception=DataAccessResourceFailureException message=Unable to open JDBC Connection; Connection refused",
+  "[2026-08-24 01:12:51.907] [ERROR] [9ecd299fabd049e4578912dea28b89b3,57c3590b31c06228] --- [http-nio-8080-exec-16] c.web.exception.RestExceptionHandler : method=GET uri=/rooms/check-joinCode exception=DataAccessResourceFailureException message=Unable to open JDBC Connection; Connection refused",
+  "[2026-08-24 01:13:38.229] [ERROR] [4397481474673fe9ccef26b54a749df7,fc4fee7e601ede9a] --- [http-nio-8080-exec-07] c.web.exception.RestExceptionHandler : method=GET uri=/rooms/check-guestName exception=DataAccessResourceFailureException message=Unable to open JDBC Connection; Connection refused",
+  "[2026-08-24 01:14:44.661] [ERROR] [55ea0d2c94582db31413eb700d1c85c6,61e362d6496c74a8] --- [http-nio-8080-exec-23] c.web.exception.RestExceptionHandler : method=PATCH uri=/rooms/G4DR/settings exception=DataAccessResourceFailureException message=Unable to open JDBC Connection; Connection refused",
+  "[2026-08-24 01:15:29.114] [ERROR] [ca06e2ff49c0621abe84b1499c9983ac,a7299eafc1a0588b] --- [http-nio-8080-exec-11] c.web.exception.RestExceptionHandler : method=POST uri=/rooms exception=DataAccessResourceFailureException message=Unable to open JDBC Connection; Connection refused",
+  "[2026-08-24 01:16:52.578] [ERROR] [5ec9df5a9a2d59959741858127606d98,92b31f1f6d8e44d0] --- [http-nio-8080-exec-29] c.web.exception.RestExceptionHandler : method=GET uri=/rooms/G4DR/probabilities exception=DataAccessResourceFailureException message=Unable to open JDBC Connection; Connection refused"
+ ],
+ "logEnvironment": "prod",
+ "expected": "예",
+ "axis": "positive-dense"
+}

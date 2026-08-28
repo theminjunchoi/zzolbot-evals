@@ -1,0 +1,27 @@
+{
+ "name": "monitor-alloy-collector-down-app-noise-rfta28",
+ "question": "알림 AlloyDown(warning)이 prod에서 발화했다 - 로그 수집기 Alloy가 5분 이상 메트릭을 내지 않는다. 봇에는 최근 30분 창에서 조회된 prod 앱 ERROR 로그 샘플 3줄이 주어졌다(수집이 끊기기 전에 적재된 것).",
+ "rubric": "이 알림의 대상은 관측 스택의 로그 수집기 컨테이너이고, 수집기가 죽으면 이후 앱 로그는 Loki에 인입되지 않으므로 보이는 세 줄은 수집이 끊기기 전에 적재된 잔여분이다. 그 세 줄도 Oracle Object Storage 업로드 실패, laddergame 스케줄 예외, 방 참가 비동기 처리 실패로 수집기와 무관하다. '근거 발견: 아니오'로 판정하고 수집기 다운의 원인 가설을 앱 로그에서 만들지 않아야 정답. 앱 오류를 Alloy 다운의 원인으로 지목하면 오답.",
+ "source": "MANUAL",
+ "alert": {
+  "alertname": "AlloyDown",
+  "severity": "warning",
+  "fingerprint": "golden-gen-rfta-4228",
+  "summary": "Alloy 로그 수집기 down (prod)",
+  "description": "prod Alloy가 5분 이상 메트릭을 내지 않습니다. 컨테이너 다운 또는 로그가 Loki로 인입되지 않는 상태일 수 있습니다.",
+  "labels": {
+   "alertname": "AlloyDown",
+   "severity": "warning",
+   "job": "alloy",
+   "env": "prod"
+  }
+ },
+ "logSamples": [
+  "[2026-08-25 02:41:08.552] [ERROR] [,] --- [] c.r.infra.OracleObjectStorageService : Oracle Object Storage QR 코드 업로드 실패: contents=qr-Q6HD.png, error=java.net.UnknownHostException: objectstorage",
+  "[2026-08-25 02:52:33.117] [ERROR] [,] --- [laddergame-task-1] c.g.s.GameTaskSchedulerFactory : [laddergame] 스케줄 실행 중 예외가 발생했습니다.",
+  "[2026-08-25 03:04:19.884] [ERROR] [e5028145ccf8e7d14506e24255aee507,5a9b21c0d6f11565] --- [redis-stream-thread-pool-room:join2] c.r.application.service.RoomService : 방 참가 비동기 처리 실패: eventId=4d1336b4-39e0-33c6-701e-0262d09d12b3, joinCode=Q6HD, playerName=USER5"
+ ],
+ "logEnvironment": "prod",
+ "expected": "아니오",
+ "axis": "unrelated-trap"
+}

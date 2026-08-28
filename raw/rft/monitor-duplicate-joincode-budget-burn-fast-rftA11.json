@@ -1,0 +1,29 @@
+{
+ "name": "monitor-duplicate-joincode-budget-burn-fast-rfta11",
+ "question": "알림 ErrorBudgetBurnFast(critical)가 prod에서 발화했다 - 5xx 비율이 짧은 창과 긴 창 모두에서 임계를 넘어 에러버짓을 빠르게 소진 중이다. 봇에는 최근 30분 창에서 조회된 prod ERROR 로그 샘플 6줄이 주어졌다.",
+ "rubric": "주어진 로그 여섯 줄은 모두 POST /rooms 요청이 DataIntegrityViolationException과 join_code 유니크 키 중복으로 실패한 기록이며, 22:31부터 22:57까지 4분에서 6분 간격으로 끊이지 않고 이어진다. 방 생성이라는 핵심 진입 요청이 지속적으로 500을 내는 상태이므로 짧은 창과 긴 창 양쪽에서 5xx 비율이 유지된다. '근거 발견: 예'로 판정하고 방 코드 중복으로 인한 방 생성 실패를 에러버짓 소진의 원인 가설로 제시하면 정답. '근거 발견: 아니오'로 판정하거나 로그에 없는 인프라 장애를 원인으로 지목하면 오답.",
+ "source": "MANUAL",
+ "alert": {
+  "alertname": "ErrorBudgetBurnFast",
+  "severity": "critical",
+  "fingerprint": "golden-gen-rfta-4211",
+  "summary": "에러버짓 빠른 소진 (SLO 99.5%, burn-rate 14.4×)",
+  "description": "prod-app 5xx 비율이 1h·5m 양 창에서 7.2%를 초과. 약 2일이면 월간 에러버짓 전부 소진.",
+  "labels": {
+   "alertname": "ErrorBudgetBurnFast",
+   "severity": "critical",
+   "job": "prod-app"
+  }
+ },
+ "logSamples": [
+  "[2026-08-25 22:31:07.412] [ERROR] [32ccae7bd5416c4d91bf4ba2e5c85c59,60a409e9ea8cce7c] --- [http-nio-8080-exec-21] c.web.exception.RestExceptionHandler : method=POST uri=/rooms exception=DataIntegrityViolationException message=could not execute statement; Duplicate entry for key 'room.uk_join_code'",
+  "[2026-08-25 22:36:44.128] [ERROR] [6339b1ba4d85bfa333b03f48105612fe,9db786e94b751784] --- [http-nio-8080-exec-09] c.web.exception.RestExceptionHandler : method=POST uri=/rooms exception=DataIntegrityViolationException message=could not execute statement; Duplicate entry for key 'room.uk_join_code'",
+  "[2026-08-25 22:41:19.885] [ERROR] [6f941a69c38700ae9f431a8954d58e1e,3aa790906d096d5d] --- [http-nio-8080-exec-16] c.web.exception.RestExceptionHandler : method=POST uri=/rooms exception=DataIntegrityViolationException message=could not execute statement; Duplicate entry for key 'room.uk_join_code'",
+  "[2026-08-25 22:46:52.330] [ERROR] [eaa6783240f69f9ea26de096a9a3a47c,a6a7717b5ba5e022] --- [http-nio-8080-exec-03] c.web.exception.RestExceptionHandler : method=POST uri=/rooms exception=DataIntegrityViolationException message=could not execute statement; Duplicate entry for key 'room.uk_join_code'",
+  "[2026-08-25 22:52:28.774] [ERROR] [4803754c796fe8710226845ce1b4941b,96a5972c01d95ee1] --- [http-nio-8080-exec-27] c.web.exception.RestExceptionHandler : method=POST uri=/rooms exception=DataIntegrityViolationException message=could not execute statement; Duplicate entry for key 'room.uk_join_code'",
+  "[2026-08-25 22:57:03.219] [ERROR] [0b2efe108f336759182de762ea162282,9710b935622acf75] --- [http-nio-8080-exec-12] c.web.exception.RestExceptionHandler : method=POST uri=/rooms exception=DataIntegrityViolationException message=could not execute statement; Duplicate entry for key 'room.uk_join_code'"
+ ],
+ "logEnvironment": "prod",
+ "expected": "예",
+ "axis": "positive-dense"
+}

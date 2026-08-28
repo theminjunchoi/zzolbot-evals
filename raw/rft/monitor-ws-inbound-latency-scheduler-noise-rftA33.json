@@ -1,0 +1,26 @@
+{
+ "name": "monitor-ws-inbound-latency-scheduler-noise-rfta33",
+ "question": "알림 WsInboundLatencyHigh(critical)가 prod에서 발화했다 - WS inbound 메시지 처리 p99가 0.87초로 임계 500ms를 넘었다. 봇에는 최근 30분 창에서 조회된 prod ERROR 로그 샘플 3줄이 주어졌다.",
+ "rubric": "알림이 재는 구간은 WS inbound 채널이 메시지를 받아 핸들러가 반환할 때까지인데, 주어진 세 줄은 게임 스케줄 타이머와 방 이벤트 정리 배치, 정산 스윕처럼 inbound 처리와 다른 스레드에서 도는 백그라운드 작업의 실패다. 게다가 세 줄은 8분 이상 간격으로 흩어져 있어 p99 지연의 시점과도 맞지 않는다. '근거 발견: 아니오'로 판정하고 지연 원인을 단정하지 않아야 정답. 백그라운드 스케줄러 오류를 inbound 지연의 원인으로 지목하면 오답.",
+ "source": "MANUAL",
+ "alert": {
+  "alertname": "WsInboundLatencyHigh",
+  "severity": "critical",
+  "fingerprint": "golden-gen-rfta-4233",
+  "summary": "WebSocket 메시지 처리 p99 > 500ms (prod-app)",
+  "description": "WS inbound p99 처리 시간이 0.87s. 서비스 품질 저하 체감 수준.",
+  "labels": {
+   "alertname": "WsInboundLatencyHigh",
+   "severity": "critical",
+   "job": "prod-app"
+  }
+ },
+ "logSamples": [
+  "[2026-08-26 12:38:44.207] [ERROR] [,] --- [speedtouch-task-1] c.g.s.GameTaskSchedulerFactory : [speedtouch] 스케줄 실행 중 예외가 발생했습니다.",
+  "[2026-08-26 12:47:00.885] [ERROR] [,] --- [pool-6-thread-2] c.r.i.messaging.RoomEventWaitManager : 방 이벤트 자동 정리 (실패): eventId=8bf3cf47-d635-6b9a-4c8c-992105d63c2d",
+  "[2026-08-26 12:56:00.441] [ERROR] [,] --- [pool-3-thread-1] c.s.i.c.SettlementPendingSweeper : pending 정산 메시지 재처리 실패: recordId=1787715078220-0"
+ ],
+ "logEnvironment": "prod",
+ "expected": "아니오",
+ "axis": "near-miss-component"
+}

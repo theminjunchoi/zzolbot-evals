@@ -1,0 +1,28 @@
+{
+ "name": "monitor-slow-query-holds-pool-rfta07",
+ "question": "알림 DbConnectionPoolHigh(warning)가 prod에서 발화했다 - DB 커넥션 풀 활성 연결이 9개로 임계 8을 넘었다. 봇에는 최근 30분 창에서 조회된 prod ERROR 로그 샘플 5줄이 주어졌다.",
+ "rubric": "주어진 로그는 두 계층에서 같은 사건을 보여준다. 16:38부터 16:50까지 /rooms/PXMH/settings와 /rooms 요청이 QueryTimeoutException으로 실패했고 메시지가 모두 statement timeout 초과이며, 같은 구간에 방 참가 비동기 처리도 두 번 실패했다. 쿼리가 타임아웃까지 커넥션을 붙잡고 있으면 활성 연결이 임계 위에 머문다. '근거 발견: 예'로 판정하고 오래 걸리는 쿼리가 커넥션을 점유해 풀 활성 수가 올라갔다는 가설을 제시하면 정답. '근거 발견: 아니오'로 판정하거나 로그에 없는 커넥션 누수 코드나 트래픽 급증을 단정하면 오답.",
+ "source": "MANUAL",
+ "alert": {
+  "alertname": "DbConnectionPoolHigh",
+  "severity": "warning",
+  "fingerprint": "golden-gen-rfta-4207",
+  "summary": "DB 커넥션 풀 활성 > 8 (prod-app)",
+  "description": "활성 연결 9개 (최대 10). 슬로우 쿼리 또는 커넥션 누수 확인 필요.",
+  "labels": {
+   "alertname": "DbConnectionPoolHigh",
+   "severity": "warning",
+   "job": "prod-app"
+  }
+ },
+ "logSamples": [
+  "[2026-08-26 16:38:22.116] [ERROR] [05f13ce6a592d7de1910256bbbc158f3,db862761b4f6b106] --- [http-nio-8080-exec-11] c.web.exception.RestExceptionHandler : method=PATCH uri=/rooms/PXMH/settings exception=QueryTimeoutException message=JDBC exception executing SQL: statement timeout after 10000ms",
+  "[2026-08-26 16:41:57.408] [ERROR] [ece18e58f3062a08cecfce59c1ee0061,e4200f51446b3aff] --- [redis-stream-thread-pool-room:join1] c.r.application.service.RoomService : 방 참가 비동기 처리 실패: eventId=9f7dd1f3-88c7-0add-a6f8-08bdd016fa0a, joinCode=PXMH, playerName=USER4",
+  "[2026-08-26 16:44:10.732] [ERROR] [79e81acbd43f31d65a756b8d47e670f4,9b06b9274452dd3e] --- [http-nio-8080-exec-05] c.web.exception.RestExceptionHandler : method=POST uri=/rooms exception=QueryTimeoutException message=JDBC exception executing SQL: statement timeout after 10000ms",
+  "[2026-08-26 16:47:35.269] [ERROR] [4e05dcf767f133a38cec72d428ecb8fd,d801eb49a674e18f] --- [redis-stream-thread-pool-room:join2] c.r.application.service.RoomService : 방 참가 비동기 처리 실패: eventId=9a81e41d-1b42-4a83-434b-cef0d1defcd4, joinCode=PXMH, playerName=USER8",
+  "[2026-08-26 16:50:48.913] [ERROR] [d7b9fa86fcf642b37a9c515d46cdbf80,f05ca55c7fbc92f4] --- [http-nio-8080-exec-20] c.web.exception.RestExceptionHandler : method=PATCH uri=/rooms/PXMH/settings exception=QueryTimeoutException message=JDBC exception executing SQL: statement timeout after 10000ms"
+ ],
+ "logEnvironment": "prod",
+ "expected": "예",
+ "axis": "compound-cause"
+}

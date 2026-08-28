@@ -1,0 +1,29 @@
+{
+ "name": "monitor-minigame-container-flap-latency-rfta20",
+ "question": "알림 RedisStreamE2eLatencyHigh(warning)가 prod에서 발화했다 - 스트림 E2E 처리 p95 지연이 2.4초로 임계 500ms를 넘었다. 봇에는 최근 30분 창에서 조회된 prod ERROR 로그 샘플 6줄이 주어졌다.",
+ "rubric": "주어진 로그는 minigame 스트림 컨테이너가 12:03부터 12:26까지 상태 확인 예외와 복구 시도 실패를 번갈아 반복한 기록이고, 그 사이 같은 스트림의 리스너에서 처리 오류 두 건이 났다. 컨테이너가 죽었다 살아나기를 반복하면 그 동안 발행된 메시지가 뒤늦게 소비되어 발행부터 처리까지의 p95 지연이 커진다. '근거 발견: 예'로 판정하고 컨테이너 재기동 반복으로 인한 소비 중단과 몰아 처리를 지연의 원인 가설로 제시하면 정답. '근거 발견: 아니오'로 판정하거나 컨슈머 비즈니스 로직의 개별 버그로 단정하면 오답.",
+ "source": "MANUAL",
+ "alert": {
+  "alertname": "RedisStreamE2eLatencyHigh",
+  "severity": "warning",
+  "fingerprint": "golden-gen-rfta-4220",
+  "summary": "Redis Stream E2E 지연 p95 > 500ms (prod-app)",
+  "description": "스트림 처리 p95 지연이 2.4s. 컨슈머 처리 적체 또는 다운스트림(App Service) 지연 가능성.",
+  "labels": {
+   "alertname": "RedisStreamE2eLatencyHigh",
+   "severity": "warning",
+   "job": "prod-app"
+  }
+ },
+ "logSamples": [
+  "[2026-08-27 12:03:00.184] [ERROR] [,] --- [pool-5-thread-2] c.g.h.RedisStreamContainerRecovery : Redis Stream container 상태 확인 중 예외: stream=minigame",
+  "[2026-08-27 12:07:41.729] [ERROR] [d8845c756959b111c980022b5b46aeb9,002a8e09d332298a] --- [redis-stream-thread-pool-minigame1] c.g.r.c.RedisStreamListenerStarter : Redis Stream 처리 중 오류가 발생했습니다.",
+  "[2026-08-27 12:11:00.402] [ERROR] [,] --- [pool-5-thread-2] c.g.h.RedisStreamContainerRecovery : Redis Stream container 복구 중 예외 발생: stream=minigame",
+  "[2026-08-27 12:18:00.657] [ERROR] [,] --- [pool-5-thread-2] c.g.h.RedisStreamContainerRecovery : Redis Stream container 상태 확인 중 예외: stream=minigame",
+  "[2026-08-27 12:22:35.263] [ERROR] [7f7f905d8d64c4c04d48156ad8731f43,78304529c8dd0962] --- [redis-stream-thread-pool-minigame2] c.g.r.c.RedisStreamListenerStarter : Redis Stream 처리 중 오류가 발생했습니다.",
+  "[2026-08-27 12:26:00.918] [ERROR] [,] --- [pool-5-thread-2] c.g.h.RedisStreamContainerRecovery : Redis Stream container 복구 중 예외 발생: stream=minigame"
+ ],
+ "logEnvironment": "prod",
+ "expected": "예",
+ "axis": "compound-cause"
+}

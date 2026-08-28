@@ -75,6 +75,44 @@ def _score_one(reward: RewardFunction, scenario: Scenario, text: str):
     return reward.score(scenario, analysis), analysis
 
 
+def run_gemini_arm(label: str, model: str, scenarios: list[Scenario], variant: str,
+                   reward: RewardFunction, min_interval: float) -> ArmResult:
+    """참조 시스템(Gemini)을 같은 보상으로 잰다.
+
+    주 종점을 참조 시스템에서 계산할 수 없으면 우리 점수가 좋은지 나쁜지 말할 수 없다.
+    로컬 팔과 달리 샘플링은 하지 않는다(비용, 그리고 상한 추정은 로컬만 필요하다).
+    """
+    import os
+
+    from harness.llm import GeminiJsonClient
+
+    client = GeminiJsonClient(api_key=os.environ["GEMINI_ZZOL_BOT_API_KEY"],
+                              model=model, min_interval_s=min_interval)
+    grounding = GroundingPipeline()
+    system = PROMPT_VARIANTS[variant]
+    greedy: dict[str, float] = {}
+    parse_failures = citation_pass = false_positives = 0
+    positives = sum(1 for s in scenarios if expects_evidence(s))
+
+    for i, scenario in enumerate(scenarios, 1):
+        raw = client.generate_json(system, build_prompt(scenario))
+        score, analysis = _score_one(reward, scenario, raw)
+        greedy[scenario.name] = score.clamped
+        if score.parse_failed:
+            parse_failures += 1
+        if analysis is not None:
+            settled = grounding.apply(analysis, scenario)
+            if expects_evidence(scenario) and settled.grounded:
+                citation_pass += 1
+            if not expects_evidence(scenario) and settled.grounded:
+                false_positives += 1
+        print(f"  [{label}] {i}/{len(scenarios)} {scenario.name} {greedy[scenario.name]:.2f}",
+              flush=True)
+
+    return ArmResult(label, greedy, dict(greedy), parse_failures, citation_pass,
+                     false_positives, positives, len(scenarios) - positives, {})
+
+
 def run_arm(label: str, adapter: str, scenarios: list[Scenario], model_path: str,
             variant: str, samples: int, temp: float, batch: int,
             reward: RewardFunction, constrained: bool = False) -> ArmResult:
@@ -137,7 +175,7 @@ def run_arm(label: str, adapter: str, scenarios: list[Scenario], model_path: str
 def main() -> int:
     parser = argparse.ArgumentParser(description="검증 가능한 보상 측정")
     parser.add_argument("--label", required=True)
-    parser.add_argument("--arm", action="append", type=parse_arm, required=True,
+    parser.add_argument("--arm", action="append", type=parse_arm, default=[],
                         help="이름=어댑터경로. 어댑터가 비면 베이스 모델")
     parser.add_argument("--scenarios-dir", type=Path, default=Path("golden-set/monitor"))
     parser.add_argument("--out-dir", type=Path, default=Path("reports/runs"))
@@ -146,6 +184,9 @@ def main() -> int:
     parser.add_argument("--samples", type=int, default=1, help="1이면 그리디만, n>1이면 best-of-n")
     parser.add_argument("--temp", type=float, default=0.8)
     parser.add_argument("--batch", type=int, default=8)
+    parser.add_argument("--gemini", default="", metavar="MODEL",
+                        help="참조 시스템을 이 모델로 함께 측정 (예: gemini-2.5-flash)")
+    parser.add_argument("--min-interval", type=float, default=1.2)
     parser.add_argument("--constrained", action="store_true",
                         help="인용 필드를 실제 로그 줄로만 생성하도록 제약")
     parser.add_argument("--specificity", type=float, default=0.0,
@@ -157,6 +198,10 @@ def main() -> int:
     reward = RewardFunction(spec)
 
     results = []
+    if args.gemini:
+        print(f"[gemini] 실행 중 ({args.gemini})", flush=True)
+        results.append(run_gemini_arm("gemini", args.gemini, scenarios,
+                                      args.prompt_variant, reward, args.min_interval))
     for name, adapter in args.arm:
         print(f"[{name}] 실행 중 (어댑터: {adapter or '없음'})", flush=True)
         results.append(run_arm(name, adapter, scenarios, args.local_model,

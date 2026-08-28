@@ -1,0 +1,29 @@
+{
+ "name": "monitor-lock-and-redis-timeout-5xx-rfta09",
+ "question": "알림 Http5xxRatioHigh(critical)가 prod에서 발화했다 - 최근 5분 5xx 비율이 7.8%로 임계 5%를 넘었다. 봇에는 최근 30분 창에서 조회된 prod ERROR 로그 샘플 6줄이 주어졌다.",
+ "rubric": "주어진 로그는 같은 5분 구간에 서로 다른 두 갈래의 실패를 함께 보여준다. 쓰기 경로인 POST /rooms 세 건은 DeadlockLoserDataAccessException으로 실패했고, 읽기 경로인 GET /rooms/K8VP/probabilities와 GET /rooms/check-joinCode 세 건은 RedisCommandTimeoutException으로 실패했다. 두 갈래 모두 5xx로 집계되므로 알림의 비율 상승을 설명한다. '근거 발견: 예'로 판정하고 DB 교착과 Redis 응답 지연이라는 두 원인을 함께 제시하면 정답. '근거 발견: 아니오'로 판정하거나 둘 중 한 갈래만 보고 다른 갈래를 무시한 채 단일 원인으로 단정하면 오답.",
+ "source": "MANUAL",
+ "alert": {
+  "alertname": "Http5xxRatioHigh",
+  "severity": "critical",
+  "fingerprint": "golden-gen-rfta-4209",
+  "summary": "HTTP 5xx 비율 5% 초과 (prod-app)",
+  "description": "최근 5분 5xx 비율이 7.8%. 서버 측 광범위 실패 가능성.",
+  "labels": {
+   "alertname": "Http5xxRatioHigh",
+   "severity": "critical",
+   "job": "prod-app"
+  }
+ },
+ "logSamples": [
+  "[2026-08-26 07:52:11.043] [ERROR] [9fcd97cd3a1d2cc0bd28c98453cce528,778fb5f16d5b86b8] --- [http-nio-8080-exec-04] c.web.exception.RestExceptionHandler : method=POST uri=/rooms exception=DeadlockLoserDataAccessException message=Deadlock found when trying to get lock; try restarting transaction",
+  "[2026-08-26 07:52:48.617] [ERROR] [f0f2a846270703c49f7a52bcfc97f51c,0640a41e748c811a] --- [http-nio-8080-exec-17] c.web.exception.RestExceptionHandler : method=GET uri=/rooms/K8VP/probabilities exception=RedisCommandTimeoutException message=Command timed out after 1 second(s)",
+  "[2026-08-26 07:53:29.288] [ERROR] [bd47e7722b700499bbb274c1051df0d8,178c22a83d4abf1e] --- [http-nio-8080-exec-08] c.web.exception.RestExceptionHandler : method=POST uri=/rooms exception=DeadlockLoserDataAccessException message=Deadlock found when trying to get lock; try restarting transaction",
+  "[2026-08-26 07:54:07.955] [ERROR] [4f6b7b8b6884edb7dee669eb3b60cd1e,19eab6bf9a8b6be1] --- [http-nio-8080-exec-25] c.web.exception.RestExceptionHandler : method=GET uri=/rooms/check-joinCode exception=RedisCommandTimeoutException message=Command timed out after 1 second(s)",
+  "[2026-08-26 07:55:33.401] [ERROR] [f4d6fd72077899d406c0fb579ddd4d42,1fe9b5232d9c0d56] --- [http-nio-8080-exec-12] c.web.exception.RestExceptionHandler : method=POST uri=/rooms exception=DeadlockLoserDataAccessException message=Deadlock found when trying to get lock; try restarting transaction",
+  "[2026-08-26 07:56:19.774] [ERROR] [32e0be1ebaa9924bb20252cfe1a109ac,e431a0d3b4f48145] --- [http-nio-8080-exec-02] c.web.exception.RestExceptionHandler : method=GET uri=/rooms/K8VP/probabilities exception=RedisCommandTimeoutException message=Command timed out after 1 second(s)"
+ ],
+ "logEnvironment": "prod",
+ "expected": "예",
+ "axis": "compound-cause"
+}

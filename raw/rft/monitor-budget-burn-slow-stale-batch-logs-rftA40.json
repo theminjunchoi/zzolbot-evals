@@ -1,0 +1,26 @@
+{
+ "name": "monitor-budget-burn-slow-stale-batch-logs-rfta40",
+ "question": "알림 ErrorBudgetBurnSlow(warning)가 2026-08-25 07:20경 prod에서 발화했다 - 5xx 비율이 긴 창과 30분 창 양쪽에서 3%를 넘었다. 봇에 주어진 ERROR 로그 샘플 3줄은 모두 같은 날 04시대의 것으로, 알림 시각 기준 최근 30분 조회 창보다 세 시간 앞선다.",
+ "rubric": "주어진 세 줄은 04:02부터 04:18까지 새벽 배치 시간대의 정산 스윕 실패와 스케줄러 오류, 방 이벤트 정리 실패인데, 알림은 07:20경에 발화했고 봇의 조회 창은 최근 30분이다. 세 시간 전 배치 구간의 실패는 알림이 가리키는 30분 창의 5xx를 설명하지 못하며, 애초에 이 세 줄은 HTTP 응답 코드와 무관한 백그라운드 작업이다. '근거 발견: 아니오'로 판정하고 시각이 어긋난 로그로 원인을 만들지 않아야 정답. 창 밖 배치 실패를 에러버짓 소진의 원인으로 단정하면 오답.",
+ "source": "MANUAL",
+ "alert": {
+  "alertname": "ErrorBudgetBurnSlow",
+  "severity": "warning",
+  "fingerprint": "golden-gen-rfta-4240",
+  "summary": "에러버짓 느린 소진 (SLO 99.5%, burn-rate 6×)",
+  "description": "prod-app 5xx 비율이 6h·30m 양 창에서 3%를 초과. 누적 시 에러버짓 위협.",
+  "labels": {
+   "alertname": "ErrorBudgetBurnSlow",
+   "severity": "warning",
+   "job": "prod-app"
+  }
+ },
+ "logSamples": [
+  "[2026-08-25 04:02:00.441] [ERROR] [,] --- [pool-3-thread-2] c.s.i.c.SettlementPendingSweeper : pending 정산 메시지 재처리 실패: recordId=1787597478663-0",
+  "[2026-08-25 04:10:00.885] [ERROR] [,] --- [pool-9-thread-3] o.s.s.s.TaskUtils$LoggingErrorHandler : Unexpected error occurred in scheduled task",
+  "[2026-08-25 04:18:00.220] [ERROR] [,] --- [pool-6-thread-1] c.r.i.messaging.RoomEventWaitManager : 방 이벤트 자동 정리 (실패): eventId=e6644cb9-9531-df20-c34d-5d1ed332a590"
+ ],
+ "logEnvironment": "prod",
+ "expected": "아니오",
+ "axis": "stale-reingested"
+}

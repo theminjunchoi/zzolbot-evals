@@ -51,12 +51,19 @@ def extract_json(text: str) -> str:
 class MlxJsonClient(LlmJsonClient):
 
     def __init__(self, model_path: str = DEFAULT_MODEL, adapter_path: str | None = None,
-                 max_tokens: int = 700, temperature: float = 0.0):
+                 max_tokens: int = 700, temperature: float = 0.0,
+                 constrained: bool = False):
+        """constrained면 인용 필드를 프롬프트에 실린 로그 줄로만 생성하도록 제약한다.
+
+        로그 줄은 프롬프트에서 뽑는다. 시나리오를 따로 넘기지 않아도 되므로 LlmJsonClient
+        인터페이스가 그대로 유지된다.
+        """
         from mlx_lm import load
 
         self._model, self._tokenizer = load(model_path, adapter_path=adapter_path)
         self._max_tokens = max_tokens
         self._temperature = temperature
+        self._constrained = constrained
 
     def generate_json(self, system_instruction: str, prompt: str) -> str:
         from mlx_lm import generate
@@ -67,7 +74,15 @@ class MlxJsonClient(LlmJsonClient):
             {"role": "user", "content": prompt},
         ]
         text = self._tokenizer.apply_chat_template(messages, add_generation_prompt=True)
+        processors = None
+        if self._constrained:
+            from harness.constrained import CitationConstraint
+
+            lines = [l[2:] for l in prompt.splitlines() if l.startswith("- [")]
+            if lines:
+                processors = [CitationConstraint(self._tokenizer, lines)]
         out = generate(self._model, self._tokenizer, prompt=text,
                        max_tokens=self._max_tokens, verbose=False,
+                       logits_processors=processors,
                        sampler=make_sampler(temp=self._temperature))
         return extract_json(out)

@@ -1,0 +1,26 @@
+{
+ "name": "monitor-disk-usage-node-layer-mismatch-rfta26",
+ "question": "알림 DiskUsageHigh(warning)가 prod에서 발화했다 - 노드 디스크 사용률이 88.7%로 임계 85%를 넘었다. 봇에는 최근 30분 창에서 조회된 prod 앱 ERROR 로그 샘플 3줄이 주어졌다.",
+ "rubric": "디스크 사용률은 호스트 파일시스템 지표이고, 주어진 로그는 blindtimer 게임 스케줄 예외와 눈치게임 press 처리 오류, 방 이벤트 자동 정리 실패로 각각 10분 넘게 떨어져 있는 앱 계층의 단발 오류다. 디스크 쓰기 실패, 로그 적재량 급증, 파일 핸들 문제를 보여주는 줄은 하나도 없다. '근거 발견: 아니오'로 판정하고 디스크 사용률 상승의 원인을 앱 로그로 설명하려 들지 않아야 정답. 무관한 게임 오류를 디스크 증가의 근거로 삼으면 오답.",
+ "source": "MANUAL",
+ "alert": {
+  "alertname": "DiskUsageHigh",
+  "severity": "warning",
+  "fingerprint": "golden-gen-rfta-4226",
+  "summary": "디스크 사용률 > 85%",
+  "description": "디스크 사용률이 88.7%. 로그 정리 또는 디스크 확장 필요.",
+  "labels": {
+   "alertname": "DiskUsageHigh",
+   "severity": "warning",
+   "job": "node"
+  }
+ },
+ "logSamples": [
+  "[2026-08-24 20:41:19.407] [ERROR] [,] --- [blindtimer-task-1] c.g.s.GameTaskSchedulerFactory : [blindtimer] 스케줄 실행 중 예외가 발생했습니다.",
+  "[2026-08-24 20:53:02.118] [ERROR] [37eba49ee13f7c9144981917d42f97e5,04e652a65d840fd6] --- [redis-stream-thread-pool-nunchi1] c.n.i.m.c.NunchiCommandEventConsumer : 눈치게임 press 처리 중 오류: joinCode=D7KV, playerName=USER3, eventId=ba68e70f-8cb3-263d-b789-530fa9025101",
+  "[2026-08-24 21:06:00.775] [ERROR] [,] --- [pool-6-thread-3] c.r.i.messaging.RoomEventWaitManager : 방 이벤트 자동 정리 (실패): eventId=18eb16f4-75e2-1bd4-8a72-793b62dab000"
+ ],
+ "logEnvironment": "prod",
+ "expected": "아니오",
+ "axis": "unrelated-trap"
+}

@@ -1,0 +1,28 @@
+{
+ "name": "monitor-public-url-failure-room-create-5xx-rfta19",
+ "question": "알림 Http5xxRatioHigh(critical)가 prod에서 발화했다 - 최근 5분 5xx 비율이 9.2%로 임계 5%를 넘었다. 봇에는 최근 30분 창에서 조회된 prod ERROR 로그 샘플 5줄이 주어졌다.",
+ "rubric": "주어진 로그는 10:38부터 10:47까지 한 갈래로 이어진다. 오브젝트 스토리지의 Public URL 생성이 403 응답으로 세 번 실패했고 그 결과 방 생성 요청 두 건이 500이 됐다. 업로드 자체는 실패 기록이 없고 URL 발급 단계에서만 실패하므로, 자격 증명이나 버킷 권한 문제로 좁힐 수 있다. '근거 발견: 예'로 판정하고 Public URL 발급 실패가 방 생성 응답을 500으로 만들었다는 가설을 제시하면 정답. '근거 발견: 아니오'로 판정하거나 업로드 타임아웃 같은 로그에 없는 단계를 원인으로 지목하면 오답.",
+ "source": "MANUAL",
+ "alert": {
+  "alertname": "Http5xxRatioHigh",
+  "severity": "critical",
+  "fingerprint": "golden-gen-rfta-4219",
+  "summary": "HTTP 5xx 비율 5% 초과 (prod-app)",
+  "description": "최근 5분 5xx 비율이 9.2%. 서버 측 광범위 실패 가능성.",
+  "labels": {
+   "alertname": "Http5xxRatioHigh",
+   "severity": "critical",
+   "job": "prod-app"
+  }
+ },
+ "logSamples": [
+  "[2026-08-27 10:38:19.552] [ERROR] [,] --- [] c.r.infra.OracleObjectStorageService : Oracle Object Storage Public URL 생성 실패: storageKey=qr/V3KD.png, error=403 Forbidden: not authorized to perform this request",
+  "[2026-08-27 10:40:44.107] [ERROR] [47271b01464a26da7fea0a1ee554536b,5e8c805dc37a6519] --- [http-nio-8080-exec-14] c.web.exception.RestExceptionHandler : method=POST uri=/rooms exception=QrCodeCreationException message=QR 코드 URL 발급에 실패했습니다",
+  "[2026-08-27 10:43:02.663] [ERROR] [6eeecb10413cf82b56d86b36c43307f2,e31fc303c79c8612] --- [] c.r.infra.OracleObjectStorageService : Oracle Object Storage Public URL 생성 실패: storageKey=qr/N8LQ.png, error=403 Forbidden: not authorized to perform this request",
+  "[2026-08-27 10:45:28.914] [ERROR] [,] --- [] c.r.infra.OracleObjectStorageService : Oracle Object Storage Public URL 생성 실패: storageKey=qr/P2JX.png, error=403 Forbidden: not authorized to perform this request",
+  "[2026-08-27 10:47:51.370] [ERROR] [dc21402ffb532cad1762e98b5c539fc2,c3dee242ab283f69] --- [http-nio-8080-exec-28] c.web.exception.RestExceptionHandler : method=POST uri=/rooms exception=QrCodeCreationException message=QR 코드 URL 발급에 실패했습니다"
+ ],
+ "logEnvironment": "prod",
+ "expected": "예",
+ "axis": "compound-cause"
+}

@@ -38,6 +38,8 @@ def main() -> int:
     parser.add_argument("--analyzer", default="gemini", choices=("gemini", "local"),
                         help="분석기 백엔드. local은 MLX 로컬 모델이라 API 비용이 judge만 남는다")
     parser.add_argument("--local-model", default=DEFAULT_LOCAL_MODEL)
+    parser.add_argument("--constrained", action="store_true",
+                        help="인용을 프롬프트의 로그 줄로만 생성하도록 제약")
     parser.add_argument("--adapter-path", default=None, help="학습한 LoRA 어댑터 경로")
     parser.add_argument("--judge-variant", default="production", choices=sorted(JUDGE_VARIANTS),
                         help="judge 프롬프트 변형. 바꾸면 과거 측정과 비교가 끊긴다")
@@ -65,7 +67,7 @@ def main() -> int:
     client = GeminiJsonClient(api_key=api_key, model=args.model, min_interval_s=args.min_interval)
     if args.analyzer == "local":
         from harness.local_model import MlxJsonClient
-        analyzer_client = MlxJsonClient(args.local_model, adapter_path=args.adapter_path)
+        analyzer_client = MlxJsonClient(args.local_model, adapter_path=args.adapter_path, constrained=args.constrained)
     else:
         analyzer_client = client
     sink = JsonlSink(args.out_dir / f"{args.label}.jsonl")

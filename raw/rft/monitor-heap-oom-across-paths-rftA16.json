@@ -1,0 +1,28 @@
+{
+ "name": "monitor-heap-oom-across-paths-rfta16",
+ "question": "알림 JvmHeapUsageHigh(critical)가 prod에서 발화했다 - JVM 힙 사용률이 94%로 임계 85%를 넘었다. 봇에는 최근 30분 창에서 조회된 prod ERROR 로그 샘플 5줄이 주어졌다.",
+ "rubric": "주어진 로그는 23:11부터 23:26까지 서로 다른 세 실행 경로에서 같은 실패를 보여준다. HTTP 요청 두 건이 OutOfMemoryError와 Java heap space로 500이 됐고, 스케줄러 스레드에서 예기치 못한 오류 두 건과 blockstacking 게임 스케줄 예외 한 건이 같은 구간에 겹쳤다. 특정 기능이 아니라 프로세스 전역에서 실패가 나는 형태는 힙 고갈의 전형이다. '근거 발견: 예'로 판정하고 힙 부족으로 인한 OOM과 그로 인한 전역 실패를 원인 가설로 제시하면 정답. '근거 발견: 아니오'로 판정하거나 개별 게임 로직 버그로 좁혀 단정하면 오답.",
+ "source": "MANUAL",
+ "alert": {
+  "alertname": "JvmHeapUsageHigh",
+  "severity": "critical",
+  "fingerprint": "golden-gen-rfta-4216",
+  "summary": "JVM 힙 사용률 > 85% (prod-app)",
+  "description": "힙 사용률이 94%. GC 오버헤드 증가 및 OOM 위험.",
+  "labels": {
+   "alertname": "JvmHeapUsageHigh",
+   "severity": "critical",
+   "job": "prod-app"
+  }
+ },
+ "logSamples": [
+  "[2026-08-25 23:11:28.664] [ERROR] [b846968f6b19c807a6becbc96aea3e73,e46a516b3ed8c217] --- [http-nio-8080-exec-08] c.web.exception.RestExceptionHandler : method=POST uri=/rooms exception=OutOfMemoryError message=Java heap space",
+  "[2026-08-25 23:15:00.209] [ERROR] [,] --- [pool-9-thread-1] o.s.s.s.TaskUtils$LoggingErrorHandler : Unexpected error occurred in scheduled task",
+  "[2026-08-25 23:18:44.851] [ERROR] [,] --- [blockstacking-task-1] c.g.s.GameTaskSchedulerFactory : [blockstacking] 스케줄 실행 중 예외가 발생했습니다.",
+  "[2026-08-25 23:22:00.377] [ERROR] [,] --- [pool-9-thread-3] o.s.s.s.TaskUtils$LoggingErrorHandler : Unexpected error occurred in scheduled task",
+  "[2026-08-25 23:26:13.920] [ERROR] [495b15ad36ffc2f195cb3cbc5d41dc4c,7b1705c55a4831d9] --- [http-nio-8080-exec-30] c.web.exception.RestExceptionHandler : method=GET uri=/rooms/check-joinCode exception=OutOfMemoryError message=Java heap space"
+ ],
+ "logEnvironment": "prod",
+ "expected": "예",
+ "axis": "compound-cause"
+}

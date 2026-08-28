@@ -19,6 +19,10 @@ import json
 from dataclasses import dataclass, field
 
 
+# 인용 값이 이미 닫힌 상태를 나타내는 표식. None(제약 없음)과 구별해야 한다.
+CLOSED: list[int] = []
+
+
 @dataclass
 class _Node:
     children: dict[int, "_Node"] = field(default_factory=dict)
@@ -52,6 +56,13 @@ class CitationConstraint:
                                  for b in self._bodies])
         quote = tokenizer.encode('"', add_special_tokens=False)
         self._quote_tokens = [t for t in quote if t is not None]
+        # evidenceLine은 스키마의 마지막 필드다. 값이 닫히면 닫는 중괄호밖에 올 수 없다.
+        # 이걸 강제하지 않으면 긴 줄을 강제로 통과한 뒤 모델이 분포 밖으로 나가
+        # 필드를 다시 쓰는 반복 생성에 빠진다(실제로 3건 발생).
+        self._closing_tokens = []
+        for piece in ("}", "\n", " "):
+            self._closing_tokens.extend(tokenizer.encode(piece, add_special_tokens=False))
+        self._closing_tokens = sorted(set(self._closing_tokens))
 
     def _generated_text(self, tokens) -> str:
         """mlx는 프롬프트를 뺀 **생성 토큰만** 프로세서에 넘긴다. 프롬프트 길이를 빼면
@@ -76,7 +87,7 @@ class CitationConstraint:
             return None
         body = rest[open_quote + 1:]
         if '"' in body:  # 값이 이미 닫혔다
-            return None
+            return CLOSED
         return self._tok.encode(body, add_special_tokens=False) if body else []
 
     def allowed_tokens(self, tokens) -> list[int] | None:
@@ -84,13 +95,23 @@ class CitationConstraint:
         ids = self._field_token_ids(tokens)
         if ids is None:
             return None
+        if ids is CLOSED:
+            text = self._generated_text(tokens)
+            tail = text[text.rfind(self.MARKER):]
+            if "}" in tail[tail.find('"', len(self.MARKER)) + 1:]:
+                return None          # 객체가 닫혔다. 이후는 모델에 맡긴다
+            return self._closing_tokens
         node = self._trie
         for token in ids:
             node = node.children.get(token)
             if node is None:
                 return None  # 트라이를 벗어났다. 제약을 풀어 무한 루프를 막는다
         allowed = list(node.children)
-        if node.terminal:
+        # 값이 비어 있을 때(루트)도 닫는 따옴표를 허용해야 한다. 시스템 프롬프트가
+        # evidenceFound=false이면 evidenceLine을 빈 문자열로 두라고 요구하는데, 막으면
+        # 모델이 긴 로그 줄을 억지로 쓰다 토큰 상한에서 JSON을 못 닫는다(실제로 3건 발생).
+        # 제약의 목적은 **날조를 막는 것**이지 인용을 강제하는 것이 아니다.
+        if node.terminal or node is self._trie:
             allowed.extend(self._quote_tokens)
         return allowed or None
 

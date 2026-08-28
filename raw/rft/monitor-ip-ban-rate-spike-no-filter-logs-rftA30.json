@@ -1,0 +1,27 @@
+{
+ "name": "monitor-ip-ban-rate-spike-no-filter-logs-rfta30",
+ "question": "알림 IpBanRateSpike(warning)가 prod에서 발화했다 - 신규 IP BAN이 초당 3.2건으로 급증했다. 봇에는 최근 30분 창에서 조회된 prod ERROR 로그 샘플 3줄이 주어졌다.",
+ "rubric": "신규 BAN 등록과 악성 경로 접근 감지는 WARN으로 남으므로 ERROR만 조회한 이 입력에는 나타나지 않는다. 주어진 세 줄은 방 생성 요청 두 건의 500과 blindtimer 스케줄 예외로, 어느 대역이 어떤 경로로 들어와 차단됐는지에 대해 아무것도 말해주지 않는다. '근거 발견: 아니오'로 판정하고 BAN 급증의 원인을 단정하지 않아야 정답. 방 생성 500을 스캐너 공격의 근거로 삼아 원인을 지어내면 오답.",
+ "source": "MANUAL",
+ "alert": {
+  "alertname": "IpBanRateSpike",
+  "severity": "warning",
+  "fingerprint": "golden-gen-rfta-4230",
+  "summary": "신규 IP BAN 급증 (prod-app)",
+  "description": "신규 BAN이 3.2 /s. 차단된 IP 대역과 접근 경로를 확인.",
+  "labels": {
+   "alertname": "IpBanRateSpike",
+   "severity": "warning",
+   "job": "prod-app",
+   "incident_group": "ip-blocking"
+  }
+ },
+ "logSamples": [
+  "[2026-08-25 06:11:33.207] [ERROR] [b6aff45d79cc00da49257ce7251b4091,8fbce16a4c64fd53] --- [http-nio-8080-exec-12] c.web.exception.RestExceptionHandler : method=POST uri=/rooms exception=IllegalStateException message=방 생성 처리 중 오류가 발생했습니다",
+  "[2026-08-25 06:24:41.885] [ERROR] [,] --- [blindtimer-task-1] c.g.s.GameTaskSchedulerFactory : [blindtimer] 스케줄 실행 중 예외가 발생했습니다.",
+  "[2026-08-25 06:37:12.440] [ERROR] [8e1529afac6e14c80d07866c38071d9f,79624395945ccca1] --- [http-nio-8080-exec-21] c.web.exception.RestExceptionHandler : method=POST uri=/rooms exception=IllegalStateException message=방 생성 처리 중 오류가 발생했습니다"
+ ],
+ "logEnvironment": "prod",
+ "expected": "아니오",
+ "axis": "sparse-evidence"
+}
