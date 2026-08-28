@@ -107,10 +107,13 @@ def test_학습_샘플은_대화_형식으로_직렬화된다():
 def test_내용이_같은_시나리오는_이름이_달라도_중복이다():
     from harness.similarity import find_duplicates, signature
 
+    # 시각을 통째로 옮기고 id만 바꾼다. 시간 **간격**은 그대로여야 같은 문제다.
+    # 한 줄만 옮기면 몰린 것이 흩어진 것으로 바뀌어 다른 문제가 된다(의도된 동작).
     a = scenario(YES_RUBRIC)
     b = Scenario(name="monitor-y", question=a.question, rubric=a.rubric, source=a.source,
                  alert=a.alert,
-                 log_samples=tuple(l.replace("8241", "9999").replace("10:00:00.000", "11:22:33.444")
+                 log_samples=tuple(l.replace("8241", "9999").replace("8242", "9998")
+                                    .replace("2026-08-25 10:0", "2026-08-27 14:3")
                                    for l in a.log_samples),
                  log_environment=a.log_environment)
 

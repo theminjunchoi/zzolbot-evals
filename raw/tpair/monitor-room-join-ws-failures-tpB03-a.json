@@ -1,0 +1,29 @@
+{
+  "name": "monitor-room-join-ws-failures-tpb03-a",
+  "question": "알림 WsConnectionFailuresHigh(warning)가 prod에서 발화했다 - 최근 5분 WS 연결 실패가 임계 10건을 넘겼다. 봇에는 prod 앱 ERROR 로그 샘플 6줄(방 참가 이벤트 소비 실패와 방 이벤트 자동 정리 실패)이 주어졌다.",
+  "rubric": "주어진 ERROR 로그 6줄은 모두 RoomJoinConsumer의 방 참가 이벤트 소비 실패와 그에 뒤따른 방 참가 비동기 처리 실패, 방 이벤트 자동 정리 실패에 해당하며, 알림 시각과 정합하는 좁은 시간창(약 4분) 안에 6건이 몰려 반복됐으므로 WS 연결 실패 급증의 직접 근거다. '근거 발견: 예'로 판정하고 STOMP 연결 직후의 방 참가 이벤트 처리 경로가 막혀 연결이 완결되지 못한 것을 원인으로 지목하면 정답. '근거 발견: 아니오'로 판정하거나 표본 부족을 이유로 근거를 부정하면 오답.",
+  "source": "MANUAL",
+  "alert": {
+    "alertname": "WsConnectionFailuresHigh",
+    "severity": "warning",
+    "fingerprint": "golden-gen-wsc-3312",
+    "summary": "WebSocket 연결 실패 급증 (prod-app)",
+    "description": "최근 5분 WS 연결 실패가 38건 (임계 10). STOMP 연결 단계 실패 누적.",
+    "labels": {
+      "alertname": "WsConnectionFailuresHigh",
+      "severity": "warning",
+      "job": "prod-app"
+    }
+  },
+  "logSamples": [
+    "[2026-08-28 19:24:55.082] [ERROR] [57e299435d7cf2638b3b3edad7fe54de,3d3afeb1295627ff] --- [redis-stream-thread-pool-room:join1] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=RoomJoinConsumer, message=RoomJoinEvent[eventId=8c41f0a2-1d7b-4f39-9a06-2ce8b5471d84, timestamp=2026-08-28T19:24:55.118427310Z, joinCode=T7QM, playerName=하린]",
+    "[2026-08-28 19:25:19.794] [ERROR] [623d387bef8d77c3b21893201c594e5e,cc9268f4052c0551] --- [redis-stream-thread-pool-room:join1] c.r.application.service.RoomService : 방 참가 비동기 처리 실패: eventId=8c41f0a2-1d7b-4f39-9a06-2ce8b5471d84, joinCode=T7QM, playerName=하린",
+    "[2026-08-28 19:25:39.390] [ERROR] [,] --- [pool-4-thread-2] c.r.i.messaging.RoomEventWaitManager : 방 이벤트 자동 정리 (실패): eventId=8c41f0a2-1d7b-4f39-9a06-2ce8b5471d84",
+    "[2026-08-28 19:27:01.134] [ERROR] [b7cf59aa208631532fd6094e66fb2382,b4694c916622f6cc] --- [redis-stream-thread-pool-room:join2] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=RoomJoinConsumer, message=RoomJoinEvent[eventId=b0d7e5c9-6a12-4c88-bd35-71fe0a9c4423, timestamp=2026-08-28T19:26:02.774903155Z, joinCode=T7QM, playerName=서준]",
+    "[2026-08-28 19:27:09.970] [ERROR] [c4e0b4f08c640b034889cda35081145a,20620cda374e6507] --- [redis-stream-thread-pool-room:join2] c.r.application.service.RoomService : 방 참가 비동기 처리 실패: eventId=b0d7e5c9-6a12-4c88-bd35-71fe0a9c4423, joinCode=T7QM, playerName=서준",
+    "[2026-08-28 19:28:46.966] [ERROR] [,] --- [pool-4-thread-2] c.r.i.messaging.RoomEventWaitManager : 방 이벤트 자동 정리 (실패): eventId=b0d7e5c9-6a12-4c88-bd35-71fe0a9c4423"
+  ],
+  "logEnvironment": "prod",
+  "expected": "예",
+  "axis": "positive-dense"
+}

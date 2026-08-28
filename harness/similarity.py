@@ -51,11 +51,31 @@ def normalize_alert_text(text: str) -> str:
     return _apply(_VOLATILE_IDS, text)
 
 
+def span_bucket(lines: tuple[str, ...] | list[str]) -> str:
+    """로그가 몇 분에 걸쳐 있는지의 구간. 정확한 분이 아니라 구간으로 잡는다.
+
+    같은 문제가 우연히 몇 초 다른 것까지 다르다고 보면 중복 탐지가 무력해진다.
+    """
+    from synthesis.pairing import span_minutes
+
+    span = span_minutes(list(lines))
+    if span is None:
+        return "?"
+    if span <= 5:
+        return "tight"
+    if span <= 60:
+        return "mid"
+    return "spread"
+
+
 def signature(scenario: Scenario) -> tuple:
     """같은 문제인지 판단하는 뼈대.
 
-    알림명만으로는 부족하다. 로그를 고정하고 알림 대상만 바꾼 대조 쌍은 서로 다른 문제인데도
-    알림명이 같으면 충돌한다. 그래서 알림의 요약과 설명까지 뼈대에 넣는다.
+    **대조가 바꾸는 축은 반드시 뼈대에 들어가야 한다.** 안 그러면 대조 쌍이 중복으로
+    판정돼 학습 데이터에서 통째로 탈락한다. 세 번 겪었다.
+
+    - 알림 대조 쌍(로그 고정, 알림 변경) → 알림 요약과 설명을 넣음
+    - 시간 대조 쌍(내용 고정, 타임스탬프 변경) → 로그의 시간 구간을 넣음
     """
     skeleton = []
     for line in scenario.log_samples:
@@ -69,6 +89,7 @@ def signature(scenario: Scenario) -> tuple:
         alert.alertname,
         normalize_alert_text(alert.summary),
         normalize_alert_text(alert.description),
+        span_bucket(scenario.log_samples),
         tuple(skeleton),
     )
 

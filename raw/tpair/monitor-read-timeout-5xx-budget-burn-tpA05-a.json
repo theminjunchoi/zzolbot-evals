@@ -1,0 +1,30 @@
+{
+  "name": "monitor-read-timeout-5xx-budget-burn-tpa05-a",
+  "question": "알림 ErrorBudgetBurnFast(critical)가 prod에서 발화했다 - 5xx 비율이 1시간과 5분 양쪽 창에서 7.2%를 넘겨 에러버짓이 빠르게 소진되고 있다(최근 5분 5xx 36건). 봇에는 최근 30분 창에서 조회된 prod ERROR 로그 샘플 7줄이 주어졌고, 7줄 모두 5분 이내에 몰려 있다.",
+  "rubric": "동일한 Read timed out(ResourceAccessException) 5xx가 알림 시각과 정합하는 좁은 시간창(약 4분)에 7회 반복된 것으로 에러버짓을 태우는 5xx 급증의 직접 근거다. '근거 발견: 예'로 판정하고 방 생성 경로가 의존하는 외부 호출(오브젝트 스토리지 QR 업로드 등)의 응답 지연이 요청 타임아웃으로 이어져 5xx가 되고 있다고 지목하면 정답. '근거 발견: 아니오'로 판정하면 오답.",
+  "source": "MANUAL",
+  "alert": {
+    "alertname": "ErrorBudgetBurnFast",
+    "severity": "critical",
+    "fingerprint": "golden-gen-tpa-1051",
+    "summary": "에러버짓 빠른 소진 (SLO 99.5%, burn-rate 14.4×)",
+    "description": "prod-app 5xx 비율이 1h·5m 양 창에서 7.2%를 초과. 약 2일이면 월간 에러버짓 전부 소진.",
+    "labels": {
+      "alertname": "ErrorBudgetBurnFast",
+      "severity": "critical",
+      "job": "prod-app"
+    }
+  },
+  "logSamples": [
+    "[2026-08-28 11:26:55.051] [ERROR] [77c5b75ac50e3f38c4e92579aa96d7f8,c774e64c4c2b30fb] --- [http-nio-8080-exec-9] c.web.exception.RestExceptionHandler : method=POST uri=/rooms exception=ResourceAccessException message=Read timed out",
+    "[2026-08-28 11:27:16.932] [ERROR] [464610123e61cce96f1fd5d03ab3d9e1,7b1585ada0bbcbd5] --- [http-nio-8080-exec-14] c.web.exception.RestExceptionHandler : method=POST uri=/rooms exception=ResourceAccessException message=Read timed out",
+    "[2026-08-28 11:27:50.053] [ERROR] [244dc77b191e16208a92dfc0706e75fb,1f21b58ddce216af] --- [http-nio-8080-exec-3] c.web.exception.RestExceptionHandler : method=GET uri=/rooms/W2HD/probabilities exception=ResourceAccessException message=Read timed out",
+    "[2026-08-28 11:28:31.483] [ERROR] [fcc94679ce1aebf4c2a85e38256de00d,bdc5de9819a7ddda] --- [http-nio-8080-exec-21] c.web.exception.RestExceptionHandler : method=POST uri=/rooms exception=ResourceAccessException message=Read timed out",
+    "[2026-08-28 11:29:25.248] [ERROR] [1653b859c64a7738fc25dcd08208d04b,c5875f5cf122b65b] --- [http-nio-8080-exec-6] c.web.exception.RestExceptionHandler : method=GET uri=/rooms/W2HD/settings exception=ResourceAccessException message=Read timed out",
+    "[2026-08-28 11:30:23.502] [ERROR] [f5ab82115b7cb5e14cd17ff66513bf21,1da4535f345378ba] --- [http-nio-8080-exec-17] c.web.exception.RestExceptionHandler : method=POST uri=/rooms exception=ResourceAccessException message=Read timed out",
+    "[2026-08-28 11:31:18.334] [ERROR] [85cb3170fff5bab3c4d9e1403a605e02,13b3dd5cc5de9228] --- [http-nio-8080-exec-12] c.web.exception.RestExceptionHandler : method=GET uri=/rooms/nickname/random exception=ResourceAccessException message=Read timed out"
+  ],
+  "logEnvironment": "prod",
+  "expected": "예",
+  "axis": "positive-dense"
+}

@@ -1,0 +1,29 @@
+{
+  "name": "monitor-player-disconnected-consumer-burst-tpa03-b",
+  "question": "알림 WsConnectionFailuresHigh(warning)가 prod에서 발화했다 - 최근 5분 WS 연결 실패가 33건으로 임계 10을 넘었다. 봇에는 prod ERROR 로그 샘플 6줄이 주어졌고, 6줄의 시각은 약 4시간 27분에 걸쳐 흩어져 있다.",
+  "rubric": "같은 종류의 PlayerDisconnectedConsumer 처리 실패지만 약 4시간 27분에 걸쳐 산발적으로 발생해 최근 5분의 WS 연결 실패 급증을 설명하지 못한다. '근거 발견: 아니오'로 판정해야 정답. 표본을 급증의 근거로 인정하면 오답.",
+  "source": "MANUAL",
+  "alert": {
+    "alertname": "WsConnectionFailuresHigh",
+    "severity": "warning",
+    "fingerprint": "golden-gen-tpa-1031",
+    "summary": "WebSocket 연결 실패 급증 (prod-app)",
+    "description": "최근 5분 WS 연결 실패가 33건 (임계 10). STOMP 연결 단계 실패 누적.",
+    "labels": {
+      "alertname": "WsConnectionFailuresHigh",
+      "severity": "warning",
+      "job": "prod-app"
+    }
+  },
+  "logSamples": [
+    "[2026-08-28 10:48:11.085] [ERROR] [7512fc9ceb30541a7d2712a138e62de3,b423b3e077c3664c] --- [redis-stream-thread-pool-room1] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=PlayerDisconnectedConsumer, message=PlayerDisconnectedEvent[eventId=a4ec653c-449a-b1ea-5975-3dd8238ff5d5, joinCode=H8VC, playerName=USER5]",
+    "[2026-08-28 11:30:21.781] [ERROR] [e2356ffedf96468f0638a6d3cdc413d5,1f07d3112e9c061b] --- [redis-stream-thread-pool-room2] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=PlayerDisconnectedConsumer, message=PlayerDisconnectedEvent[eventId=f0699cd4-c46d-fdac-884c-75ce3aa4daa7, joinCode=H8VC, playerName=USER2]",
+    "[2026-08-28 12:19:52.168] [ERROR] [b8e6735cb6b4ce8d4d70872bd1ee4233,8620b5af8efc5fd5] --- [redis-stream-thread-pool-room1] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=PlayerDisconnectedConsumer, message=PlayerDisconnectedEvent[eventId=5891df5d-3ebd-8276-c689-103b69155562, joinCode=D7SB, playerName=USER1]",
+    "[2026-08-28 13:16:47.228] [ERROR] [ae4a20fabefff4091f481f47add54f4c,e54292ec3b13d210] --- [redis-stream-thread-pool-room3] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=PlayerDisconnectedConsumer, message=PlayerDisconnectedEvent[eventId=b5f39221-eb50-2eca-6ee6-db803a6b4f43, joinCode=H8VC, playerName=USER4]",
+    "[2026-08-28 14:13:31.036] [ERROR] [3b084c909505bc2d7d5c0af550b8d0df,cdcdbfbad8530f80] --- [redis-stream-thread-pool-room2] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=PlayerDisconnectedConsumer, message=PlayerDisconnectedEvent[eventId=1aa27de4-002a-c103-05a1-bf328ecf890f, joinCode=D7SB, playerName=USER3]",
+    "[2026-08-28 15:15:06.594] [ERROR] [282f318bd7ab6d53ed5b1d2014909566,de229e9854f3b167] --- [redis-stream-thread-pool-room1] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=PlayerDisconnectedConsumer, message=PlayerDisconnectedEvent[eventId=e50b9a85-f512-4c24-7bf2-5feabaecd3a5, joinCode=D7SB, playerName=USER6]"
+  ],
+  "logEnvironment": "prod",
+  "expected": "아니오",
+  "axis": "sparse-evidence"
+}

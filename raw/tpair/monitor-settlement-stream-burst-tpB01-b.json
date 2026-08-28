@@ -1,0 +1,28 @@
+{
+  "name": "monitor-settlement-stream-burst-tpb01-b",
+  "question": "알림 AppErrorLogSpike(warning)가 prod에서 발화했다 - 최근 5분 ERROR 로그가 임계 30건을 넘겼다. 봇에는 prod 앱 ERROR 로그 샘플 5줄(정산 결과 스트림 컨슈머의 ACK 보류와 pending 재처리 실패)이 주어졌다.",
+  "rubric": "주어진 ERROR 로그 5줄은 정산 결과 스트림 컨슈머가 ACK를 보류하고 재전달을 대기한 실패와 sweeper의 pending 재처리 실패에 해당해 종류는 같지만, 약 1시간 37분에 걸쳐 5건이 산발적으로 흩어져 있어 최근 5분의 ERROR 로그 급증을 설명하지 못한다. '근거 발견: 아니오'로 판정하고 시간 분포가 알림 창과 맞지 않음을 지적해야 정답. '근거 발견: 예'로 판정하거나 이 표본을 급증의 근거로 인정하면 오답.",
+  "source": "MANUAL",
+  "alert": {
+    "alertname": "AppErrorLogSpike",
+    "severity": "warning",
+    "fingerprint": "golden-gen-aes-3117",
+    "summary": "ERROR 로그 급증(최근 5분, prod-app)",
+    "description": "ERROR 로그가 34건(임계 30/5m)입니다. zzol-bot이 근본원인을 분석합니다.",
+    "labels": {
+      "alertname": "AppErrorLogSpike",
+      "severity": "warning",
+      "job": "prod-app"
+    }
+  },
+  "logSamples": [
+    "[2026-08-28 08:12:33.238] [ERROR] [f19ea88918534723be95f17d73604d81,f245d12f7ffe46f8] --- [redis-stream-thread-pool-settlement:result1] c.s.i.c.SettlementStreamConsumer : 정산 처리 실패 — ACK 보류, 재전달 대기: recordId=1756421903118-0",
+    "[2026-08-28 08:20:16.208] [ERROR] [c26354c65987a6f26d00f930b0f35146,19daebff91f66d07] --- [redis-stream-thread-pool-settlement:result2] c.s.i.c.SettlementStreamConsumer : 정산 스트림 처리 중 오류가 발생했습니다.",
+    "[2026-08-28 09:17:12.176] [ERROR] [397da307494d47d64500b9a668745158,cc1c3950e70a81b3] --- [redis-stream-thread-pool-settlement:result1] c.s.i.c.SettlementStreamConsumer : 정산 처리 실패 — ACK 보류, 재전달 대기: recordId=1756421918442-1",
+    "[2026-08-28 09:40:50.895] [ERROR] [,] --- [pool-3-thread-1] c.s.i.c.SettlementPendingSweeper : pending 정산 메시지 재처리 실패: recordId=1756421903118-0",
+    "[2026-08-28 09:49:33.368] [ERROR] [d2803a26ad944ee6c25183d29208027f,fb47fb8d59bd083e] --- [redis-stream-thread-pool-settlement:result2] c.s.i.c.SettlementStreamConsumer : 정산 처리 실패 — ACK 보류, 재전달 대기: recordId=1756421935077-0"
+  ],
+  "logEnvironment": "prod",
+  "expected": "아니오",
+  "axis": "sparse-evidence"
+}

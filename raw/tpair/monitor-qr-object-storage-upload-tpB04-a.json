@@ -1,0 +1,29 @@
+{
+  "name": "monitor-qr-object-storage-upload-tpb04-a",
+  "question": "알림 AppErrorLogSpike(warning)가 prod에서 발화했다 - 최근 5분 ERROR 로그가 임계 30건을 넘겼다. 봇에는 prod 앱 ERROR 로그 샘플 6줄(QR 코드 업로드와 Public URL 생성 실패)이 주어졌다.",
+  "rubric": "주어진 ERROR 로그 6줄은 모두 Oracle Object Storage 업로드와 Public URL 생성 실패, 그에 뒤따른 QR 코드 생성 실패에 해당하며, 알림 시각과 정합하는 좁은 시간창(약 4분) 안에 6건이 몰려 반복됐으므로 ERROR 로그 급증의 직접 근거다. '근거 발견: 예'로 판정하고 Object Storage 응답 불가로 QR 발급 경로 전체가 실패한 것을 원인으로 지목하면 정답. '근거 발견: 아니오'로 판정하거나 표본 부족을 이유로 근거를 부정하면 오답.",
+  "source": "MANUAL",
+  "alert": {
+    "alertname": "AppErrorLogSpike",
+    "severity": "warning",
+    "fingerprint": "golden-gen-aes-3428",
+    "summary": "ERROR 로그 급증(최근 5분, prod-app)",
+    "description": "ERROR 로그가 41건(임계 30/5m)입니다. zzol-bot이 근본원인을 분석합니다.",
+    "labels": {
+      "alertname": "AppErrorLogSpike",
+      "severity": "warning",
+      "job": "prod-app"
+    }
+  },
+  "logSamples": [
+    "[2026-08-28 13:11:02.747] [ERROR] [4e2a9647fa63272a40c0ee1cf15cedd7,0f399238c2273018] --- [] c.r.infra.OracleObjectStorageService : Oracle Object Storage QR 코드 업로드 실패: contents=qr/2026/08/28/W4KP.png, error=BmcException: Service error:ServiceUnavailable",
+    "[2026-08-28 13:11:57.315] [ERROR] [da58856cdc94800462533ee1bba45ace,761c3b91fca3f1b7] --- [] c.r.application.service.QrCodeService : QR 코드 생성 실패: joinCode=W4KP, error=ObjectStorageUploadException: QR 이미지 업로드에 실패했습니다",
+    "[2026-08-28 13:12:11.249] [ERROR] [3f8a794d3a6de88998d28f60c96649b8,0644a65e6a701915] --- [] c.r.infra.OracleObjectStorageService : Oracle Object Storage QR 코드 업로드 실패: contents=qr/2026/08/28/H8ZC.png, error=SdkClientException: Unable to execute HTTP request: Read timed out",
+    "[2026-08-28 13:12:18.194] [ERROR] [260f3286763fd4054eba19abaa37225d,709017f4a1d5738b] --- [] c.r.application.service.QrCodeService : QR 코드 생성 실패: joinCode=H8ZC, error=ObjectStorageUploadException: QR 이미지 업로드에 실패했습니다",
+    "[2026-08-28 13:12:56.711] [ERROR] [9d80bbed8babaa58ac66826d63e50447,a975588d2500dca0] --- [] c.r.infra.OracleObjectStorageService : Oracle Object Storage Public URL 생성 실패: storageKey=qr/2026/08/28/H8ZC.png, error=BmcException: Service error:ServiceUnavailable",
+    "[2026-08-28 13:15:26.083] [ERROR] [dff21273c80b1a2d4e12934aaee7d880,5cae385c081f1941] --- [] c.r.application.service.QrCodeService : QR 코드 생성 실패: joinCode=M3VB, error=ObjectStorageUploadException: QR 이미지 업로드에 실패했습니다"
+  ],
+  "logEnvironment": "prod",
+  "expected": "예",
+  "axis": "positive-dense"
+}

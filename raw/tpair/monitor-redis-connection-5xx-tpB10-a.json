@@ -1,0 +1,32 @@
+{
+  "name": "monitor-redis-connection-5xx-tpb10-a",
+  "question": "알림 Http5xxRatioHigh(critical)가 prod에서 발화했다 - 최근 5분 5xx 비율이 임계 5%를 넘겼다. 봇에는 prod 앱 ERROR 로그 샘플 9줄(Redis 연결 실패로 5xx가 된 HTTP 요청과 스트림 처리 오류)이 주어졌다.",
+  "rubric": "주어진 ERROR 로그 9줄은 모두 Redis 연결 실패로 방 API 요청이 5xx로 떨어진 기록과 같은 시각의 Redis Stream 처리 오류에 해당하며, 알림 시각과 정합하는 좁은 시간창(약 4분) 안에 9건이 몰려 반복됐으므로 5xx 급증의 직접 근거다. '근거 발견: 예'로 판정하고 Redis 인스턴스 접속 불가가 HTTP 요청과 스트림 소비 양쪽을 동시에 무너뜨린 것을 원인으로 지목하면 정답. '근거 발견: 아니오'로 판정하거나 표본 부족을 이유로 근거를 부정하면 오답.",
+  "source": "MANUAL",
+  "alert": {
+    "alertname": "Http5xxRatioHigh",
+    "severity": "critical",
+    "fingerprint": "golden-gen-h5x-4083",
+    "summary": "HTTP 5xx 비율 5% 초과 (prod-app)",
+    "description": "최근 5분 5xx 비율이 13.5%. 서버 측 광범위 실패 가능성.",
+    "labels": {
+      "alertname": "Http5xxRatioHigh",
+      "severity": "critical",
+      "job": "prod-app"
+    }
+  },
+  "logSamples": [
+    "[2026-08-28 16:39:12.323] [ERROR] [2f795adfa326981260d2713680163973,c86af8992614f131] --- [http-nio-8080-exec-12] c.web.exception.RestExceptionHandler : method=POST uri=/rooms exception=RedisConnectionFailureException message=Unable to connect to Redis",
+    "[2026-08-28 16:39:57.042] [ERROR] [593834dda0740396661a677a61423de6,9cbe96da8e4660ea] --- [redis-stream-thread-pool-laddergame1] c.g.r.c.RedisStreamListenerStarter : Redis Stream 처리 중 오류가 발생했습니다.",
+    "[2026-08-28 16:40:22.162] [ERROR] [2f0b963c5176f09360339b09d3362cd0,7600bb2048b295df] --- [http-nio-8080-exec-25] c.web.exception.RestExceptionHandler : method=GET uri=/rooms/check-joinCode exception=RedisConnectionFailureException message=Unable to connect to Redis",
+    "[2026-08-28 16:41:19.442] [ERROR] [566dea729764e83a7b248858d0af6a41,0aeb4d323bf3c751] --- [http-nio-8080-exec-7] c.web.exception.RestExceptionHandler : method=GET uri=/rooms/P2CK/settings exception=RedisConnectionFailureException message=Unable to connect to Redis",
+    "[2026-08-28 16:41:27.620] [ERROR] [70f46f651bc336f031391a7a76c0a562,49e41f6b9058504a] --- [http-nio-8080-exec-18] c.web.exception.RestExceptionHandler : method=GET uri=/rooms/nickname/random exception=RedisSystemException message=Redis exception; nested exception is io.lettuce.core.RedisException",
+    "[2026-08-28 16:41:40.578] [ERROR] [6028732890e9d93a8653beeafdfd492a,a903abeb09510f8e] --- [redis-stream-thread-pool-laddergame2] c.g.r.c.RedisStreamListenerStarter : Redis Stream 처리 중 오류가 발생했습니다.",
+    "[2026-08-28 16:41:41.064] [ERROR] [7ee1ab420f84d08a4c9cd2171a76e83d,721457d472e25b28] --- [http-nio-8080-exec-31] c.web.exception.RestExceptionHandler : method=GET uri=/rooms/P2CK/probabilities exception=RedisConnectionFailureException message=Unable to connect to Redis",
+    "[2026-08-28 16:42:52.839] [ERROR] [eaf07c0436960fe8d490a56c310b8f33,991f2e9a0e4a124d] --- [http-nio-8080-exec-3] c.web.exception.RestExceptionHandler : method=POST uri=/rooms exception=RedisConnectionFailureException message=Unable to connect to Redis",
+    "[2026-08-28 16:43:34.113] [ERROR] [a273ebbaabe1482c9ebaf60c17bd3995,58ca9917e3fe6d80] --- [http-nio-8080-exec-22] c.web.exception.RestExceptionHandler : method=GET uri=/rooms/check-guestName exception=RedisSystemException message=Redis exception; nested exception is io.lettuce.core.RedisException"
+  ],
+  "logEnvironment": "prod",
+  "expected": "예",
+  "axis": "positive-dense"
+}

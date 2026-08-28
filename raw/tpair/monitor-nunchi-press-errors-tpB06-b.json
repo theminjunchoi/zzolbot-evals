@@ -1,0 +1,30 @@
+{
+  "name": "monitor-nunchi-press-errors-tpb06-b",
+  "question": "알림 AppErrorLogSpike(warning)가 prod에서 발화했다 - 최근 5분 ERROR 로그가 임계 30건을 넘겼다. 봇에는 prod 앱 ERROR 로그 샘플 7줄(눈치게임 press 처리 오류와 게임 스케줄 실행 예외)이 주어졌다.",
+  "rubric": "주어진 ERROR 로그 7줄은 눈치게임 press 커맨드 소비 오류와 nunchi 게임 스케줄 실행 예외에 해당해 종류는 같지만, 약 1시간 57분에 걸쳐 7건이 산발적으로 흩어져 있어 최근 5분의 ERROR 로그 급증을 설명하지 못한다. '근거 발견: 아니오'로 판정하고 시간 분포가 알림 창과 맞지 않음을 지적해야 정답. '근거 발견: 예'로 판정하거나 이 표본을 급증의 근거로 인정하면 오답.",
+  "source": "MANUAL",
+  "alert": {
+    "alertname": "AppErrorLogSpike",
+    "severity": "warning",
+    "fingerprint": "golden-gen-aes-3645",
+    "summary": "ERROR 로그 급증(최근 5분, prod-app)",
+    "description": "ERROR 로그가 36건(임계 30/5m)입니다. zzol-bot이 근본원인을 분석합니다.",
+    "labels": {
+      "alertname": "AppErrorLogSpike",
+      "severity": "warning",
+      "job": "prod-app"
+    }
+  },
+  "logSamples": [
+    "[2026-08-28 15:41:50.608] [ERROR] [c5b151c6d8029ac4a88ebe0b687f5f52,9bcf18a3ee303f9d] --- [redis-stream-thread-pool-nunchi1] c.n.i.m.c.NunchiCommandEventConsumer : 눈치게임 press 처리 중 오류: joinCode=F5RJ, playerName=도윤, eventId=69bc7d14-109a-42a4-83ae-84bfffd8e2e8",
+    "[2026-08-28 15:49:38.710] [ERROR] [512b119dd30fa01c689e2760e7deb5d3,d69b502d67daa3ae] --- [redis-stream-thread-pool-nunchi2] c.n.i.m.c.NunchiCommandEventConsumer : 눈치게임 press 처리 중 오류: joinCode=F5RJ, playerName=민서, eventId=16c4dde0-c1fc-4784-ba77-e5151e99fbf7",
+    "[2026-08-28 16:11:58.687] [ERROR] [,] --- [nunchi-task-1] c.g.s.GameTaskSchedulerFactory : [nunchi] 스케줄 실행 중 예외가 발생했습니다.",
+    "[2026-08-28 16:12:07.824] [ERROR] [ed521fbddf0704ec98b3f22e0c0a8d45,f9cb5ad8727985e7] --- [redis-stream-thread-pool-nunchi1] c.n.i.m.c.NunchiCommandEventConsumer : 눈치게임 press 처리 중 오류: joinCode=F5RJ, playerName=도윤, eventId=2a7c3ee1-9f04-4be2-8d51-c0b31a7d5e96",
+    "[2026-08-28 17:26:36.085] [ERROR] [,] --- [pool-2-thread-3] o.s.s.s.TaskUtils$LoggingErrorHandler : Unexpected error occurred in scheduled task",
+    "[2026-08-28 17:30:57.665] [ERROR] [79028d1424cbb919d5b05aaf632e6dc0,af492cdfdbf3864c] --- [redis-stream-thread-pool-nunchi3] c.n.i.m.c.NunchiCommandEventConsumer : 눈치게임 press 처리 중 오류: joinCode=F5RJ, playerName=세아, eventId=c48f11d0-5b6a-42f7-9e13-77a205d8b0af",
+    "[2026-08-28 17:38:50.107] [ERROR] [,] --- [nunchi-task-1] c.g.s.GameTaskSchedulerFactory : [nunchi] 스케줄 실행 중 예외가 발생했습니다."
+  ],
+  "logEnvironment": "prod",
+  "expected": "아니오",
+  "axis": "sparse-evidence"
+}

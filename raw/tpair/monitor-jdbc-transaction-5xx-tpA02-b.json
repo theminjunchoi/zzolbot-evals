@@ -1,0 +1,28 @@
+{
+  "name": "monitor-jdbc-transaction-5xx-tpa02-b",
+  "question": "알림 Http5xxRatioHigh(critical)가 prod에서 발화했다 - 최근 5분 5xx 비율이 9.3%로 임계 5%를 넘었다(5xx 38건). 봇에는 prod ERROR 로그 샘플 5줄이 주어졌고, 5줄의 시각은 약 4시간 15분에 걸쳐 흩어져 있다.",
+  "rubric": "같은 종류의 JDBC 커넥션 획득 실패지만 약 4시간 15분에 걸쳐 산발적으로 발생해 최근 5분의 5xx 비율 급증을 설명하지 못한다. '근거 발견: 아니오'로 판정해야 정답. 표본을 급증의 근거로 인정하면 오답.",
+  "source": "MANUAL",
+  "alert": {
+    "alertname": "Http5xxRatioHigh",
+    "severity": "critical",
+    "fingerprint": "golden-gen-tpa-1021",
+    "summary": "HTTP 5xx 비율 5% 초과 (prod-app)",
+    "description": "최근 5분 5xx 비율이 9.3%. 서버 측 광범위 실패 가능성.",
+    "labels": {
+      "alertname": "Http5xxRatioHigh",
+      "severity": "critical",
+      "job": "prod-app"
+    }
+  },
+  "logSamples": [
+    "[2026-08-28 06:23:21.731] [ERROR] [d8689dbd777e683d5160a810ae458b9e,5346a19931c77fd9] --- [http-nio-8080-exec-11] c.web.exception.RestExceptionHandler : method=POST uri=/rooms exception=CannotCreateTransactionException message=Could not open JDBC Connection for transaction",
+    "[2026-08-28 07:19:10.176] [ERROR] [02c4e0422c266376a5408015228bfb3e,f3945f9989a2ec17] --- [http-nio-8080-exec-4] c.web.exception.RestExceptionHandler : method=GET uri=/rooms/check-joinCode exception=CannotCreateTransactionException message=Could not open JDBC Connection for transaction",
+    "[2026-08-28 08:22:26.606] [ERROR] [482a40383bb8ec581943d524db37461c,a143098bd6159d70] --- [http-nio-8080-exec-19] c.web.exception.RestExceptionHandler : method=GET uri=/rooms/M4TZ/settings exception=CannotCreateTransactionException message=Could not open JDBC Connection for transaction",
+    "[2026-08-28 09:33:43.207] [ERROR] [3d65ac5f173ea3b34d48cbe55e84c816,75c3946a43a72e9b] --- [http-nio-8080-exec-7] c.web.exception.RestExceptionHandler : method=GET uri=/rooms/check-guestName exception=CannotCreateTransactionException message=Could not open JDBC Connection for transaction",
+    "[2026-08-28 10:38:15.925] [ERROR] [199831554e4b1f8d2ef6721e2d30439d,0b677e4fd812b6b6] --- [http-nio-8080-exec-23] c.web.exception.RestExceptionHandler : method=GET uri=/rooms/nickname/random exception=CannotCreateTransactionException message=Could not open JDBC Connection for transaction"
+  ],
+  "logEnvironment": "prod",
+  "expected": "아니오",
+  "axis": "sparse-evidence"
+}

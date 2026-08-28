@@ -1,0 +1,28 @@
+{
+  "name": "monitor-room-join-consumer-burst-tpa01-a",
+  "question": "알림 AppErrorLogSpike(warning)가 prod에서 발화했다 - 최근 5분 ERROR 로그가 34건으로 임계 30을 넘었다. 봇에는 최근 30분 창에서 조회된 prod ERROR 로그 샘플 5줄이 주어졌고, 5줄 모두 4분 이내에 몰려 있다.",
+  "rubric": "동일한 room:join 스트림의 RoomJoinConsumer 처리 실패가 알림 시각과 정합하는 좁은 시간창(약 4분)에 5회 반복된 것으로 급증의 직접 근거다. '근거 발견: 예'로 판정하고 방 참가 이벤트(RoomJoinEvent) 소비 실패가 room:join 컨슈머에서 연속으로 터지고 있다고 지목하면 정답. '근거 발견: 아니오'로 판정하면 오답.",
+  "source": "MANUAL",
+  "alert": {
+    "alertname": "AppErrorLogSpike",
+    "severity": "warning",
+    "fingerprint": "golden-gen-tpa-1011",
+    "summary": "ERROR 로그 급증(최근 5분, prod-app)",
+    "description": "ERROR 로그가 34건(임계 30/5m)입니다. zzol-bot이 근본원인을 분석합니다.",
+    "labels": {
+      "alertname": "AppErrorLogSpike",
+      "severity": "warning",
+      "job": "prod-app"
+    }
+  },
+  "logSamples": [
+    "[2026-08-28 03:12:04.101] [ERROR] [da21140125e48501520a8fa7d5ebbad6,60d2e82c20f213ef] --- [redis-stream-thread-pool-room:join1] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=RoomJoinConsumer, message=RoomJoinEvent[eventId=601f25b9-0ef9-e1ed-9767-890774a81d90, joinCode=K3QP, playerName=USER1]",
+    "[2026-08-28 03:12:42.148] [ERROR] [8ae66257ddaabf4055ba9f7b6f7fc558,001c1a86b1aa3b45] --- [redis-stream-thread-pool-room:join2] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=RoomJoinConsumer, message=RoomJoinEvent[eventId=76aaf85f-ee3b-0674-e5ec-9f305b23d506, joinCode=K3QP, playerName=USER3]",
+    "[2026-08-28 03:13:35.553] [ERROR] [e33d6cd3acd60658fc04742a74284c80,90f293fad16b486e] --- [redis-stream-thread-pool-room:join1] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=RoomJoinConsumer, message=RoomJoinEvent[eventId=afa6b925-0e2c-17a2-80ee-cf419b37212f, joinCode=B7TD, playerName=USER2]",
+    "[2026-08-28 03:14:48.137] [ERROR] [b005c235f7cc63c8c8cdbcff70207670,09c798a22956e9eb] --- [redis-stream-thread-pool-room:join3] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=RoomJoinConsumer, message=RoomJoinEvent[eventId=cfa1f6fc-e680-f62b-0c2b-c62747674daa, joinCode=B7TD, playerName=USER5]",
+    "[2026-08-28 03:16:00.878] [ERROR] [30e8997379117fb1ba4ea981e64da2c1,a2e7b5038f65bf74] --- [redis-stream-thread-pool-room:join2] c.global.redis.EventDispatcher : 이벤트 처리 실패: consumer=RoomJoinConsumer, message=RoomJoinEvent[eventId=69af9e31-9868-5232-12ea-185518dad355, joinCode=K3QP, playerName=USER4]"
+  ],
+  "logEnvironment": "prod",
+  "expected": "예",
+  "axis": "positive-dense"
+}

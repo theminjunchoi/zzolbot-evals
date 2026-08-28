@@ -1,0 +1,29 @@
+{
+  "name": "monitor-nunchi-press-burst-tpa04-b",
+  "question": "알림 AppErrorLogSpike(warning)가 prod에서 발화했다 - 최근 5분 ERROR 로그가 41건으로 임계 30을 넘었다. 봇에는 prod ERROR 로그 샘플 6줄이 주어졌고, 6줄의 시각은 약 4시간 45분에 걸쳐 흩어져 있다.",
+  "rubric": "같은 종류의 눈치게임 press 처리 실패지만 약 4시간 45분에 걸쳐 산발적으로 발생해 최근 5분의 급증을 설명하지 못한다. '근거 발견: 아니오'로 판정해야 정답. 표본을 급증의 근거로 인정하면 오답.",
+  "source": "MANUAL",
+  "alert": {
+    "alertname": "AppErrorLogSpike",
+    "severity": "warning",
+    "fingerprint": "golden-gen-tpa-1041",
+    "summary": "ERROR 로그 급증(최근 5분, prod-app)",
+    "description": "ERROR 로그가 41건(임계 30/5m)입니다. zzol-bot이 근본원인을 분석합니다.",
+    "labels": {
+      "alertname": "AppErrorLogSpike",
+      "severity": "warning",
+      "job": "prod-app"
+    }
+  },
+  "logSamples": [
+    "[2026-08-28 16:11:11.638] [ERROR] [170b68e7b279540d1a3bf913601f48c9,e14d9128945d1acd] --- [redis-stream-thread-pool-nunchi1] c.n.i.m.c.NunchiCommandEventConsumer : 눈치게임 press 처리 중 오류: joinCode=T9WQ, playerName=USER2, eventId=78829d90-7a98-bf5f-132b-fe2007f60325",
+    "[2026-08-28 17:04:59.547] [ERROR] [4b474193999a3ebe7c01e1c4ef851cfe,1f7270984e7a729b] --- [redis-stream-thread-pool-nunchi2] c.n.i.m.c.NunchiCommandEventConsumer : 눈치게임 press 처리 중 오류: joinCode=T9WQ, playerName=USER4, eventId=a72d8c4b-14e3-8937-9c6e-2b65e15bde10",
+    "[2026-08-28 18:06:10.828] [ERROR] [895fa970a017bce39ff92ab5365e228d,449de43b5178e0df] --- [redis-stream-thread-pool-nunchi1] c.n.i.m.c.NunchiCommandEventConsumer : 눈치게임 press 처리 중 오류: joinCode=T9WQ, playerName=USER1, eventId=79bfc127-2f70-6026-5a3b-0c498ef9c0cf",
+    "[2026-08-28 19:10:44.400] [ERROR] [ae553384687c24cc6b70d7ecccd1f4ec,794cc20cbd24de5e] --- [redis-stream-thread-pool-nunchi3] c.n.i.m.c.NunchiCommandEventConsumer : 눈치게임 press 처리 중 오류: joinCode=P5BK, playerName=USER3, eventId=457129d1-cd2c-856f-1974-b15661a964c2",
+    "[2026-08-28 20:04:28.085] [ERROR] [8f30f596752959f135ab4ffd41e328c7,e0bdbb449ee734df] --- [redis-stream-thread-pool-nunchi2] c.n.i.m.c.NunchiCommandEventConsumer : 눈치게임 press 처리 중 오류: joinCode=P5BK, playerName=USER5, eventId=39f32868-dcab-13bf-ca51-21a2939d42b5",
+    "[2026-08-28 20:56:59.881] [ERROR] [3f4a3efc88d6fed35e741d4585a27a93,c280906736ff64e2] --- [redis-stream-thread-pool-nunchi1] c.n.i.m.c.NunchiCommandEventConsumer : 눈치게임 press 처리 중 오류: joinCode=T9WQ, playerName=USER6, eventId=2654f224-d890-e90d-36fd-68e70e0cd062"
+  ],
+  "logEnvironment": "prod",
+  "expected": "아니오",
+  "axis": "sparse-evidence"
+}

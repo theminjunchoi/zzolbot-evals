@@ -88,3 +88,24 @@ def test_against를_주면_그쪽과만_대조한다():
 def test_알림_정규화는_식별자만_지운다():
     assert normalize_alert_text("joinCode=V9KM 방에서 50건") == "joinCode=<code> 방에서 50건"
     assert normalize_message("id=6902 건수 50") == "id=<n> 건수 <n>"
+
+
+def test_시간_대조_쌍은_같은_로그_내용이어도_다른_문제다():
+    """타임스탬프만 다른 쌍. 시그니처가 시간을 안 보면 중복으로 잡혀 통째로 탈락한다."""
+    tight = [f"[2026-08-26 14:1{i}:00] [ERROR] [,] --- [pool-1-thread-2] c.g.o.OutboxEventProcessor : 실패"
+             for i in range(3)]
+    spread = [f"[2026-08-26 0{i+1}:10:00] [ERROR] [,] --- [pool-1-thread-2] c.g.o.OutboxEventProcessor : 실패"
+              for i in range(3)]
+    a = scenario("a", "AppErrorLogSpike", "급증", "40건", tuple(tight))
+    b = scenario("b", "AppErrorLogSpike", "급증", "40건", tuple(spread))
+    assert signature(a) != signature(b)
+    assert find_duplicates([a, b]) == []
+
+
+def test_몇_초_차이는_같은_구간으로_본다():
+    base = [f"[2026-08-26 14:10:0{i}] [ERROR] [,] --- [pool-1-thread-2] c.g.o.OutboxEventProcessor : 실패"
+            for i in range(3)]
+    shifted = [x.replace("14:10:", "14:11:") for x in base]
+    a = scenario("a", "X", "s", "d", tuple(base))
+    b = scenario("b", "X", "s", "d", tuple(shifted))
+    assert signature(a) == signature(b)

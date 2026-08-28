@@ -1,0 +1,32 @@
+{
+  "name": "monitor-room-join-async-failure-burst-tpa09-b",
+  "question": "알림 WsConnectionFailuresHigh(warning)가 prod에서 발화했다 - 최근 5분 WS 연결 실패가 38건으로 임계 10을 넘었다. 봇에는 prod ERROR 로그 샘플 9줄이 주어졌고, 9줄의 시각은 약 5시간 30분에 걸쳐 흩어져 있다.",
+  "rubric": "같은 종류의 방 참가 비동기 처리 실패지만 약 5시간 30분에 걸쳐 산발적으로 발생해 최근 5분의 WS 연결 실패 급증을 설명하지 못한다. '근거 발견: 아니오'로 판정해야 정답. 표본을 급증의 근거로 인정하면 오답.",
+  "source": "MANUAL",
+  "alert": {
+    "alertname": "WsConnectionFailuresHigh",
+    "severity": "warning",
+    "fingerprint": "golden-gen-tpa-1091",
+    "summary": "WebSocket 연결 실패 급증 (prod-app)",
+    "description": "최근 5분 WS 연결 실패가 38건 (임계 10). STOMP 연결 단계 실패 누적.",
+    "labels": {
+      "alertname": "WsConnectionFailuresHigh",
+      "severity": "warning",
+      "job": "prod-app"
+    }
+  },
+  "logSamples": [
+    "[2026-08-28 03:31:19.706] [ERROR] [90b83394d40e90962d952b91ec38c542,0ef6c9bbdb50820d] --- [redis-stream-thread-pool-room:join1] c.r.application.service.RoomService : 방 참가 비동기 처리 실패: eventId=c6156b57-cf15-247b-7d6e-8c9621cf1f25, joinCode=Q3ND, playerName=USER1",
+    "[2026-08-28 04:02:38.171] [ERROR] [c99bb07329f8a6809ca22a8d9b1735b7,9b503077baf8b27d] --- [redis-stream-thread-pool-room:join2] c.r.application.service.RoomService : 방 참가 비동기 처리 실패: eventId=28c3209a-3539-f907-779f-aed3e62ba810, joinCode=Q3ND, playerName=USER3",
+    "[2026-08-28 04:38:22.040] [ERROR] [270fee661141d895ac16ae651d5c94a4,d81bafb2307fa914] --- [redis-stream-thread-pool-room:join1] c.r.application.service.RoomService : 방 참가 비동기 처리 실패: eventId=780296bf-0a84-abb3-307e-8e6b20fc7142, joinCode=F2QW, playerName=USER2",
+    "[2026-08-28 05:19:51.162] [ERROR] [682f2d8dcb3fa037ea69d4c3550fd6ee,66a8d570e49cd31c] --- [redis-stream-thread-pool-room:join3] c.r.application.service.RoomService : 방 참가 비동기 처리 실패: eventId=95b8ac3d-8029-54c9-f5a8-49ec4741716a, joinCode=Q3ND, playerName=USER5",
+    "[2026-08-28 05:57:17.231] [ERROR] [9a4e031b28ef190869f3c96e194ef203,23da9c6a65a4bd3e] --- [redis-stream-thread-pool-room:join2] c.r.application.service.RoomService : 방 참가 비동기 처리 실패: eventId=954277dd-31d2-f958-27e4-2a3bad645ae6, joinCode=F2QW, playerName=USER4",
+    "[2026-08-28 06:40:40.065] [ERROR] [11558e36a57855e91b529c1c35ee897e,f8b8e5ad6234d6e8] --- [redis-stream-thread-pool-room:join1] c.r.application.service.RoomService : 방 참가 비동기 처리 실패: eventId=b0b5b2aa-47ae-21a9-fd34-96b24a608c84, joinCode=F2QW, playerName=USER6",
+    "[2026-08-28 07:26:44.045] [ERROR] [314ca7a42e8702c6c145de009f2effe4,09db01bad9211a36] --- [redis-stream-thread-pool-room:join3] c.r.application.service.RoomService : 방 참가 비동기 처리 실패: eventId=82933741-fb63-c535-4604-1f61e3da63a0, joinCode=Q3ND, playerName=USER7",
+    "[2026-08-28 08:14:04.626] [ERROR] [84c59444a78dfac42c3620c71c5eb0c0,47cee9ed55470443] --- [redis-stream-thread-pool-room:join2] c.r.application.service.RoomService : 방 참가 비동기 처리 실패: eventId=3853b68e-3338-4f33-a8b6-2fad886147d6, joinCode=F2QW, playerName=USER8",
+    "[2026-08-28 09:01:38.033] [ERROR] [1d6b78e7b6f05d7dabad8b664e171534,b39b01ac80608e32] --- [redis-stream-thread-pool-room:join1] c.r.application.service.RoomService : 방 참가 비동기 처리 실패: eventId=f685b047-ffa5-91c9-2d2e-9ae13e8c9dc8, joinCode=Q3ND, playerName=USER9"
+  ],
+  "logEnvironment": "prod",
+  "expected": "아니오",
+  "axis": "sparse-evidence"
+}
