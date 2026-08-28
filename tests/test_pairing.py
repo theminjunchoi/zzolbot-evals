@@ -80,3 +80,53 @@ def test_여러_쌍_중_문제_있는_것만_제외한다():
     bad[1]["logSamples"] = ["다른 줄"]
     names = paired_names(ok + bad)
     assert names == {"monitor-ok-pair-a", "monitor-ok-pair-b"}
+
+
+# --- 시간 대조 쌍 ---
+
+from synthesis.pairing import check_temporal_pairs, log_skeleton, span_minutes
+
+TIGHT = [f"[2026-08-26 14:1{i}:0{i}] [ERROR] [,] --- [pool-1-thread-2] c.g.o.OutboxEventProcessor : 실패"
+         for i in range(3)]
+SPREAD = [f"[2026-08-26 0{i+1}:10:05] [ERROR] [,] --- [pool-1-thread-2] c.g.o.OutboxEventProcessor : 실패"
+          for i in range(3)]
+
+
+def temporal(base="monitor-x-tp01"):
+    a = side(base, "a", "예", "급증", TIGHT)
+    b = side(base, "b", "아니오", "급증", SPREAD)
+    return [a, b]
+
+
+def test_타임스탬프를_떼면_같은_뼈대다():
+    assert log_skeleton(TIGHT[0]) == log_skeleton(SPREAD[0])
+
+
+def test_시간창을_분으로_잰다():
+    assert span_minutes(TIGHT) < 5
+    assert span_minutes(SPREAD) > 60
+
+
+def test_온전한_시간_대조_쌍은_통과한다():
+    assert check_temporal_pairs(temporal()) == []
+
+
+def test_줄_수가_다르면_탈락():
+    a, b = temporal(); b["logSamples"] = SPREAD[:2]
+    assert any("줄 수가 다르다" in p.reason for p in check_temporal_pairs([a, b]))
+
+
+def test_타임스탬프_외의_내용이_다르면_탈락():
+    a, b = temporal()
+    b["logSamples"] = [x.replace("OutboxEventProcessor", "EventDispatcher") for x in SPREAD]
+    assert any("타임스탬프 외의 내용이 다르다" in p.reason for p in check_temporal_pairs([a, b]))
+
+
+def test_예쪽이_퍼져_있으면_탈락():
+    a, b = temporal(); a["logSamples"] = SPREAD; b["logSamples"] = SPREAD
+    assert any("분에 퍼져 있다" in p.reason for p in check_temporal_pairs([a, b]))
+
+
+def test_아니오쪽이_몰려_있으면_탈락():
+    a, b = temporal(); b["logSamples"] = TIGHT
+    assert any("분뿐이다" in p.reason for p in check_temporal_pairs([a, b]))
