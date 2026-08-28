@@ -84,10 +84,11 @@ def implicit_accuracy(model, pair: PreferencePair) -> bool:
 
 
 def precompute_reference(model, pairs: list[PreferencePair]) -> list[PreferencePair]:
-    """참조 정책(어댑터를 끈 상태)의 로그 확률을 미리 계산한다.
+    """참조 정책의 로그 확률을 미리 계산한다.
 
-    호출 전에 모델의 LoRA 어댑터가 꺼져 있어야 한다. 켜진 채로 부르면 참조가 정책과
-    같아져 마진이 0이 되고 DPO가 아무것도 학습하지 않는다.
+    **참조는 SFT 모델 자체다.** 정책도 거기서 출발하므로 학습 시작 시점에 마진이 0이고
+    손실이 log 2인 것이 정상이다. 학습이 진행되며 정책이 참조에서 멀어진다.
+    그래서 이 함수는 어댑터가 얹힌 상태에서 부른다.
     """
     out = []
     for pair in pairs:
