@@ -125,3 +125,34 @@ class CitationConstraint:
         idx = mx.array(allowed)
         mask[..., idx] = logits[..., idx]
         return mask
+
+
+class TorchCitationProcessor:
+    """`CitationConstraint`를 HuggingFace `LogitsProcessor` 규약에 맞춘 어댑터.
+
+    트라이 판정은 `CitationConstraint.allowed_tokens`를 그대로 쓴다. **두 엔진이 같은
+    판정 코드를 공유해야** 재현 대조에서 불일치가 나왔을 때 원인을 가릴 수 있다. 제약
+    로직을 두 번 구현하면 그 자체가 불일치의 후보가 되어 실험이 무의미해진다.
+
+    MLX와 다른 점이 하나 있고 그게 이 클래스가 존재하는 유일한 이유다.
+    **mlx는 생성 토큰만 넘기고 HF는 프롬프트를 포함한 전체를 넘긴다.** 프롬프트 길이를
+    빼지 않으면 매 호출마다 프롬프트가 디코드돼 마커를 엉뚱한 곳에서 찾는다.
+    """
+
+    def __init__(self, constraint: "CitationConstraint", prompt_len: int):
+        self._c = constraint
+        self._prompt_len = prompt_len
+
+    def __call__(self, input_ids, scores):
+        import torch
+
+        for row in range(input_ids.shape[0]):
+            generated = input_ids[row, self._prompt_len:]
+            allowed = self._c.allowed_tokens(generated)
+            if allowed is None:
+                continue
+            mask = torch.full_like(scores[row], float("-inf"))
+            idx = torch.tensor(allowed, device=scores.device, dtype=torch.long)
+            mask[idx] = scores[row][idx]
+            scores[row] = mask
+        return scores

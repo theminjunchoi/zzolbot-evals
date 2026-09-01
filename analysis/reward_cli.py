@@ -23,7 +23,6 @@ from pathlib import Path
 from analysis.reward import RewardFunction, RewardSpec
 from harness.analyzer import PROMPT_VARIANTS, build_prompt, parse_analysis
 from harness.domain import Scenario
-from harness.constrained import CitationConstraint
 from harness.grounding import GroundingPipeline
 from harness.loading import ScenarioLoader
 from harness.local_model import extract_json
@@ -115,15 +114,18 @@ def run_gemini_arm(label: str, model: str, scenarios: list[Scenario], variant: s
 
 def run_arm(label: str, adapter: str, scenarios: list[Scenario], model_path: str,
             variant: str, samples: int, temp: float, batch: int,
-            reward: RewardFunction, constrained: bool = False) -> ArmResult:
-    from mlx_lm import batch_generate, generate, load
-    from mlx_lm.sample_utils import make_sampler
+            reward: RewardFunction, constrained: bool = False,
+            engine_kind: str = "mlx") -> ArmResult:
+    """엔진만 갈아끼우고 **채점 경로는 한 벌만 쓴다.**
 
-    model, tok = load(model_path, adapter_path=adapter or None)
+    프롬프트 조립, JSON 추출, 보상, 접지가 공유되어야 두 엔진의 차이가 나왔을 때
+    엔진으로 원인이 좁혀진다. 여기서 갈라지면 대조가 무의미해진다.
+    """
+    from harness.engines import make_engine
+
+    engine = make_engine(engine_kind, model_path, adapter or None)
     grounding = GroundingPipeline()
     system = PROMPT_VARIANTS[variant]
-    greedy_sampler = make_sampler(temp=0.0)
-    warm_sampler = make_sampler(temp=temp, top_p=0.95)
 
     greedy: dict[str, float] = {}
     best: dict[str, float] = {}
@@ -132,14 +134,9 @@ def run_arm(label: str, adapter: str, scenarios: list[Scenario], model_path: str
     positives = sum(1 for s in scenarios if expects_evidence(s))
 
     for i, scenario in enumerate(scenarios, 1):
-        text_prompt = tok.apply_chat_template(
-            [{"role": "system", "content": system},
-             {"role": "user", "content": build_prompt(scenario)}],
-            tokenize=False, add_generation_prompt=True)
-
-        procs = [CitationConstraint(tok, list(scenario.log_samples))] if constrained else None
-        raw = generate(model, tok, text_prompt, max_tokens=700,
-                       sampler=greedy_sampler, logits_processors=procs, verbose=False)
+        user_prompt = build_prompt(scenario)
+        logs = list(scenario.log_samples) if constrained else None
+        raw = engine.generate(system, user_prompt, log_samples=logs, temp=0.0)[0]
         score, analysis = _score_one(reward, scenario, raw)
         greedy[scenario.name] = score.clamped
         if score.parse_failed:
@@ -154,12 +151,10 @@ def run_arm(label: str, adapter: str, scenarios: list[Scenario], model_path: str
                 false_positives += 1
 
         if samples > 1:
-            ids = [tok.encode(text_prompt)] * samples
             outs = []
             for start in range(0, samples, batch):
-                outs.extend(batch_generate(model, tok, ids[start:start + batch],
-                                           max_tokens=700, sampler=warm_sampler,
-                                           verbose=False).texts)
+                chunk = min(batch, samples - start)
+                outs.extend(engine.generate(system, user_prompt, temp=temp, n=chunk))
             sample_scores = [_score_one(reward, scenario, t)[0].clamped for t in outs]
             per_sample[scenario.name] = sample_scores
             best[scenario.name] = max([greedy[scenario.name]] + sample_scores)
@@ -189,6 +184,9 @@ def main() -> int:
     parser.add_argument("--min-interval", type=float, default=1.2)
     parser.add_argument("--constrained", action="store_true",
                         help="인용 필드를 실제 로그 줄로만 생성하도록 제약")
+    parser.add_argument("--engine", default="mlx", choices=("mlx", "torch"),
+                        help="생성 엔진(연산 프레임워크). torch는 fp16 비양자화만 된다"
+                             " - bitsandbytes에 MPS 지원이 없다")
     parser.add_argument("--specificity", type=float, default=0.0,
                         help="구체성 배점. 사전 등록 검사 미통과로 기본 0")
     args = parser.parse_args()
@@ -206,13 +204,13 @@ def main() -> int:
         print(f"[{name}] 실행 중 (어댑터: {adapter or '없음'})", flush=True)
         results.append(run_arm(name, adapter, scenarios, args.local_model,
                                args.prompt_variant, args.samples, args.temp,
-                               args.batch, reward, args.constrained))
+                               args.batch, reward, args.constrained, args.engine))
 
     lines = [
         f"# 보상 측정: {args.label}",
         "",
         f"- 시나리오 {len(scenarios)}종 (근거 있음 {results[0].positives} / 없음 {results[0].negatives})",
-        f"- 모델 {args.local_model}, 프롬프트 {args.prompt_variant}, judge 미사용",
+        f"- 엔진 {args.engine}, 모델 {args.local_model}, 프롬프트 {args.prompt_variant}, judge 미사용",
         f"- 배점 schema {spec.schema} / verdict {spec.verdict} / citation {spec.citation}"
         f" / specificity {spec.specificity}",
         f"- best-of-n: n={args.samples}, temperature={args.temp}",
