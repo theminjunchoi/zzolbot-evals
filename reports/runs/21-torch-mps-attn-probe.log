@@ -1,0 +1,7 @@
+측정 길이 3086
+
+attn     ckpt     peak_GB   s/step
+eager    False      28.89     4.63
+eager    True       13.79     7.94
+sdpa     False      28.78     4.56
+sdpa     True       13.76     7.84

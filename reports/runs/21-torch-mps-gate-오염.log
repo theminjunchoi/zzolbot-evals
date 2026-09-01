@@ -1,0 +1,8 @@
+layers=28 lora_targets=32 trainable=0.62M
+n=166 len p50=1726 p95=2637 max=3086
+  step   1   3.53s  loss 2.0050  len 2552
+  step   2   1.84s  loss 2.2598  len 1489
+  step   3   2.40s  loss 1.6678  len 1879
+  step  20  46.96s  loss 1.9218  len 2241
+/opt/homebrew/Cellar/python@3.12/3.12.13_2/Frameworks/Python.framework/Versions/3.12/lib/python3.12/multiprocessing/resource_tracker.py:279: UserWarning: resource_tracker: There appear to be 1 leaked semaphore objects to clean up at shutdown
+  warnings.warn('resource_tracker: There appear to be %d '
