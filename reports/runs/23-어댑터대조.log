@@ -1,0 +1,98 @@
+########## MLX + 어댑터 ##########
+[v6] 실행 중 (어댑터: training/adapters/sft-v6-s1)
+  [v6] 엔진 mlx, 정밀도 mlx.core.bfloat16
+  [v6] 1/33 monitor-5xx-compound-cause-32 그리디 1.00 최고 1.00
+  [v6] 2/33 monitor-5xx-db-connection-failure 그리디 1.00 최고 1.00
+  [v6] 3/33 monitor-5xx-redis-connection-failure 그리디 1.00 최고 1.00
+  [v6] 4/33 monitor-alloy-down-observability-layer 그리디 1.00 최고 1.00
+  [v6] 5/33 monitor-app-error-log-spike-17 그리디 0.50 최고 0.50
+  [v6] 6/33 monitor-app-error-log-spike-19 그리디 0.70 최고 0.70
+  [v6] 7/33 monitor-circuit-breaker-open-02 그리디 1.00 최고 1.00
+  [v6] 8/33 monitor-circuit-breaker-open-qr-uploads 그리디 1.00 최고 1.00
+  [v6] 9/33 monitor-db-pool-exhaustion-request-timeouts 그리디 0.50 최고 0.50
+  [v6] 10/33 monitor-db-pool-high-unrelated-game-errors 그리디 1.00 최고 1.00
+  [v6] 11/33 monitor-disk-high-unrelated-app-logs 그리디 1.00 최고 1.00
+  [v6] 12/33 monitor-disk-usage-high-unrelated-trap-08 그리디 1.00 최고 1.00
+  [v6] 13/33 monitor-error-budget-burn-slow-11 그리디 1.00 최고 1.00
+  [v6] 14/33 monitor-error-spike-cardgame-select-burst 그리디 1.00 최고 1.00
+  [v6] 15/33 monitor-error-spike-nunchi-consumer 그리디 1.00 최고 1.00
+  [v6] 16/33 monitor-error-spike-roomjoin-current-window 그리디 1.00 최고 1.00
+  [v6] 17/33 monitor-error-spike-sparse-two-lines 그리디 1.00 최고 1.00
+  [v6] 18/33 monitor-error-spike-stale-reingested-v2 그리디 0.50 최고 0.50
+  [v6] 19/33 monitor-heap-high-sparse-unrelated-errors 그리디 1.00 최고 1.00
+  [v6] 20/33 monitor-http-5xx-ratio-high-sparse-logs 그리디 1.00 최고 1.00
+  [v6] 21/33 monitor-jvm-heap-high-unrelated-redis-errors-31 그리디 0.50 최고 0.50
+  [v6] 22/33 monitor-login-drop-unrelated-logs 그리디 1.00 최고 1.00
+  [v6] 23/33 monitor-mass-ip-blocking-description-echo-trap 그리디 1.00 최고 1.00
+  [v6] 24/33 monitor-outbox-dead-letter-high-33 그리디 0.50 최고 0.50
+  [v6] 25/33 monitor-outbox-deadletter-publish-failures 그리디 1.00 최고 1.00
+  [v6] 26/33 monitor-redis-stream-e2e-latency-27 그리디 1.00 최고 1.00
+  [v6] 27/33 monitor-redis-stream-e2e-latency-35 그리디 0.60 최고 0.60
+  [v6] 28/33 monitor-redis-stream-e2e-latency-high-05 그리디 1.00 최고 1.00
+  [v6] 29/33 monitor-settlement-backlog-consumer-failures 그리디 1.00 최고 1.00
+  [v6] 30/33 monitor-stream-latency-container-recovery 그리디 1.00 최고 1.00
+  [v6] 31/33 monitor-target-down-mysql-exporter 그리디 1.00 최고 1.00
+  [v6] 32/33 monitor-ws-inbound-latency-sparse-evidence-18 그리디 1.00 최고 1.00
+  [v6] 33/33 monitor-ws-probe-failed-edge-layer 그리디 1.00 최고 1.00
+
+# 보상 측정: adp-mlx
+
+- 시나리오 33종 (근거 있음 15 / 없음 18)
+- 엔진 mlx, 모델 Qwen/Qwen2.5-1.5B-Instruct, 프롬프트 production, judge 미사용
+- 배점 schema 0.1 / verdict 0.5 / citation 0.4 / specificity 0.0
+- best-of-n: n=1, temperature=0.8
+- 인용 제약 디코딩: 없음
+
+| 팔 | 그리디 평균 | 최고 평균 | 상한 여유 | 인용 통과 | 오탐 | 파싱 실패 |
+|---|---|---|---|---|---|---|
+| v6 | 0.903 | 0.903 | **+0.000** | 13/15 | 4/18 | 0 |
+
+########## torch + 같은 어댑터(peft 변환) ##########
+[v6] 실행 중 (어댑터: training/adapters/sft-v6-s1-peft)
+  [v6] 엔진 torch, 정밀도 torch.bfloat16
+  [v6] 1/33 monitor-5xx-compound-cause-32 그리디 1.00 최고 1.00
+  [v6] 2/33 monitor-5xx-db-connection-failure 그리디 1.00 최고 1.00
+  [v6] 3/33 monitor-5xx-redis-connection-failure 그리디 0.60 최고 0.60
+  [v6] 4/33 monitor-alloy-down-observability-layer 그리디 1.00 최고 1.00
+  [v6] 5/33 monitor-app-error-log-spike-17 그리디 0.50 최고 0.50
+  [v6] 6/33 monitor-app-error-log-spike-19 그리디 0.50 최고 0.50
+  [v6] 7/33 monitor-circuit-breaker-open-02 그리디 1.00 최고 1.00
+  [v6] 8/33 monitor-circuit-breaker-open-qr-uploads 그리디 1.00 최고 1.00
+  [v6] 9/33 monitor-db-pool-exhaustion-request-timeouts 그리디 0.50 최고 0.50
+  [v6] 10/33 monitor-db-pool-high-unrelated-game-errors 그리디 1.00 최고 1.00
+  [v6] 11/33 monitor-disk-high-unrelated-app-logs 그리디 1.00 최고 1.00
+  [v6] 12/33 monitor-disk-usage-high-unrelated-trap-08 그리디 1.00 최고 1.00
+  [v6] 13/33 monitor-error-budget-burn-slow-11 그리디 0.50 최고 0.50
+  [v6] 14/33 monitor-error-spike-cardgame-select-burst 그리디 1.00 최고 1.00
+  [v6] 15/33 monitor-error-spike-nunchi-consumer 그리디 1.00 최고 1.00
+  [v6] 16/33 monitor-error-spike-roomjoin-current-window 그리디 0.60 최고 0.60
+  [v6] 17/33 monitor-error-spike-sparse-two-lines 그리디 1.00 최고 1.00
+  [v6] 18/33 monitor-error-spike-stale-reingested-v2 그리디 0.50 최고 0.50
+  [v6] 19/33 monitor-heap-high-sparse-unrelated-errors 그리디 1.00 최고 1.00
+  [v6] 20/33 monitor-http-5xx-ratio-high-sparse-logs 그리디 1.00 최고 1.00
+  [v6] 21/33 monitor-jvm-heap-high-unrelated-redis-errors-31 그리디 0.50 최고 0.50
+  [v6] 22/33 monitor-login-drop-unrelated-logs 그리디 1.00 최고 1.00
+  [v6] 23/33 monitor-mass-ip-blocking-description-echo-trap 그리디 1.00 최고 1.00
+  [v6] 24/33 monitor-outbox-dead-letter-high-33 그리디 0.50 최고 0.50
+  [v6] 25/33 monitor-outbox-deadletter-publish-failures 그리디 1.00 최고 1.00
+  [v6] 26/33 monitor-redis-stream-e2e-latency-27 그리디 1.00 최고 1.00
+  [v6] 27/33 monitor-redis-stream-e2e-latency-35 그리디 0.60 최고 0.60
+  [v6] 28/33 monitor-redis-stream-e2e-latency-high-05 그리디 1.00 최고 1.00
+  [v6] 29/33 monitor-settlement-backlog-consumer-failures 그리디 1.00 최고 1.00
+  [v6] 30/33 monitor-stream-latency-container-recovery 그리디 1.00 최고 1.00
+  [v6] 31/33 monitor-target-down-mysql-exporter 그리디 1.00 최고 1.00
+  [v6] 32/33 monitor-ws-inbound-latency-sparse-evidence-18 그리디 1.00 최고 1.00
+  [v6] 33/33 monitor-ws-probe-failed-edge-layer 그리디 1.00 최고 1.00
+
+# 보상 측정: adp-torch
+
+- 시나리오 33종 (근거 있음 15 / 없음 18)
+- 엔진 torch, 모델 Qwen/Qwen2.5-1.5B-Instruct, 프롬프트 production, judge 미사용
+- 배점 schema 0.1 / verdict 0.5 / citation 0.4 / specificity 0.0
+- best-of-n: n=1, temperature=0.8
+- 인용 제약 디코딩: 없음
+
+| 팔 | 그리디 평균 | 최고 평균 | 상한 여유 | 인용 통과 | 오탐 | 파싱 실패 |
+|---|---|---|---|---|---|---|
+| v6 | 0.858 | 0.858 | **+0.000** | 11/15 | 5/18 | 0 |
+########## 완료 ##########
