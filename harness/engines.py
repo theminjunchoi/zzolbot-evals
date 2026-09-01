@@ -29,6 +29,9 @@ class GenerationEngine(ABC):
     JSON 추출과 채점은 호출부가 한다. 백엔드는 생성만 책임진다.
     """
 
+    #: 실제로 올라간 가중치의 정밀도. 두 엔진을 맞댈 때 **먼저 확인해야 하는 값**이다.
+    dtype: str = "?"
+
     @abstractmethod
     def generate(self, system: str, prompt: str, *, log_samples: list[str] | None = None,
                  temp: float = 0.0, n: int = 1, max_tokens: int = 700) -> list[str]:
@@ -41,6 +44,8 @@ class MlxEngine(GenerationEngine):
         from mlx_lm import load
 
         self.model, self.tok = load(model_path, adapter_path=adapter_path or None)
+        # 두 엔진의 정밀도를 밖에서 맞대볼 수 있어야 한다. 안 보이면 또 어긋난다
+        self.dtype = str(self.model.model.layers[0].self_attn.q_proj.weight.dtype)
 
     def generate(self, system, prompt, *, log_samples=None, temp=0.0, n=1, max_tokens=700):
         from mlx_lm import batch_generate, generate
@@ -67,19 +72,30 @@ class TorchEngine(GenerationEngine):
     """
 
     def __init__(self, model_path: str, adapter_path: str | None = None,
-                 device: str = "mps", dtype: str = "float16"):
+                 device: str = "mps", dtype: str = "auto"):
+        """**정밀도를 하드코딩하지 않는다. 체크포인트에서 물려받는다.**
+
+        처음에 float16으로 박아뒀다가 33종 중 23종이 MLX와 갈렸다. Qwen2.5의
+        체크포인트는 bfloat16이고 MLX는 그것을 그대로 올리는데, torch만 float16으로
+        내려서 지수부 범위가 달라졌다. 같은 가중치 같은 프롬프트 그리디인데 출력이
+        딴판이 됐다.
+
+        dtype="auto"면 transformers가 config의 dtype을 따르므로 MLX와 자동으로 맞는다.
+        """
         import torch
         from transformers import AutoModelForCausalLM, AutoTokenizer
 
         self.tok = AutoTokenizer.from_pretrained(model_path)
+        resolved = dtype if dtype == "auto" else getattr(torch, dtype)
         self.model = AutoModelForCausalLM.from_pretrained(
-            model_path, dtype=getattr(torch, dtype)).to(device)
+            model_path, dtype=resolved).to(device)
         if adapter_path:
             from peft import PeftModel
 
             self.model = PeftModel.from_pretrained(self.model, adapter_path)
         self.model.eval()
         self.device = device
+        self.dtype = str(next(self.model.parameters()).dtype)
 
     def generate(self, system, prompt, *, log_samples=None, temp=0.0, n=1, max_tokens=700):
         import torch
@@ -96,12 +112,20 @@ class TorchEngine(GenerationEngine):
             processors = [TorchCitationProcessor(
                 CitationConstraint(self.tok, list(log_samples)), prompt_len)]
 
+        # **생성 파라미터를 전부 명시한다. 물려받으면 안 된다.**
+        # Qwen2.5의 generation_config.json에 repetition_penalty 1.1, top_k 20,
+        # top_p 0.8이 들어 있고 HF는 이것을 조용히 적용한다. 반복 페널티는
+        # do_sample=False인 그리디에서도 걸리므로, 명시하지 않으면 MLX의 그리디와
+        # 다른 것을 재게 된다. 실제로 33종 중 23종이 갈렸다.
+        # MLX의 make_sampler는 페널티 없음, top_k 비활성이 기본이라 거기에 맞춘다.
         kwargs = dict(max_new_tokens=max_tokens, num_return_sequences=n,
-                      pad_token_id=self.tok.pad_token_id or self.tok.eos_token_id)
+                      pad_token_id=self.tok.pad_token_id or self.tok.eos_token_id,
+                      repetition_penalty=1.0)
         if temp == 0.0:
-            kwargs["do_sample"] = False       # 그리디. temperature는 넘기지 않는다
+            # 그리디에서는 top_k, top_p, temperature가 무효라 넘기면 경고만 난다
+            kwargs.update(do_sample=False, temperature=None, top_p=None)
         else:
-            kwargs.update(do_sample=True, temperature=temp, top_p=0.95)
+            kwargs.update(do_sample=True, temperature=temp, top_p=0.95, top_k=0)
         if processors:
             kwargs["logits_processor"] = processors
 

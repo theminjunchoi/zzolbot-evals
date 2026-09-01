@@ -31,6 +31,29 @@ from training.verification import expects_evidence
 DEFAULT_MODEL = "mlx-community/Qwen2.5-1.5B-Instruct-4bit"
 
 
+class RawSink:
+    """모델 출력 원문을 시나리오마다 즉시 파일에 적는다.
+
+    **점수만 남기면 무엇이 갈렸는지 못 가른다.** 엔진 이식 대조에서 33종 중 23종이
+    갈렸을 때, 원문이 없어서 원인을 찾으려고 별도 스크립트로 다시 생성해야 했다.
+    이 레포의 반복 실패 1번(집계만 남기고 원본을 버림)이 도구에 남아 있던 것이다.
+
+    끝나고 한 번에 쓰지 않고 **항목마다 즉시 flush**한다. 33종 중간에 죽으면 그때까지의
+    원문이라도 남아야 하고, 실제로 그렇게 잃은 적이 있다.
+    """
+
+    def __init__(self, path: Path):
+        path.parent.mkdir(parents=True, exist_ok=True)
+        self._f = path.open("w", encoding="utf-8")
+
+    def write(self, **row) -> None:
+        self._f.write(json.dumps(row, ensure_ascii=False) + "\n")
+        self._f.flush()
+
+    def close(self) -> None:
+        self._f.close()
+
+
 @dataclass(frozen=True)
 class ArmResult:
     label: str
@@ -115,7 +138,7 @@ def run_gemini_arm(label: str, model: str, scenarios: list[Scenario], variant: s
 def run_arm(label: str, adapter: str, scenarios: list[Scenario], model_path: str,
             variant: str, samples: int, temp: float, batch: int,
             reward: RewardFunction, constrained: bool = False,
-            engine_kind: str = "mlx") -> ArmResult:
+            engine_kind: str = "mlx", raw_sink: "RawSink | None" = None) -> ArmResult:
     """엔진만 갈아끼우고 **채점 경로는 한 벌만 쓴다.**
 
     프롬프트 조립, JSON 추출, 보상, 접지가 공유되어야 두 엔진의 차이가 나왔을 때
@@ -124,6 +147,7 @@ def run_arm(label: str, adapter: str, scenarios: list[Scenario], model_path: str
     from harness.engines import make_engine
 
     engine = make_engine(engine_kind, model_path, adapter or None)
+    print(f"  [{label}] 엔진 {engine_kind}, 정밀도 {engine.dtype}", flush=True)
     grounding = GroundingPipeline()
     system = PROMPT_VARIANTS[variant]
 
@@ -138,6 +162,10 @@ def run_arm(label: str, adapter: str, scenarios: list[Scenario], model_path: str
         logs = list(scenario.log_samples) if constrained else None
         raw = engine.generate(system, user_prompt, log_samples=logs, temp=0.0)[0]
         score, analysis = _score_one(reward, scenario, raw)
+        if raw_sink is not None:
+            raw_sink.write(arm=label, scenario=scenario.name, engine=engine_kind,
+                           dtype=engine.dtype, raw=raw, score=score.clamped,
+                           parts=score.parts, parse_failed=score.parse_failed)
         greedy[scenario.name] = score.clamped
         if score.parse_failed:
             parse_failures += 1
@@ -200,11 +228,16 @@ def main() -> int:
         print(f"[gemini] 실행 중 ({args.gemini})", flush=True)
         results.append(run_gemini_arm("gemini", args.gemini, scenarios,
                                       args.prompt_variant, reward, args.min_interval))
-    for name, adapter in args.arm:
-        print(f"[{name}] 실행 중 (어댑터: {adapter or '없음'})", flush=True)
-        results.append(run_arm(name, adapter, scenarios, args.local_model,
-                               args.prompt_variant, args.samples, args.temp,
-                               args.batch, reward, args.constrained, args.engine))
+    raw_sink = RawSink(args.out_dir / f"{args.label}-raw.jsonl")
+    try:
+        for name, adapter in args.arm:
+            print(f"[{name}] 실행 중 (어댑터: {adapter or '없음'})", flush=True)
+            results.append(run_arm(name, adapter, scenarios, args.local_model,
+                                   args.prompt_variant, args.samples, args.temp,
+                                   args.batch, reward, args.constrained, args.engine,
+                                   raw_sink))
+    finally:
+        raw_sink.close()
 
     lines = [
         f"# 보상 측정: {args.label}",
