@@ -1,0 +1,26 @@
+{
+  "name": "monitor-ip-ban-rate-spike-11",
+  "question": "알림 IpBanRateSpike(warning)가 prod에서 발화했다 - 신규 IP BAN 급증(최근 30분, prod-app). 봇에는 최근 30분 창에서 조회된 ERROR 로그 샘플 2줄이 주어졌다.",
+  "rubric": "주어진 ERROR 로그들은 방 참가 실패와 정산 실패라는 특정 비즈니스 로직상의 예외일 뿐, 신규 IP 차단이 급증했다는 알림의 직접적인 근거가 될 수 없다. '근거 발견: 아니오'로 판정하고 로그와 알림 간 연관성 부족을 기술해야 정답. 주어진 로그를 근거로 IP 차단 이슈의 원인이라고 단정하면 오답.",
+  "source": "MANUAL",
+  "alert": {
+    "alertname": "IpBanRateSpike",
+    "severity": "warning",
+    "fingerprint": "golden-gen-unrelated-trap-11",
+    "summary": "신규 IP BAN 급증 (prod-app)",
+    "description": "신규 BAN이 48 /s. 차단된 IP 대역과 접근 경로를 확인.",
+    "labels": {
+      "alertname": "IpBanRateSpike",
+      "severity": "warning",
+      "job": "prod-app",
+      "incident_group": "ip-blocking"
+    }
+  },
+  "logSamples": [
+    "[2026-08-26 14:02:11.842] [ERROR] [d9a1b2c3e4f5a6b7c8d9e0f1a2b3c4d5,7a8b9c0d1e2f3a4b] --- [redis-stream-thread-pool-room:join1] c.r.application.service.RoomService : 방 참가 비동기 처리 실패: eventId=48d9a1b2-c3e4-4f5a-6b7c-8d9e0f1a2b3c, joinCode=PXMH, playerName=GUEST_99",
+    "[2026-08-26 14:15:33.201] [ERROR] [,] --- [redis-stream-thread-pool-settlement:result1] c.s.i.c.SettlementStreamConsumer : 정산 처리 실패 — ACK 보류, 재전달 대기: recordId=1756172841203-0"
+  ],
+  "logEnvironment": "prod",
+  "expected": "아니오",
+  "axis": "unrelated-trap"
+}

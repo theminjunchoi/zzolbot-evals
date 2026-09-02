@@ -1,0 +1,26 @@
+{
+  "name": "monitor-ws-connection-failures-high-20",
+  "question": "알림 WsConnectionFailuresHigh(warning)가 prod에서 발화했다 - WebSocket 연결 실패 급증(최근 5분). 봇에는 최근 30분 창에서 조회된 ERROR 로그 샘플 3줄이 주어졌다.",
+  "rubric": "주어진 로그는 방 이벤트 정리 실패와 QR 코드 생성 실패 등 WebSocket 연결과는 무관한 도메인의 단발성 에러일 뿐, WebSocket 연결 실패가 급증했다는 알림의 근거가 되지 않는다. 근거 발견: 아니오로 판정하고, 로그 상으로 WebSocket 관련 에러가 식별되지 않음을 명시해야 정답. 무관한 로그를 근거로 장애 원인을 지목하면 오답.",
+  "source": "MANUAL",
+  "alert": {
+    "alertname": "WsConnectionFailuresHigh",
+    "severity": "warning",
+    "fingerprint": "golden-gen-unrelated-trap-20",
+    "summary": "WebSocket 연결 실패 급증 (prod-app)",
+    "description": "최근 5분 WS 연결 실패가 14건 (임계 10). STOMP 연결 단계 실패 누적.",
+    "labels": {
+      "alertname": "WsConnectionFailuresHigh",
+      "severity": "warning",
+      "job": "prod-app"
+    }
+  },
+  "logSamples": [
+    "[2026-08-26 14:10:05.123] [ERROR] [,] --- [pool-5-thread-2] c.r.i.messaging.RoomEventWaitManager : 방 이벤트 자동 정리 (실패): eventId=a1b2c3d4-e5f6-7890-abcd-ef0123456789",
+    "[2026-08-26 14:15:42.882] [ERROR] [,] --- [] c.r.application.service.QrCodeService : QR 코드 생성 실패: joinCode=PXMH, error=java.net.SocketTimeoutException: Read timed out",
+    "[2026-08-26 14:22:11.455] [ERROR] [f9e8d7c6b5a43210f9e8d7c6b5a43210,1234567890abcdef] --- [redis-stream-thread-pool-nunchi1] c.n.i.m.c.NunchiCommandEventConsumer : 눈치게임 press 처리 중 오류: joinCode=PXMH, playerName=USER1, eventId=550e8400-e29b-41d4-a716-446655440000"
+  ],
+  "logEnvironment": "prod",
+  "expected": "아니오",
+  "axis": "unrelated-trap"
+}

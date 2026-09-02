@@ -15,6 +15,7 @@ from pathlib import Path
 from harness.llm import GeminiJsonClient
 from harness.loading import ScenarioLoader
 from synthesis.axes import AXES
+from synthesis.catalog import ALERT_RULES
 from synthesis.generator import ScenarioGenerator
 from synthesis.pipeline import BatchItem, SynthesisPipeline
 from synthesis.screening import LlmScreener
@@ -58,6 +59,10 @@ def main() -> int:
     parser.add_argument("--screen-model", default="gemini-2.5-flash",
                         help="정합성 스크리너 모델. 판정이 아니라 rubric-로그 모순만 본다")
     parser.add_argument("--no-screen", action="store_true", help="스크리닝 단계를 끈다")
+    parser.add_argument("--alerts", nargs="*", default=None,
+                        help="이 알림들만 쓴다. 기본은 축별 기본 목록(AXIS_ALERTS). "
+                             "커버리지 구멍을 겨냥할 때 쓴다. 축별 목록에 없는 알림도 "
+                             "카탈로그에 있으면 생성된다")
     args = parser.parse_args()
 
     api_key = os.environ.get(KEY_ENV, "")
@@ -69,10 +74,18 @@ def main() -> int:
     existing_names = {s.name for s in exemplars}
     rng = random.Random(args.seed)
 
+    if args.alerts:
+        unknown = [a for a in args.alerts if a not in ALERT_RULES]
+        if unknown:
+            print(f"카탈로그에 없는 알림: {unknown}", file=sys.stderr)
+            return 1
+
     batch = []
     for axis_key in args.axes:
         axis = AXES[axis_key]
-        alerts = AXIS_ALERTS.get(axis_key, ["AppErrorLogSpike"])
+        # --alerts를 주면 축별 기본 목록을 무시한다. 커버리지 구멍은 축 정의와
+        # 무관하게 겨냥해야 하고, 기본 목록은 이미 덮은 알림 위주로 짜여 있다.
+        alerts = args.alerts or AXIS_ALERTS.get(axis_key, ["AppErrorLogSpike"])
         for i in range(args.per_axis):
             batch.append(BatchItem(axis, alerts[(i + rng.randrange(len(alerts))) % len(alerts)], 1))
 

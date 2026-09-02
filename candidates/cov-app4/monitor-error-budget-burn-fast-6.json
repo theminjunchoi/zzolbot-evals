@@ -1,0 +1,29 @@
+{
+  "name": "monitor-error-budget-burn-fast-6",
+  "question": "알림 ErrorBudgetBurnFast(critical)가 prod에서 발화했다 - 에러버짓 빠른 소진 (SLO 99.5%, burn-rate 14.4×). 봇에는 최근 30분 ERROR 로그 샘플 6줄(정산 스트림 및 정산 처리 실패 반복)이 주어졌다.",
+  "rubric": "주어진 ERROR 로그는 정산 스트림 처리 과정에서 지속적인 실패와 ACK 보류가 반복되고 있음을 보여주며, 이는 에러버짓 소진의 핵심 원인인 정산 서비스의 불안정성을 직접 증명한다. '근거 발견: 예'로 판정하고 정산 스트림 컨슈머의 장애를 에러버짓 소진의 근본 원인으로 제시하면 정답. '근거 발견: 아니오'로 판정하거나 정산 문제를 무시하고 다른 부수적인 로그를 근거로 삼으면 오답.",
+  "source": "MANUAL",
+  "alert": {
+    "alertname": "ErrorBudgetBurnFast",
+    "severity": "critical",
+    "fingerprint": "golden-gen-ebb-6",
+    "summary": "에러버짓 빠른 소진 (SLO 99.5%, burn-rate 14.4×)",
+    "description": "prod-app 5xx 비율이 1h·5m 양 창에서 7.2%를 초과. 약 2일이면 월간 에러버짓 전부 소진.",
+    "labels": {
+      "alertname": "ErrorBudgetBurnFast",
+      "severity": "critical",
+      "job": "prod-app"
+    }
+  },
+  "logSamples": [
+    "[2026-08-26 14:10:05.123] [ERROR] [c3a1b2d4e5f60708090a1b2c3d4e5f60,c3a1b2d4e5f60708] --- [redis-stream-thread-pool-settlement:result1] c.s.i.c.SettlementStreamConsumer : 정산 스트림 처리 중 오류가 발생했습니다.",
+    "[2026-08-26 14:10:05.125] [ERROR] [c3a1b2d4e5f60708090a1b2c3d4e5f60,c3a1b2d4e5f60708] --- [redis-stream-thread-pool-settlement:result1] c.s.i.c.SettlementStreamConsumer : 정산 처리 실패 — ACK 보류, 재전달 대기: recordId=1756172841203-0",
+    "[2026-08-26 14:11:22.456] [ERROR] [d4a1b2d4e5f60708090a1b2c3d4e5f61,d4a1b2d4e5f60708] --- [redis-stream-thread-pool-settlement:result2] c.s.i.c.SettlementStreamConsumer : 정산 스트림 처리 중 오류가 발생했습니다.",
+    "[2026-08-26 14:11:22.458] [ERROR] [d4a1b2d4e5f60708090a1b2c3d4e5f61,d4a1b2d4e5f60708] --- [redis-stream-thread-pool-settlement:result2] c.s.i.c.SettlementStreamConsumer : 정산 처리 실패 — ACK 보류, 재전달 대기: recordId=1756172845672-0",
+    "[2026-08-26 14:12:45.789] [ERROR] [e5a1b2d4e5f60708090a1b2c3d4e5f62,e5a1b2d4e5f60708] --- [redis-stream-thread-pool-settlement:result3] c.s.i.c.SettlementStreamConsumer : 정산 스트림 처리 중 오류가 발생했습니다.",
+    "[2026-08-26 14:12:45.791] [ERROR] [e5a1b2d4e5f60708090a1b2c3d4e5f62,e5a1b2d4e5f60708] --- [redis-stream-thread-pool-settlement:result3] c.s.i.c.SettlementStreamConsumer : 정산 처리 실패 — ACK 보류, 재전달 대기: recordId=1756172852103-0"
+  ],
+  "logEnvironment": "prod",
+  "expected": "예",
+  "axis": "positive-dense"
+}
