@@ -121,6 +121,38 @@ class IdentifiersAreGrounded(TargetRule):
         return found
 
 
+class NoFabricatedIdentifiers(TargetRule):
+    """답변 **전체**가 언급한 식별자는 로그나 알림에 실제로 존재해야 한다.
+
+    `IdentifiersAreGrounded`와 조작적 정의는 같고 **보는 범위만 다르다.** 그쪽은
+    summary와 rootCauseHypothesis만 보고, 여기는 **suggestedActions까지** 본다.
+
+    왜 나눠 두는가. 기존 규칙은 학습 데이터 검증에 쓰이고 과거 채택 이력이 그 정의 위에
+    서 있다. 범위를 넓혀 덮어쓰면 그 이력의 의미가 바뀐다(반복 실패 2번). 그래서 새
+    규칙으로 두고, 보상에 넣을지는 별도로 판정한다.
+
+    잡는 것은 **식별자 수준의 환각**뿐이다. 메커니즘을 잘못 서술하는 오진은 식별자가
+    전부 맞아도 성립하고 그건 이 규칙이 못 본다.
+    """
+
+    name = "fabricated-identifier"
+
+    def violations(self, scenario: Scenario, target: Analysis) -> list[str]:
+        haystack = "\n".join(scenario.log_samples)
+        haystack += "\n" + scenario.alert.summary + "\n" + scenario.alert.description
+        haystack += "\n" + scenario.alert.alertname + "\n" + " ".join(scenario.alert.labels.values())
+        text = "\n".join([target.summary, target.root_cause_hypothesis,
+                          *target.suggested_actions])
+        found = []
+        for label, pattern in _IDENTIFIER_PATTERNS:
+            for value in pattern.findall(text):
+                if value.lower() in _IDENTIFIER_STOPWORDS:
+                    continue
+                if value not in haystack:
+                    found.append(f"{label} '{value}'가 로그와 알림 어디에도 없음")
+        return found
+
+
 class SchemaIsComplete(TargetRule):
     """정답이 비어 있지 않아야 한다."""
 
