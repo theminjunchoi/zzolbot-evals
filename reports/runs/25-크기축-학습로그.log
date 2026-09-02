@@ -1,0 +1,225 @@
+########## 0p5b 학습 시작 (18:49) 모델=mlx-community/Qwen2.5-0.5B-Instruct-4bit 레이어=14 ##########
+Loading pretrained model
+Loading datasets
+Training
+Trainable parameters: 0.519% (2.566M/494.033M)
+Starting training..., iters: 781
+Iter 1: Val loss 2.560, Val took 9.293s
+Iter 100: Train loss 0.657, Learning Rate 1.000e-04, It/sec 1.064, Tokens/sec 1933.941, Trained Tokens 181767, Peak mem 11.045 GB
+Iter 100: Saved adapter weights to training/adapters/size-0p5b/adapters.safetensors and training/adapters/size-0p5b/0000100_adapters.safetensors.
+Iter 200: Train loss 0.500, Learning Rate 1.000e-04, It/sec 1.043, Tokens/sec 2006.004, Trained Tokens 374026, Peak mem 11.856 GB
+Iter 200: Saved adapter weights to training/adapters/size-0p5b/adapters.safetensors and training/adapters/size-0p5b/0000200_adapters.safetensors.
+Iter 260: Val loss 0.493, Val took 9.217s
+Iter 300: Train loss 0.409, Learning Rate 1.000e-04, It/sec 1.077, Tokens/sec 2003.397, Trained Tokens 559969, Peak mem 11.856 GB
+Iter 300: Saved adapter weights to training/adapters/size-0p5b/adapters.safetensors and training/adapters/size-0p5b/0000300_adapters.safetensors.
+Iter 400: Train loss 0.358, Learning Rate 1.000e-04, It/sec 1.091, Tokens/sec 2052.105, Trained Tokens 747982, Peak mem 11.856 GB
+Iter 400: Saved adapter weights to training/adapters/size-0p5b/adapters.safetensors and training/adapters/size-0p5b/0000400_adapters.safetensors.
+Iter 500: Train loss 0.365, Learning Rate 1.000e-04, It/sec 1.106, Tokens/sec 2056.676, Trained Tokens 933918, Peak mem 11.856 GB
+Iter 500: Saved adapter weights to training/adapters/size-0p5b/adapters.safetensors and training/adapters/size-0p5b/0000500_adapters.safetensors.
+Iter 520: Val loss 0.514, Val took 9.111s
+Iter 600: Train loss 0.320, Learning Rate 1.000e-04, It/sec 1.084, Tokens/sec 2058.163, Trained Tokens 1123784, Peak mem 11.856 GB
+Iter 600: Saved adapter weights to training/adapters/size-0p5b/adapters.safetensors and training/adapters/size-0p5b/0000600_adapters.safetensors.
+Iter 700: Train loss 0.294, Learning Rate 1.000e-04, It/sec 1.136, Tokens/sec 2054.830, Trained Tokens 1304602, Peak mem 11.856 GB
+Iter 700: Saved adapter weights to training/adapters/size-0p5b/adapters.safetensors and training/adapters/size-0p5b/0000700_adapters.safetensors.
+Iter 780: Val loss 0.530, Val took 9.133s
+Iter 781: Val loss 0.531, Val took 9.172s
+Iter 781: Train loss 0.289, Learning Rate 1.000e-04, It/sec 1.307, Tokens/sec 2041.568, Trained Tokens 1460761, Peak mem 11.856 GB
+Saved final weights to training/adapters/size-0p5b/adapters.safetensors.
+########## 0p5b 평가 시작 (19:02) ##########
+[base] 실행 중 (어댑터: 없음)
+  [base] 엔진 mlx, 정밀도 mlx.core.uint32
+  [base] 1/33 monitor-5xx-compound-cause-32 그리디 0.00 최고 0.00
+  [base] 2/33 monitor-5xx-db-connection-failure 그리디 0.00 최고 0.00
+  [base] 3/33 monitor-5xx-redis-connection-failure 그리디 0.00 최고 0.00
+  [base] 4/33 monitor-alloy-down-observability-layer 그리디 0.00 최고 0.00
+  [base] 5/33 monitor-app-error-log-spike-17 그리디 0.00 최고 0.00
+  [base] 6/33 monitor-app-error-log-spike-19 그리디 0.00 최고 0.00
+  [base] 7/33 monitor-circuit-breaker-open-02 그리디 0.00 최고 0.00
+  [base] 8/33 monitor-circuit-breaker-open-qr-uploads 그리디 0.00 최고 0.00
+  [base] 9/33 monitor-db-pool-exhaustion-request-timeouts 그리디 0.00 최고 0.00
+  [base] 10/33 monitor-db-pool-high-unrelated-game-errors 그리디 0.00 최고 0.00
+  [base] 11/33 monitor-disk-high-unrelated-app-logs 그리디 0.00 최고 0.00
+  [base] 12/33 monitor-disk-usage-high-unrelated-trap-08 그리디 0.00 최고 0.00
+  [base] 13/33 monitor-error-budget-burn-slow-11 그리디 0.00 최고 0.00
+  [base] 14/33 monitor-error-spike-cardgame-select-burst 그리디 0.00 최고 0.00
+  [base] 15/33 monitor-error-spike-nunchi-consumer 그리디 0.00 최고 0.00
+  [base] 16/33 monitor-error-spike-roomjoin-current-window 그리디 0.00 최고 0.00
+  [base] 17/33 monitor-error-spike-sparse-two-lines 그리디 0.00 최고 0.00
+  [base] 18/33 monitor-error-spike-stale-reingested-v2 그리디 0.00 최고 0.00
+  [base] 19/33 monitor-heap-high-sparse-unrelated-errors 그리디 0.00 최고 0.00
+  [base] 20/33 monitor-http-5xx-ratio-high-sparse-logs 그리디 0.00 최고 0.00
+  [base] 21/33 monitor-jvm-heap-high-unrelated-redis-errors-31 그리디 0.00 최고 0.00
+  [base] 22/33 monitor-login-drop-unrelated-logs 그리디 0.00 최고 0.00
+  [base] 23/33 monitor-mass-ip-blocking-description-echo-trap 그리디 0.70 최고 0.70
+  [base] 24/33 monitor-outbox-dead-letter-high-33 그리디 0.00 최고 0.00
+  [base] 25/33 monitor-outbox-deadletter-publish-failures 그리디 0.00 최고 0.00
+  [base] 26/33 monitor-redis-stream-e2e-latency-27 그리디 0.00 최고 0.00
+  [base] 27/33 monitor-redis-stream-e2e-latency-35 그리디 0.00 최고 0.00
+  [base] 28/33 monitor-redis-stream-e2e-latency-high-05 그리디 0.00 최고 0.00
+  [base] 29/33 monitor-settlement-backlog-consumer-failures 그리디 0.00 최고 0.00
+  [base] 30/33 monitor-stream-latency-container-recovery 그리디 0.00 최고 0.00
+  [base] 31/33 monitor-target-down-mysql-exporter 그리디 0.00 최고 0.00
+  [base] 32/33 monitor-ws-inbound-latency-sparse-evidence-18 그리디 0.00 최고 0.00
+  [base] 33/33 monitor-ws-probe-failed-edge-layer 그리디 0.00 최고 0.00
+[trained] 실행 중 (어댑터: training/adapters/size-0p5b)
+  [trained] 엔진 mlx, 정밀도 mlx.core.uint32
+  [trained] 1/33 monitor-5xx-compound-cause-32 그리디 1.00 최고 1.00
+  [trained] 2/33 monitor-5xx-db-connection-failure 그리디 1.00 최고 1.00
+  [trained] 3/33 monitor-5xx-redis-connection-failure 그리디 0.50 최고 0.50
+  [trained] 4/33 monitor-alloy-down-observability-layer 그리디 1.00 최고 1.00
+  [trained] 5/33 monitor-app-error-log-spike-17 그리디 1.00 최고 1.00
+  [trained] 6/33 monitor-app-error-log-spike-19 그리디 1.00 최고 1.00
+  [trained] 7/33 monitor-circuit-breaker-open-02 그리디 1.00 최고 1.00
+  [trained] 8/33 monitor-circuit-breaker-open-qr-uploads 그리디 1.00 최고 1.00
+  [trained] 9/33 monitor-db-pool-exhaustion-request-timeouts 그리디 0.50 최고 0.50
+  [trained] 10/33 monitor-db-pool-high-unrelated-game-errors 그리디 1.00 최고 1.00
+  [trained] 11/33 monitor-disk-high-unrelated-app-logs 그리디 1.00 최고 1.00
+  [trained] 12/33 monitor-disk-usage-high-unrelated-trap-08 그리디 1.00 최고 1.00
+  [trained] 13/33 monitor-error-budget-burn-slow-11 그리디 1.00 최고 1.00
+  [trained] 14/33 monitor-error-spike-cardgame-select-burst 그리디 1.00 최고 1.00
+  [trained] 15/33 monitor-error-spike-nunchi-consumer 그리디 1.00 최고 1.00
+  [trained] 16/33 monitor-error-spike-roomjoin-current-window 그리디 0.60 최고 0.60
+  [trained] 17/33 monitor-error-spike-sparse-two-lines 그리디 1.00 최고 1.00
+  [trained] 18/33 monitor-error-spike-stale-reingested-v2 그리디 0.50 최고 0.50
+  [trained] 19/33 monitor-heap-high-sparse-unrelated-errors 그리디 1.00 최고 1.00
+  [trained] 20/33 monitor-http-5xx-ratio-high-sparse-logs 그리디 1.00 최고 1.00
+  [trained] 21/33 monitor-jvm-heap-high-unrelated-redis-errors-31 그리디 1.00 최고 1.00
+  [trained] 22/33 monitor-login-drop-unrelated-logs 그리디 1.00 최고 1.00
+  [trained] 23/33 monitor-mass-ip-blocking-description-echo-trap 그리디 1.00 최고 1.00
+  [trained] 24/33 monitor-outbox-dead-letter-high-33 그리디 1.00 최고 1.00
+  [trained] 25/33 monitor-outbox-deadletter-publish-failures 그리디 1.00 최고 1.00
+  [trained] 26/33 monitor-redis-stream-e2e-latency-27 그리디 0.60 최고 0.60
+  [trained] 27/33 monitor-redis-stream-e2e-latency-35 그리디 0.60 최고 0.60
+  [trained] 28/33 monitor-redis-stream-e2e-latency-high-05 그리디 0.60 최고 0.60
+  [trained] 29/33 monitor-settlement-backlog-consumer-failures 그리디 1.00 최고 1.00
+  [trained] 30/33 monitor-stream-latency-container-recovery 그리디 0.60 최고 0.60
+  [trained] 31/33 monitor-target-down-mysql-exporter 그리디 1.00 최고 1.00
+  [trained] 32/33 monitor-ws-inbound-latency-sparse-evidence-18 그리디 1.00 최고 1.00
+  [trained] 33/33 monitor-ws-probe-failed-edge-layer 그리디 1.00 최고 1.00
+
+# 보상 측정: size-0p5b
+
+- 시나리오 33종 (근거 있음 15 / 없음 18)
+- 엔진 mlx, 모델 mlx-community/Qwen2.5-0.5B-Instruct-4bit, 프롬프트 production, judge 미사용
+- 배점 schema 0.1 / verdict 0.5 / citation 0.4 / specificity 0.0
+- best-of-n: n=1, temperature=0.8
+- 인용 제약 디코딩: 없음
+
+| 팔 | 그리디 평균 | 최고 평균 | 상한 여유 | 인용 통과 | 오탐 | 파싱 실패 |
+|---|---|---|---|---|---|---|
+| base | 0.021 | 0.021 | **+0.000** | 0/15 | 0/18 | 32 |
+| trained | 0.894 | 0.894 | **+0.000** | 8/15 | 0/18 | 0 |
+########## 0p5b 완료 (19:05) ##########
+########## 3b 학습 시작 (19:05) 모델=mlx-community/Qwen2.5-3B-Instruct-4bit 레이어=21 ##########
+Loading pretrained model
+Loading datasets
+Training
+Trainable parameters: 0.283% (8.731M/3085.939M)
+Starting training..., iters: 781
+Iter 1: Val loss 2.149, Val took 46.986s
+Iter 100: Train loss 0.550, Learning Rate 1.000e-04, It/sec 0.256, Tokens/sec 465.838, Trained Tokens 181767, Peak mem 22.325 GB
+Iter 100: Saved adapter weights to training/adapters/size-3b/adapters.safetensors and training/adapters/size-3b/0000100_adapters.safetensors.
+Iter 200: Train loss 0.444, Learning Rate 1.000e-04, It/sec 0.088, Tokens/sec 169.578, Trained Tokens 374026, Peak mem 23.820 GB
+Iter 200: Saved adapter weights to training/adapters/size-3b/adapters.safetensors and training/adapters/size-3b/0000200_adapters.safetensors.
+Iter 260: Val loss 0.446, Val took 46.962s
+Iter 300: Train loss 0.371, Learning Rate 1.000e-04, It/sec 0.251, Tokens/sec 467.194, Trained Tokens 559969, Peak mem 23.821 GB
+Iter 300: Saved adapter weights to training/adapters/size-3b/adapters.safetensors and training/adapters/size-3b/0000300_adapters.safetensors.
+Iter 400: Train loss 0.328, Learning Rate 1.000e-04, It/sec 0.249, Tokens/sec 467.893, Trained Tokens 747982, Peak mem 23.821 GB
+Iter 400: Saved adapter weights to training/adapters/size-3b/adapters.safetensors and training/adapters/size-3b/0000400_adapters.safetensors.
+Iter 500: Train loss 0.339, Learning Rate 1.000e-04, It/sec 0.251, Tokens/sec 466.635, Trained Tokens 933918, Peak mem 23.821 GB
+Iter 500: Saved adapter weights to training/adapters/size-3b/adapters.safetensors and training/adapters/size-3b/0000500_adapters.safetensors.
+Iter 520: Val loss 0.468, Val took 45.419s
+Iter 600: Train loss 0.305, Learning Rate 1.000e-04, It/sec 0.246, Tokens/sec 466.607, Trained Tokens 1123784, Peak mem 23.821 GB
+Iter 600: Saved adapter weights to training/adapters/size-3b/adapters.safetensors and training/adapters/size-3b/0000600_adapters.safetensors.
+Iter 700: Train loss 0.280, Learning Rate 1.000e-04, It/sec 0.260, Tokens/sec 470.459, Trained Tokens 1304602, Peak mem 23.821 GB
+Iter 700: Saved adapter weights to training/adapters/size-3b/adapters.safetensors and training/adapters/size-3b/0000700_adapters.safetensors.
+Iter 780: Val loss 0.473, Val took 46.253s
+Iter 781: Val loss 0.472, Val took 46.102s
+Iter 781: Train loss 0.281, Learning Rate 1.000e-04, It/sec 0.298, Tokens/sec 466.007, Trained Tokens 1460761, Peak mem 23.821 GB
+Saved final weights to training/adapters/size-3b/adapters.safetensors.
+########## 3b 평가 시작 (20:13) ##########
+[base] 실행 중 (어댑터: 없음)
+  [base] 엔진 mlx, 정밀도 mlx.core.uint32
+  [base] 1/33 monitor-5xx-compound-cause-32 그리디 0.90 최고 0.90
+  [base] 2/33 monitor-5xx-db-connection-failure 그리디 0.90 최고 0.90
+  [base] 3/33 monitor-5xx-redis-connection-failure 그리디 0.90 최고 0.90
+  [base] 4/33 monitor-alloy-down-observability-layer 그리디 0.40 최고 0.40
+  [base] 5/33 monitor-app-error-log-spike-17 그리디 0.40 최고 0.40
+  [base] 6/33 monitor-app-error-log-spike-19 그리디 0.40 최고 0.40
+  [base] 7/33 monitor-circuit-breaker-open-02 그리디 0.90 최고 0.90
+  [base] 8/33 monitor-circuit-breaker-open-qr-uploads 그리디 0.90 최고 0.90
+  [base] 9/33 monitor-db-pool-exhaustion-request-timeouts 그리디 0.90 최고 0.90
+  [base] 10/33 monitor-db-pool-high-unrelated-game-errors 그리디 0.40 최고 0.40
+  [base] 11/33 monitor-disk-high-unrelated-app-logs 그리디 1.00 최고 1.00
+  [base] 12/33 monitor-disk-usage-high-unrelated-trap-08 그리디 1.00 최고 1.00
+  [base] 13/33 monitor-error-budget-burn-slow-11 그리디 0.40 최고 0.40
+  [base] 14/33 monitor-error-spike-cardgame-select-burst 그리디 0.90 최고 0.90
+  [base] 15/33 monitor-error-spike-nunchi-consumer 그리디 0.90 최고 0.90
+  [base] 16/33 monitor-error-spike-roomjoin-current-window 그리디 0.90 최고 0.90
+  [base] 17/33 monitor-error-spike-sparse-two-lines 그리디 0.40 최고 0.40
+  [base] 18/33 monitor-error-spike-stale-reingested-v2 그리디 0.40 최고 0.40
+  [base] 19/33 monitor-heap-high-sparse-unrelated-errors 그리디 0.40 최고 0.40
+  [base] 20/33 monitor-http-5xx-ratio-high-sparse-logs 그리디 0.40 최고 0.40
+  [base] 21/33 monitor-jvm-heap-high-unrelated-redis-errors-31 그리디 0.40 최고 0.40
+  [base] 22/33 monitor-login-drop-unrelated-logs 그리디 0.40 최고 0.40
+  [base] 23/33 monitor-mass-ip-blocking-description-echo-trap 그리디 0.40 최고 0.40
+  [base] 24/33 monitor-outbox-dead-letter-high-33 그리디 0.40 최고 0.40
+  [base] 25/33 monitor-outbox-deadletter-publish-failures 그리디 0.90 최고 0.90
+  [base] 26/33 monitor-redis-stream-e2e-latency-27 그리디 0.90 최고 0.90
+  [base] 27/33 monitor-redis-stream-e2e-latency-35 그리디 0.90 최고 0.90
+  [base] 28/33 monitor-redis-stream-e2e-latency-high-05 그리디 0.90 최고 0.90
+  [base] 29/33 monitor-settlement-backlog-consumer-failures 그리디 0.90 최고 0.90
+  [base] 30/33 monitor-stream-latency-container-recovery 그리디 0.90 최고 0.90
+  [base] 31/33 monitor-target-down-mysql-exporter 그리디 0.40 최고 0.40
+  [base] 32/33 monitor-ws-inbound-latency-sparse-evidence-18 그리디 0.40 최고 0.40
+  [base] 33/33 monitor-ws-probe-failed-edge-layer 그리디 0.50 최고 0.50
+[trained] 실행 중 (어댑터: training/adapters/size-3b)
+  [trained] 엔진 mlx, 정밀도 mlx.core.uint32
+  [trained] 1/33 monitor-5xx-compound-cause-32 그리디 1.00 최고 1.00
+  [trained] 2/33 monitor-5xx-db-connection-failure 그리디 1.00 최고 1.00
+  [trained] 3/33 monitor-5xx-redis-connection-failure 그리디 1.00 최고 1.00
+  [trained] 4/33 monitor-alloy-down-observability-layer 그리디 1.00 최고 1.00
+  [trained] 5/33 monitor-app-error-log-spike-17 그리디 1.00 최고 1.00
+  [trained] 6/33 monitor-app-error-log-spike-19 그리디 1.00 최고 1.00
+  [trained] 7/33 monitor-circuit-breaker-open-02 그리디 1.00 최고 1.00
+  [trained] 8/33 monitor-circuit-breaker-open-qr-uploads 그리디 1.00 최고 1.00
+  [trained] 9/33 monitor-db-pool-exhaustion-request-timeouts 그리디 0.50 최고 0.50
+  [trained] 10/33 monitor-db-pool-high-unrelated-game-errors 그리디 1.00 최고 1.00
+  [trained] 11/33 monitor-disk-high-unrelated-app-logs 그리디 1.00 최고 1.00
+  [trained] 12/33 monitor-disk-usage-high-unrelated-trap-08 그리디 1.00 최고 1.00
+  [trained] 13/33 monitor-error-budget-burn-slow-11 그리디 1.00 최고 1.00
+  [trained] 14/33 monitor-error-spike-cardgame-select-burst 그리디 1.00 최고 1.00
+  [trained] 15/33 monitor-error-spike-nunchi-consumer 그리디 1.00 최고 1.00
+  [trained] 16/33 monitor-error-spike-roomjoin-current-window 그리디 1.00 최고 1.00
+  [trained] 17/33 monitor-error-spike-sparse-two-lines 그리디 1.00 최고 1.00
+  [trained] 18/33 monitor-error-spike-stale-reingested-v2 그리디 1.00 최고 1.00
+  [trained] 19/33 monitor-heap-high-sparse-unrelated-errors 그리디 1.00 최고 1.00
+  [trained] 20/33 monitor-http-5xx-ratio-high-sparse-logs 그리디 1.00 최고 1.00
+  [trained] 21/33 monitor-jvm-heap-high-unrelated-redis-errors-31 그리디 1.00 최고 1.00
+  [trained] 22/33 monitor-login-drop-unrelated-logs 그리디 1.00 최고 1.00
+  [trained] 23/33 monitor-mass-ip-blocking-description-echo-trap 그리디 1.00 최고 1.00
+  [trained] 24/33 monitor-outbox-dead-letter-high-33 그리디 1.00 최고 1.00
+  [trained] 25/33 monitor-outbox-deadletter-publish-failures 그리디 1.00 최고 1.00
+  [trained] 26/33 monitor-redis-stream-e2e-latency-27 그리디 1.00 최고 1.00
+  [trained] 27/33 monitor-redis-stream-e2e-latency-35 그리디 1.00 최고 1.00
+  [trained] 28/33 monitor-redis-stream-e2e-latency-high-05 그리디 1.00 최고 1.00
+  [trained] 29/33 monitor-settlement-backlog-consumer-failures 그리디 1.00 최고 1.00
+  [trained] 30/33 monitor-stream-latency-container-recovery 그리디 1.00 최고 1.00
+  [trained] 31/33 monitor-target-down-mysql-exporter 그리디 1.00 최고 1.00
+  [trained] 32/33 monitor-ws-inbound-latency-sparse-evidence-18 그리디 1.00 최고 1.00
+  [trained] 33/33 monitor-ws-probe-failed-edge-layer 그리디 1.00 최고 1.00
+
+# 보상 측정: size-3b
+
+- 시나리오 33종 (근거 있음 15 / 없음 18)
+- 엔진 mlx, 모델 mlx-community/Qwen2.5-3B-Instruct-4bit, 프롬프트 production, judge 미사용
+- 배점 schema 0.1 / verdict 0.5 / citation 0.4 / specificity 0.0
+- best-of-n: n=1, temperature=0.8
+- 인용 제약 디코딩: 없음
+
+| 팔 | 그리디 평균 | 최고 평균 | 상한 여유 | 인용 통과 | 오탐 | 파싱 실패 |
+|---|---|---|---|---|---|---|
+| base | 0.667 | 0.667 | **+0.000** | 15/15 | 16/18 | 0 |
+| trained | 0.985 | 0.985 | **+0.000** | 14/15 | 0/18 | 0 |
+########## 3b 완료 (20:18) ##########
+########## 전부 완료 (20:18) ##########
