@@ -215,9 +215,13 @@ class LlamaCppEngine(GenerationEngine):
         import json
         import urllib.request
 
+        grammar = None
         if log_samples:
-            # 조용히 무시하면 제약 없는 값을 제약 있는 값으로 착각한다. GBNF 이식은 별건이다
-            raise NotImplementedError("llama.cpp 인용 제약은 아직 없다. GBNF 이식이 선행되어야 한다")
+            # 트라이 대신 GBNF로 같은 계약을 강제한다. 문법이 출력 전체를 서술하므로
+            # 앞 필드의 순서까지 고정되는 것이 트라이와 다른 점이다(harness/gbnf.py 참조)
+            from harness.gbnf import citation_grammar
+
+            grammar = citation_grammar(list(log_samples))
 
         outs = []
         for i in range(n):
@@ -239,6 +243,8 @@ class LlamaCppEngine(GenerationEngine):
                 "seed": 20260826 + i,
                 "cache_prompt": False,
             }
+            if grammar is not None:
+                payload["grammar"] = grammar
             if temp > 0:
                 payload["top_p"] = 0.95
             req = urllib.request.Request(
