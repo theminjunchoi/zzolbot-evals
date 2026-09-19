@@ -135,9 +135,127 @@ class TorchEngine(GenerationEngine):
         return [self.tok.decode(row[prompt_len:], skip_special_tokens=True) for row in out]
 
 
+class LlamaCppEngine(GenerationEngine):
+    """llama.cpp 서버를 같은 포트 뒤에 둔다. GGUF를 읽으므로 양자화 팔을 그대로 잰다.
+
+    **어댑터를 얹는 개념이 없다.** GGUF는 병합된 가중치 하나이고, 팔의 값이 곧 모델 파일이다.
+
+    **서버를 쓰는 이유가 둘이다.** 하나는 모델을 한 번만 올리는 것이고, 다른 하나는 이것이
+    실제 배포에서 붙을 경로라는 것이다. 측정 경로와 배포 경로가 같아야 여기서 잰 값이
+    그쪽에서도 성립한다.
+
+    **채팅 템플릿을 서버가 적용한다(--jinja).** MLX와 torch는 tokenizer의 템플릿을 쓴다.
+    출처가 같은 모델이라 같을 것으로 보지만 **같다고 가정하지 않는다.** 엔진 대조가
+    확인하는 것이 정확히 그것이다.
+    """
+
+    #: gguf의 general.file_type. 실제로 올라간 가중치가 무엇인지 밖에서 보여야 한다
+    _FILE_TYPES = {0: "F32", 1: "F16", 7: "Q8_0", 15: "Q4_K_M", 32: "BF16"}
+
+    def __init__(self, model_path: str, adapter_path: str | None = None,
+                 base_url: str | None = None, port: int = 18081, n_ctx: int = 4096,
+                 timeout: float = 180.0):
+        import atexit
+        import subprocess
+        import time
+        import urllib.error
+        import urllib.request
+
+        if adapter_path:
+            raise ValueError("llama.cpp 팔에는 어댑터를 얹지 않는다. 병합된 GGUF를 model_path로 준다")
+
+        self.timeout = timeout
+        self.dtype = self._read_file_type(model_path)
+        self._proc = None
+
+        if base_url:
+            self.base_url = base_url.rstrip("/")
+            return
+
+        self.base_url = f"http://127.0.0.1:{port}"
+        self._proc = subprocess.Popen(
+            ["llama-server", "-m", model_path, "--port", str(port), "--jinja",
+             "-c", str(n_ctx), "-ngl", "99", "--no-warmup"],
+            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        atexit.register(self.close)
+
+        deadline = time.time() + 120
+        while time.time() < deadline:
+            try:
+                with urllib.request.urlopen(f"{self.base_url}/health", timeout=2) as res:
+                    if res.status == 200:
+                        return
+            except (urllib.error.URLError, OSError):
+                pass
+            time.sleep(0.5)
+        self.close()
+        raise RuntimeError(f"llama-server가 뜨지 않는다: {model_path}")
+
+    def _read_file_type(self, model_path: str) -> str:
+        try:
+            from gguf import GGUFReader
+
+            reader = GGUFReader(model_path)
+            field = reader.fields["general.file_type"]
+            value = int(field.parts[field.data[0]][0])
+            return self._FILE_TYPES.get(value, f"file_type={value}")
+        except Exception:
+            return "?"
+
+    def close(self) -> None:
+        if self._proc is not None and self._proc.poll() is None:
+            self._proc.terminate()
+            try:
+                self._proc.wait(timeout=10)
+            except Exception:
+                self._proc.kill()
+        self._proc = None
+
+    def generate(self, system, prompt, *, log_samples=None, temp=0.0, n=1, max_tokens=700):
+        import json
+        import urllib.request
+
+        if log_samples:
+            # 조용히 무시하면 제약 없는 값을 제약 있는 값으로 착각한다. GBNF 이식은 별건이다
+            raise NotImplementedError("llama.cpp 인용 제약은 아직 없다. GBNF 이식이 선행되어야 한다")
+
+        outs = []
+        for i in range(n):
+            # **샘플링 파라미터를 전부 명시한다.** HF가 generation_config의 반복 페널티를
+            # 조용히 적용해 33종 중 23종이 갈린 적이 있다(리포트 22번). llama.cpp도 기본값이
+            # 있으므로 같은 함정을 가정하고 전부 못박는다.
+            payload = {
+                "messages": [{"role": "system", "content": system},
+                             {"role": "user", "content": prompt}],
+                "n_predict": max_tokens,
+                "temperature": temp,
+                "top_k": 0,
+                "top_p": 1.0,
+                "min_p": 0.0,
+                "typical_p": 1.0,
+                "repeat_penalty": 1.0,
+                "presence_penalty": 0.0,
+                "frequency_penalty": 0.0,
+                "seed": 20260826 + i,
+                "cache_prompt": False,
+            }
+            if temp > 0:
+                payload["top_p"] = 0.95
+            req = urllib.request.Request(
+                f"{self.base_url}/v1/chat/completions",
+                data=json.dumps(payload).encode("utf-8"),
+                headers={"Content-Type": "application/json"})
+            with urllib.request.urlopen(req, timeout=self.timeout) as res:
+                body = json.loads(res.read().decode("utf-8"))
+            outs.append(body["choices"][0]["message"]["content"])
+        return outs
+
+
 def make_engine(kind: str, model_path: str, adapter_path: str | None = None) -> GenerationEngine:
     if kind == "mlx":
         return MlxEngine(model_path, adapter_path)
     if kind == "torch":
         return TorchEngine(model_path, adapter_path)
+    if kind == "llamacpp":
+        return LlamaCppEngine(model_path, adapter_path)
     raise ValueError(f"모르는 엔진: {kind}")

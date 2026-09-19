@@ -146,7 +146,12 @@ def run_arm(label: str, adapter: str, scenarios: list[Scenario], model_path: str
     """
     from harness.engines import make_engine
 
-    engine = make_engine(engine_kind, model_path, adapter or None)
+    if engine_kind == "llamacpp":
+        # llama.cpp는 어댑터를 얹는 개념이 없다. GGUF가 이미 병합된 가중치 하나이므로
+        # 팔의 값을 모델 파일로 읽는다. 팔마다 다른 양자화를 재는 것이 이 엔진의 쓰임이다.
+        engine = make_engine(engine_kind, adapter or model_path, None)
+    else:
+        engine = make_engine(engine_kind, model_path, adapter or None)
     print(f"  [{label}] 엔진 {engine_kind}, 정밀도 {engine.dtype}", flush=True)
     grounding = GroundingPipeline()
     system = PROMPT_VARIANTS[variant]
@@ -191,6 +196,9 @@ def run_arm(label: str, adapter: str, scenarios: list[Scenario], model_path: str
         print(f"  [{label}] {i}/{len(scenarios)} {scenario.name} "
               f"그리디 {greedy[scenario.name]:.2f} 최고 {best[scenario.name]:.2f}", flush=True)
 
+    closer = getattr(engine, "close", None)
+    if closer is not None:
+        closer()
     return ArmResult(label, greedy, best, parse_failures, citation_pass,
                      false_positives, positives, len(scenarios) - positives, per_sample)
 
@@ -212,9 +220,10 @@ def main() -> int:
     parser.add_argument("--min-interval", type=float, default=1.2)
     parser.add_argument("--constrained", action="store_true",
                         help="인용 필드를 실제 로그 줄로만 생성하도록 제약")
-    parser.add_argument("--engine", default="mlx", choices=("mlx", "torch"),
+    parser.add_argument("--engine", default="mlx", choices=("mlx", "torch", "llamacpp"),
                         help="생성 엔진(연산 프레임워크). torch는 fp16 비양자화만 된다"
-                             " - bitsandbytes에 MPS 지원이 없다")
+                             " - bitsandbytes에 MPS 지원이 없다."
+                             " llamacpp는 팔의 값을 GGUF 경로로 읽는다")
     parser.add_argument("--specificity", type=float, default=0.0,
                         help="구체성 배점. 사전 등록 검사 미통과로 기본 0")
     args = parser.parse_args()
@@ -243,7 +252,11 @@ def main() -> int:
         f"# 보상 측정: {args.label}",
         "",
         f"- 시나리오 {len(scenarios)}종 (근거 있음 {results[0].positives} / 없음 {results[0].negatives})",
-        f"- 엔진 {args.engine}, 모델 {args.local_model}, 프롬프트 {args.prompt_variant}, judge 미사용",
+        # llamacpp는 팔의 값이 곧 모델이다. local_model을 찍으면 기록에 틀린 모델이 남는다
+        f"- 엔진 {args.engine}, 모델 "
+        + (", ".join(f"{n}={a}" for n, a in args.arm) if args.engine == "llamacpp"
+           else args.local_model)
+        + f", 프롬프트 {args.prompt_variant}, judge 미사용",
         f"- 배점 schema {spec.schema} / verdict {spec.verdict} / citation {spec.citation}"
         f" / specificity {spec.specificity}",
         f"- best-of-n: n={args.samples}, temperature={args.temp}",
