@@ -1,0 +1,28 @@
+팔|시나리오|프롬프트토큰|프롬프트ms|프롬프트tok/s|생성토큰|생성ms|생성tok/s|총초
+Q4-2코어|monitor-5xx-db-connection-failure|1343|41101|32.7|360|44974|8.0|86.1
+Q4-2코어|monitor-alloy-down-observability-layer|1189|36043|33.0|214|24779|8.6|60.8
+Q4-2코어|monitor-error-spike-nunchi-consumer|2574|85068|30.3|390|53726|7.2|138.8
+Q4-2코어|monitor-error-spike-roomjoin-current-window|2535|84183|30.1|375|50654|7.4|134.8
+Q4-2코어|monitor-heap-high-sparse-unrelated-errors|1188|35858|33.1|233|28050|8.3|63.9
+MEM|Q4-2코어|1.937GiB / 23.41GiB
+Q8-2코어|monitor-5xx-db-connection-failure|1343|26650|50.4|309|39893|7.7|66.5
+Q8-2코어|monitor-alloy-down-observability-layer|1189|23245|51.2|207|28225|7.3|51.5
+Q8-2코어|monitor-error-spike-nunchi-consumer|2574|57142|45.0|432|63900|6.7|121.0
+Q8-2코어|monitor-error-spike-roomjoin-current-window|2535|56143|45.2|423|62064|6.8|118.2
+Q8-2코어|monitor-heap-high-sparse-unrelated-errors|1188|23017|51.6|237|30924|7.6|53.9
+MEM|Q8-2코어|2.224GiB / 23.41GiB
+Q4-4코어|monitor-5xx-db-connection-failure|1343|21861|61.4|360|20339|17.7|42.2
+Q4-4코어|monitor-alloy-down-observability-layer|1189|19119|62.2|214|11705|18.2|30.8
+Q4-4코어|monitor-error-spike-nunchi-consumer|2574|45250|56.9|390|24653|15.8|69.9
+Q4-4코어|monitor-error-spike-roomjoin-current-window|2535|44743|56.7|375|23432|16.0|68.2
+Q4-4코어|monitor-heap-high-sparse-unrelated-errors|1188|19242|61.7|233|12657|18.3|31.9
+MEM|Q4-4코어|1.328GiB / 23.41GiB
+Q8-4코어|monitor-5xx-db-connection-failure|1343|14158|94.9|309|19117|16.1|33.3
+Q8-4코어|monitor-alloy-down-observability-layer|1189|12335|96.4|207|12470|16.5|24.8
+Q8-4코어|monitor-error-spike-nunchi-consumer|2574|30480|84.4|432|29248|14.7|59.7
+Q8-4코어|monitor-error-spike-roomjoin-current-window|2535|30137|84.1|423|28757|14.7|58.9
+Q8-4코어|monitor-heap-high-sparse-unrelated-errors|1188|12328|96.4|237|13889|17.0|26.2
+MEM|Q8-4코어|1.928GiB / 23.41GiB
+=== 토큰 상한 확인 ===
+n_predict=16 -> 생성 16 토큰
+max_tokens=16 -> 생성 16 토큰
