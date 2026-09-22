@@ -122,14 +122,42 @@ def build_windows(lines: list[LogLine]) -> list[Window]:
     return windows
 
 
-COARSE_DESCRIPTIONS = {
-    "c.global.redis.EventDispatcher": ("Redis Stream 컨슈머 처리 실패 급증", "이벤트 컨슈머가 메시지 처리에 반복 실패하고 있습니다."),
-    "c.web.exception.RestExceptionHandler": ("HTTP 요청 처리 오류 급증", "REST 요청이 처리되지 못하고 오류로 끝나고 있습니다."),
-    "c.r.i.w.PlayerDisconnectionService": ("플레이어 연결 종료 처리 실패 급증", "연결이 끊긴 플레이어의 정리 처리가 실패하고 있습니다."),
-    "c.g.s.GameTaskSchedulerFactory": ("게임 스케줄러 오류 급증", "게임 진행 스케줄러가 작업을 예약하지 못하고 있습니다."),
+REAL_RULES_PATH = "raw/scratch-prod-replay/real-rules.json"
+"""서버에 실제로 적재된 알림 룰. 문구를 내가 지어내면 재생이 현실과 멀어진다."""
+
+RELATED = {
+    "c.global.redis.EventDispatcher": ["RedisStreamConsumptionStalled", "RedisStreamE2eLatencyHigh"],
+    "c.web.exception.RestExceptionHandler": ["WsConnectionFailuresHigh"],
+    "c.r.i.w.PlayerDisconnectionService": ["WsConnectionFailuresHigh"],
 }
-"""굵은 계열을 사람이 쓸 법한 알림 문구로 옮긴다. 로거 클래스명을 알림에 노출하면 실제 알림과
-모양이 달라지고, 모델이 로그와 알림을 클래스명으로 곧장 대조해버린다."""
+"""로그 계열과 주제가 맞는 실제 룰. 컨슈머 처리 실패는 스트림 소비 정지, 지연 룰과 실제로 닿는다."""
+
+UNRELATED = ["CircuitBreakerOpen", "AppInstanceDown"]
+"""어느 계열과도 무관한 룰.
+
+`CircuitBreakerOpen` 은 외부 오브젝트 스토리지 장애다. `AppInstanceDown` 은 앱이 메트릭을 내지
+않는다는 뜻인데, **앱이 ERROR 로그를 남기고 있다는 사실 자체가 down 이 아니라는 증거**다.
+어느 쪽이든 우리 로그로는 뒷받침할 수 없다.
+"""
+
+_TEMPLATE_VALUES = {
+    "{{ $labels.job }}": "prod-app",
+    "{{ $labels.stream }}": "room-events",
+    "{{ $labels.name }}": "OracleObjectStorage",
+}
+
+
+def _render(text: str) -> str:
+    """룰 문구의 Go 템플릿을 실제 발화 때처럼 채운다. 남은 표현식은 그럴듯한 값으로 바꾼다."""
+    for k, v in _TEMPLATE_VALUES.items():
+        text = text.replace(k, v)
+    text = re.sub(r"\{\{ \$value[^}]*\}\}", "12", text)
+    return re.sub(r"\{\{[^}]*\}\}", "", text).strip()
+
+
+def load_rules(path: str | Path = REAL_RULES_PATH) -> dict[str, dict]:
+    with open(path, encoding="utf-8") as f:
+        return {r["name"]: r for r in json.load(f)}
 
 
 def coarse_family(line_or_family: str) -> str:
@@ -141,56 +169,38 @@ def coarse_family(line_or_family: str) -> str:
     return line_or_family.split(":", 1)[0]
 
 
-def _alert_for(coarse: str, index: int, matched: bool) -> Alert:
-    """굵은 계열에서 알림을 만든다. 운영 룰(AppErrorLogSpike)의 모양을 따른다."""
-    summary, description = COARSE_DESCRIPTIONS.get(coarse, (f"{coarse} 오류 급증", "오류가 임계를 초과했습니다."))
+def _alert_from_rule(rule: dict, index: int, matched: bool) -> Alert:
     return Alert(
-        alertname="AppErrorLogSpike",
-        severity="warning",
+        alertname=rule["name"],
+        severity=rule.get("severity", "warning"),
         fingerprint=f"replay-{'pos' if matched else 'neg'}-{index}",
-        summary=summary,
-        description=description,
-        labels={"alertname": "AppErrorLogSpike", "severity": "warning", "job": "prod-app"},
+        summary=_render(rule.get("summary", "")),
+        description=_render(rule.get("description", "")),
+        labels={"alertname": rule["name"], "severity": rule.get("severity", "warning"), "job": "prod-app"},
     )
 
 
-def to_scenarios(windows: list[Window]) -> list[Scenario]:
-    """윈도우마다 양성 하나, 가능하면 음성 하나를 만든다.
+def to_scenarios(windows: list[Window], rules: dict[str, dict] | None = None) -> list[Scenario]:
+    """윈도우마다 양성과 음성을 만든다. 알림 문구는 **실제 적재된 룰**에서 가져온다.
 
-    음성은 **그 윈도우에 없는 굵은 계열**의 알림을 붙인다. 로그는 진짜인데 알림과 무관하므로
-    정답이 "근거 없음"이다. 굵게 잡는 이유는 같은 로거 안에서 짝지으면(컨슈머 A 알림 + 컨슈머 B
-    로그) 둘 다 컨슈머 처리 실패라 근거 없음이라고 단정할 수 없기 때문이다.
+    음성은 어느 계열과도 무관한 룰을 붙인다. 로그는 진짜인데 알림과 무관하므로 정답이
+    "근거 없음"이다. 양성은 주제가 닿는 룰을 붙이지만 **라벨을 붙이지 않는다**. 알림이 말하는
+    상태를 로그가 실제로 뒷받침하는지는 건수와 내용에 달려 있어 기계적으로 정할 수 없다.
     """
-    coarse_all = sorted({coarse_family(w.family) for w in windows})
+    rules = rules or load_rules()
     scenarios: list[Scenario] = []
     for w in windows:
-        present = {coarse_family(family_of(s)) for s in w.samples}
-        scenarios.append(
-            Scenario(
-                name=f"replay-pos-{w.index:03d}",
-                question="",
-                rubric="",
-                source="prod-replay",
-                alert=_alert_for(coarse_family(w.family), w.index, matched=True),
-                log_samples=w.samples,
-                log_environment="prod",
-                expected="",
-            )
-        )
-        others = [f for f in coarse_all if f not in present]
-        if not others:
-            continue
-        mismatched = others[w.index % len(others)]
-        scenarios.append(
-            Scenario(
-                name=f"replay-neg-{w.index:03d}",
-                question="",
-                rubric="",
-                source="prod-replay",
-                alert=_alert_for(mismatched, w.index, matched=False),
-                log_samples=w.samples,
-                log_environment="prod",
-                expected="아니오",
-            )
-        )
+        coarse = coarse_family(w.family)
+        related = [n for n in RELATED.get(coarse, []) if n in rules]
+        if related:
+            scenarios.append(Scenario(
+                name=f"replay-pos-{w.index:03d}", question="", rubric="", source="prod-replay",
+                alert=_alert_from_rule(rules[related[w.index % len(related)]], w.index, True),
+                log_samples=w.samples, log_environment="prod", expected=""))
+        pool = [n for n in UNRELATED if n in rules]
+        if pool:
+            scenarios.append(Scenario(
+                name=f"replay-neg-{w.index:03d}", question="", rubric="", source="prod-replay",
+                alert=_alert_from_rule(rules[pool[w.index % len(pool)]], w.index, False),
+                log_samples=w.samples, log_environment="prod", expected="아니오"))
     return scenarios
