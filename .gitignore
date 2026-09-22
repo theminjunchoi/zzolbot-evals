@@ -7,3 +7,5 @@ raw/scratch-*/
 training/adapters/
 training/merged/
 training/gguf/
+# 운영 로그 원문이 담긴다(모델 인용에 로그 줄이 그대로 복사됨). 레포에 올리지 않는다
+reports/runs/*-replay-raw.jsonl
